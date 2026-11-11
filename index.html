@@ -8,21 +8,21 @@
 :root{
   --bg:#f2f4f8;--panel:#ffffff;--ink:#14213a;--muted:#5b6678;--line:#dde2ea;--accent:#1b5fd1;--accent-ink:#ffffff;
   --pres:#0f8a4f;--pres-bg:#dcf5e7;--rep:#6d3fd6;--rep-bg:#ece4fb;--aus:#8a94a6;--aus-bg:#eceff4;
-  --fav:#0f8a4f;--con:#c22727;--abs:#b26a00;--warn-bg:#fff3d6;--warn:#8a5a00;--err-bg:#fde4e4;--shadow:0 1px 2px rgba(15,25,45,.07),0 6px 16px rgba(15,25,45,.05);
+  --fav:#0f8a4f;--con:#c22727;--abs:#b26a00;--vf:#2152e0;--vfbg:#e8eeff;--vc:#b4400d;--vcbg:#fdebdd;--vx:#475569;--vxbg:#e8ecf2;--warn-bg:#fff3d6;--warn:#8a5a00;--err-bg:#fde4e4;--shadow:0 1px 2px rgba(15,25,45,.07),0 6px 16px rgba(15,25,45,.05);
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0d131f;--panel:#171f2e;--ink:#e7ecf6;--muted:#9aa6bb;--line:#2a3549;--accent:#6c9bff;--accent-ink:#0b1220;
     --pres:#4ade80;--pres-bg:#12351f;--rep:#b79bff;--rep-bg:#2a2147;--aus:#8693a8;--aus-bg:#222b3b;
-    --fav:#4ade80;--con:#ff7b7b;--abs:#fbbf24;--warn-bg:#3a2d0c;--warn:#fcd34d;--err-bg:#3d1717;--shadow:0 1px 2px rgba(0,0,0,.4);
+    --fav:#4ade80;--con:#ff7b7b;--abs:#fbbf24;--vf:#7fa2ff;--vfbg:#16234a;--vc:#ffa877;--vcbg:#3d2312;--vx:#c3cee0;--vxbg:#242e42;--warn-bg:#3a2d0c;--warn:#fcd34d;--err-bg:#3d1717;--shadow:0 1px 2px rgba(0,0,0,.4);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0d131f;--panel:#171f2e;--ink:#e7ecf6;--muted:#9aa6bb;--line:#2a3549;--accent:#6c9bff;--accent-ink:#0b1220;
   --pres:#4ade80;--pres-bg:#12351f;--rep:#b79bff;--rep-bg:#2a2147;--aus:#8693a8;--aus-bg:#222b3b;
-  --fav:#4ade80;--con:#ff7b7b;--abs:#fbbf24;--warn-bg:#3a2d0c;--warn:#fcd34d;--err-bg:#3d1717;--shadow:0 1px 2px rgba(0,0,0,.4);
+  --fav:#4ade80;--con:#ff7b7b;--abs:#fbbf24;--vf:#7fa2ff;--vfbg:#16234a;--vc:#ffa877;--vcbg:#3d2312;--vx:#c3cee0;--vxbg:#242e42;--warn-bg:#3a2d0c;--warn:#fcd34d;--err-bg:#3d1717;--shadow:0 1px 2px rgba(0,0,0,.4);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -73,9 +73,9 @@ textarea{min-height:110px;font-family:ui-monospace,Consolas,monospace;font-size:
 .seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
 .seg button{border:1px solid var(--line);background:var(--panel);border-radius:10px;min-height:44px;cursor:pointer;font-size:14px}
 .seg button:disabled{opacity:.5;cursor:not-allowed}
-.seg button.on.F{background:var(--pres-bg);border-color:var(--fav);color:var(--fav);font-weight:650}
-.seg button.on.C{background:var(--err-bg);border-color:var(--con);color:var(--con);font-weight:650}
-.seg button.on.X{background:var(--warn-bg);border-color:var(--abs);color:var(--abs);font-weight:650}
+.seg button.on.F{background:var(--vfbg);border-color:var(--vf);color:var(--vf);font-weight:650}
+.seg button.on.C{background:var(--vcbg);border-color:var(--vc);color:var(--vc);font-weight:650}
+.seg button.on.X{background:var(--vxbg);border-color:var(--vx);color:var(--vx);font-weight:650}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 .chips button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px}
 .chips button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
@@ -87,7 +87,7 @@ th{color:var(--muted);font-weight:600;font-size:12px}
 .verdict{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:650}
 .verdict.ok{background:var(--pres-bg);color:var(--pres)}.verdict.no{background:var(--err-bg);color:var(--con)}.verdict.wait{background:var(--aus-bg);color:var(--muted)}
 .rbar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--aus-bg);margin:8px 0}
-.rbar i{display:block;height:100%}.rbar .f{background:var(--fav)}.rbar .c{background:var(--con)}.rbar .a{background:var(--abs)}
+.rbar i{display:block;height:100%}.rbar .f{background:var(--vf)}.rbar .c{background:var(--vc)}.rbar .a{background:var(--vx)}
 nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav .wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding-top:6px;padding-bottom:6px}
 nav button{padding:2px;border:0;background:transparent;border-radius:10px;min-height:48px;cursor:pointer;color:var(--muted);font-size:11.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
@@ -145,12 +145,32 @@ button.pulsado{animation:pulso .5s ease-out}
 .toast.err{background:#b42323;color:#fff}.toast.err::before{content:"!";font-weight:800;border:2px solid #fff;border-radius:50%;width:18px;height:18px;display:inline-grid;place-items:center;font-size:12px}
 nav button{position:relative}nav .nn{position:absolute;top:1px;left:calc(50% - 24px);width:15px;height:15px;border-radius:50%;background:var(--aus-bg);color:var(--muted);font-size:10px;font-weight:700;display:grid;place-items:center}
 nav button.on .nn{background:var(--accent);color:var(--accent-ink)}
+#lock{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;display:none;align-items:center;justify-content:center;padding:20px}
+body.bloqueado #lock{display:flex}
+body.bloqueado>*:not(#lock):not(#modal):not(script):not(style){display:none!important}
+body.bloqueado .ov{z-index:300}
+#asmLock[hidden]{display:none}
+.lockcard{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:22px;width:100%;max-width:400px}
+.lockcard h1{font-size:22px;margin:0 0 6px;color:var(--ink)}
+.lockcard .field{margin-top:12px}
+.lockcard label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.lockcard input,.mbox .field input[type=password]{width:100%;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);box-sizing:border-box}
+.lockcard .btn.primary{width:100%;margin-top:14px;min-height:46px}
+.lockerr{color:var(--con);font-size:13.5px;min-height:20px;margin-top:8px}
+.lockcard .small{font-size:12px;margin-top:14px}
+.linkbtn{background:none;border:0;color:var(--accent);font-size:13.5px;padding:10px 0;cursor:pointer;text-decoration:underline}
+.next{background:var(--panel);border:2px solid var(--accent);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
+.next .et{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.next h2{margin:0;font-size:18px;color:var(--ink)}.next p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.next .row{margin-top:6px;gap:8px;flex-wrap:wrap}
+#asmPantalla[hidden]{display:none}
 details.card>summary{cursor:pointer;font-weight:650;font-size:15px}
 </style>
 </head>
 <body>
+<div id="lock" hidden></div>
 <header><div class="wrap">
-  <div class="hrow"><select id="asmSel" aria-label="Asamblea"></select><button class="btn small" id="asmNew">＋ Nueva</button></div>
+  <div class="hrow"><select id="asmSel" aria-label="Asamblea"></select><button class="btn small" id="asmNew">＋ Nueva</button><button class="btn small" id="asmLock" hidden aria-label="Seguridad y bloqueo">🔒</button><button class="btn small" id="asmPantalla" aria-label="Abrir la pantalla de sala para proyectar" title="Pantalla de sala">🖥</button></div>
   <div class="hrow" style="margin-top:6px"><span class="chip" id="estChip">—</span><span class="chip" id="intChip">—</span><span class="chip" id="sync">—</span><span class="chip hide" id="remChip"></span></div>
   <div class="qbar" id="qbar"><i class="p"></i><i class="r"></i><span class="qmark" id="qmark"></span></div>
   <div class="qtxt" id="qtxt"></div>
@@ -217,7 +237,7 @@ const LS = 'wcon-asamblea-v2';
 let store = { asms: {}, current: '', op: '' }, memOnly = false;
 let tab = 'padron', filtro = 'T', buscar = '', puntoSel = '', filtroEv = 'T', vBuscar = '', vFiltro = 'T'; const selV = new Set();
 function loadLocal() { try { const s = JSON.parse(localStorage.getItem(LS) || 'null'); if (s && s.asms) store = s; } catch (e) { memOnly = true; } }
-function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(store)); return true; } catch (e) { memOnly = true; return false; } }
+function saveLocal() { if (window.__cifrado) { guardarCifrado(); return true; } try { localStorage.setItem(LS, JSON.stringify(store)); return true; } catch (e) { memOnly = true; return false; } }
 const cur = () => store.asms[store.current];
 function nuevaAsm(nombre) {
   const id = 'a' + Date.now().toString(36) + gid().slice(0, 3);
@@ -235,7 +255,7 @@ function append(type, p) {
 function derive(a) {
   const ev = a.events; const ann = new Map();
   ev.forEach(e => { if (e.type === 'ANULACION') ann.set(e.p.ref, { by: e.seq, motivo: e.p.motivo, ts: e.ts, op: e.op }); });
-  const d = { maxId: 0, sumAli: 0, meta: { nombre: 'Nueva asamblea', fecha: '', quorumReq: 50, maxRep: 0 }, rows: [], frozen: false, abierta: false, closed: false, units: [], byId: {}, puntos: [], pById: {}, timeline: [], ann, T: 0, warns: [], openedAt: 0, closedAt: 0, openHash: '', closeHash: '', closeSeq: 0, quorumHit: 0, maxPct: 0, padronHash: '', cierre: null, remotoAbierto: false, remotoRid: 0, remotoVotos: 0, remotoIngresos: 0 };
+  const d = { maxId: 0, sumAli: 0, meta: { nombre: 'Nueva asamblea', fecha: '', quorumReq: 50, maxRep: 0 }, rows: [], frozen: false, abierta: false, closed: false, units: [], byId: {}, puntos: [], pById: {}, timeline: [], ann, T: 0, warns: [], openedAt: 0, closedAt: 0, openHash: '', closeHash: '', closeSeq: 0, quorumHit: 0, maxPct: 0, padronHash: '', cierre: null, remotoAbierto: false, remotoRid: 0, remotoVotos: 0, remotoIngresos: 0, remotoH: new Set(), remotoU: {} };
   const pct = () => { let s = 0; d.units.forEach(u => { if (u.est !== 'A') s += u.ali; }); return d.T ? s / d.T * 100 : 0; };
   const mark = e => { const q = pct(); d.timeline.push({ t: e.ts, pct: q, seq: e.seq }); if (q > d.maxPct) d.maxPct = q; if (!d.quorumHit && q >= d.meta.quorumReq && d.T > 0) d.quorumHit = e.ts; };
   for (const e of ev) {
@@ -263,13 +283,13 @@ function derive(a) {
       case 'REMOTO_ABIERTO': d.remotoAbierto = true; break;
       case 'REMOTO_CERRADO': d.remotoAbierto = false; break;
       case 'INGRESO_REMOTO': {
-        d.remotoRid = Math.max(d.remotoRid, p.rid || 0);
+        d.remotoRid = Math.max(d.remotoRid, p.rid || 0); if (p.h) { d.remotoH.add(p.h); d.remotoU[p.h] = p.ubic || ''; }
         if (!d.abierta || d.closed) { d.warns.push(`#${e.seq}: ingreso por correo fuera de la asamblea abierta`); break; }
         (p.units || []).forEach(id => { const u = d.byId[id]; if (u && u.est === 'A') { u.est = 'P'; u.ingreso = e.ts; u.salida = 0; u.rep = null; u.via = 'correo'; u.ubic = p.ubic || ''; u.evs.push(e.seq); d.remotoIngresos++; mark(e); } });
         break;
       }
       case 'VOTO_REMOTO': {
-        d.remotoRid = Math.max(d.remotoRid, p.rid || 0); const pt = d.pById[p.punto];
+        d.remotoRid = Math.max(d.remotoRid, p.rid || 0); if (p.h) d.remotoH.add(p.h); const pt = d.pById[p.punto];
         if (!pt || pt.cerrado || !d.abierta || d.closed) { d.warns.push(`#${e.seq}: voto por correo sobre un punto no abierto`); break; }
         (p.inms || []).forEach(id => { const u = d.byId[id]; if (!u) return; const o = p.detalle && p.detalle[id]; if (!o) return;
           if (u.est === 'A') { u.est = 'P'; u.ingreso = e.ts; u.salida = 0; u.rep = null; u.via = 'correo'; u.evs.push(e.seq); d.remotoIngresos++; mark(e); }
@@ -518,7 +538,10 @@ async function registrarPoder(d, u) {
   if (!(await ensureOp())) return; const a = cur(); const cnt = {}; d.units.forEach(x => { if (x.est === 'R' && x.rep) cnt[norm(x.rep.nombre)] = (cnt[norm(x.rep.nombre)] || 0) + 1; });
   const r = await modal((b, close) => {
     const n = h('input', { type: 'text', placeholder: 'Nombre de quien representa', list: 'repl' }), c = h('input', { type: 'text', placeholder: 'Cédula de quien representa', inputmode: 'numeric' }), ref = h('input', { type: 'text', placeholder: 'Referencia del poder (fecha, número o nota)' });
-    const dl = h('datalist', { id: 'repl' }, [...new Set(d.units.filter(x => x.est === 'R' && x.rep).map(x => x.rep.nombre))].map(x => h('option', { value: x })));
+    const nombresPadron = new Map(); d.units.forEach(x => { const k = norm(x.prop); if (!k) return; if (!nombresPadron.has(k)) nombresPadron.set(k, { nombre: x.prop, inms: [] }); nombresPadron.get(k).inms.push(x.inm); });
+    const dl = h('datalist', { id: 'repl' }, [...nombresPadron.values()].map(v => h('option', { value: v.nombre, label: `${v.nombre} · ${v.inms.join(', ')}` })).concat([...new Set(d.units.filter(x => x.est === 'R' && x.rep).map(x => x.rep.nombre))].filter(nm => !nombresPadron.has(norm(nm))).map(x => h('option', { value: x }))));
+    const hint = h('div', { class: 'muted', style: 'font-size:12px;margin-top:4px', 'aria-live': 'polite' });
+    n.addEventListener('input', () => { const k = norm(n.value); const m = nombresPadron.get(k); hint.textContent = !k ? '' : m ? `Coincide con el propietario de ${m.inms.join(', ')}: sus votos en sala se juntarán en una sola tarjeta.` : 'No coincide con ningún propietario del padrón. Si es un propietario, elige su nombre de la lista; si es un tercero, déjalo así.'; });
     const ver = h('input', { type: 'checkbox' }), exc = h('input', { type: 'checkbox' }); const excRow = h('label', { class: 'note bad hide', style: 'display:block' }, exc, ' Registrar de todos modos: supera el máximo de poderes (queda anotado como excepción)');
     const gl = gruposDe(a, d).grupos; const selEnl = h('select', {}, h('option', { value: '', text: 'No: lo registro yo en sala' }), gl.filter(g => !g.units.includes(u.id)).map(g => h('option', { value: enlaceId(g.k), text: `${g.nombre} (${g.correos[0]})` })));
     const file = h('input', { type: 'file', accept: 'image/*', capture: 'environment' }); const prev = h('div', {}); let foto = null;
@@ -526,8 +549,8 @@ async function registrarPoder(d, u) {
     const bt = h('button', { class: 'btn primary', text: 'Registrar representación', disabled: true });
     const chk = () => { const k = norm(n.value); const over = d.meta.maxRep > 0 && k && (cnt[k] || 0) >= d.meta.maxRep; excRow.classList.toggle('hide', !over); bt.disabled = !(n.value.trim().length >= 3 && c.value.trim().length >= 5 && ref.value.trim().length >= 2 && ver.checked && (!over || exc.checked)); };
     [n, c, ref].forEach(x => x.addEventListener('input', chk)); ver.addEventListener('change', chk); exc.addEventListener('change', chk);
-    bt.addEventListener('click', () => close({ nombre: n.value.trim(), cedula: c.value.trim(), ref: ref.value.trim(), verificado: true, excepcion: !excRow.classList.contains('hide') && exc.checked, foto, enlace: selEnl.value, enlaceNombre: selEnl.value ? (selEnl.options[selEnl.selectedIndex].text.replace(/ \(.*\)$/, '')) : '' }));
-    b.append(h('h3', { text: `Representación de ${u.inm}` }), h('p', { class: 'muted', text: `${u.prop || 'Sin nombre'} · ${fmtA(u.ali)} %` }), dl, h('div', { class: 'fld' }, n), h('div', { class: 'fld' }, c), h('div', { class: 'fld' }, ref), h('div', { class: 'fld' }, h('label', { class: 'muted', text: 'Foto del poder y la cédula (opcional)' }), file, prev), gl.length ? h('div', { class: 'fld' }, h('label', { class: 'muted', text: '¿El representante votará desde su celular con el enlace de otro propietario?' }), selEnl) : null, excRow, h('label', { class: 'fld', style: 'display:flex;gap:8px;align-items:flex-start' }, ver, h('span', { text: 'Verifiqué el poder y la cédula de quien representa' })), h('div', { class: 'row', style: 'margin-top:10px' }, bt, h('button', { class: 'btn', text: 'Cancelar', onclick: () => close(null) })));
+    bt.addEventListener('click', () => close({ nombre: ((nombresPadron.get(norm(n.value.trim())) || {}).nombre) || n.value.trim(), cedula: c.value.trim(), ref: ref.value.trim(), verificado: true, excepcion: !excRow.classList.contains('hide') && exc.checked, foto, enlace: selEnl.value, enlaceNombre: selEnl.value ? (selEnl.options[selEnl.selectedIndex].text.replace(/ \(.*\)$/, '')) : '' }));
+    b.append(h('h3', { text: `Representación de ${u.inm}` }), h('p', { class: 'muted', text: `${u.prop || 'Sin nombre'} · ${fmtA(u.ali)} %` }), dl, h('div', { class: 'fld' }, n, hint), h('div', { class: 'fld' }, c), h('div', { class: 'fld' }, ref), h('div', { class: 'fld' }, h('label', { class: 'muted', text: 'Foto del poder y la cédula (opcional)' }), file, prev), gl.length ? h('div', { class: 'fld' }, h('label', { class: 'muted', text: '¿El representante votará desde su celular con el enlace de otro propietario?' }), selEnl) : null, excRow, h('label', { class: 'fld', style: 'display:flex;gap:8px;align-items:flex-start' }, ver, h('span', { text: 'Verifiqué el poder y la cédula de quien representa' })), h('div', { class: 'row', style: 'margin-top:10px' }, bt, h('button', { class: 'btn', text: 'Cancelar', onclick: () => close(null) })));
   });
   if (!r) return; const rep = { nombre: r.nombre, cedula: r.cedula, ref: r.ref, verificado: true }; if (r.excepcion) rep.excepcion = true; if (r.enlace) { rep.enlace = r.enlace; rep.enlaceNombre = r.enlaceNombre; }
   if (r.foto) { const sha = sha256(r.foto); a.fotos[sha] = r.foto; rep.fotoSha = sha; }
@@ -569,7 +592,7 @@ function cardResultado(d, p, grande) {
   if (!t.pend || p.cerrado) { cls = t.ok ? 'ok' : 'no'; txt = t.ok ? `APROBADO: ${fmt(t.pct)} % a favor (se necesita más de ${fmt(p.umbral)} %)` : `NO APROBADO: ${fmt(t.pct)} % a favor (se necesita más de ${fmt(p.umbral)} %)`; }
   return h('div', { class: 'card' }, h('h2', { text: p.titulo + (p.cerrado ? ' · cerrado ' + hm(p.cierre.ts) : '') }),
     h('div', { class: 'rbar' }, h('i', { class: 'f', style: `width:${f / den * 100}%` }), h('i', { class: 'c', style: `width:${c / den * 100}%` }), h('i', { class: 'a', style: `width:${x / den * 100}%` })),
-    h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Voto' }), h('th', { text: 'Presentes %' }), h('th', { text: 'En representación %' }), h('th', { text: 'Total %' }), h('th', { text: p.base === 'total' ? '% del edificio' : '% de asistentes' }), h('th', { text: 'Inmuebles' }))), h('tbody', {}, fila('A favor', 'F', 'var(--fav)'), fila('En contra', 'C', 'var(--con)'), fila('Abstención', 'X', 'var(--abs)'), fila('Sin votar', 'N', 'var(--aus)')))),
+    h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Voto' }), h('th', { text: 'Presentes %' }), h('th', { text: 'En representación %' }), h('th', { text: 'Total %' }), h('th', { text: p.base === 'total' ? '% del edificio' : '% de asistentes' }), h('th', { text: 'Inmuebles' }))), h('tbody', {}, fila('A favor', 'F', 'var(--vf)'), fila('En contra', 'C', 'var(--vc)'), fila('Abstención', 'X', 'var(--vx)'), fila('Sin votar', 'N', 'var(--aus)')))),
     h('div', { class: 'verdict ' + cls, text: txt }), grande ? h('p', { class: 'muted', text: 'Las tres primeras columnas son porcentajes de la alícuota total del edificio.' }) : null, p.cerrado ? h('p', { class: 'muted', text: `Resultado sellado en la anotación #${p.cierre.seq} · huella ${huella(p.cierre.hash)}` }) : null);
 }
 function viewVotacion() {
@@ -611,7 +634,7 @@ function viewVotacion() {
   };
   const btnVis = h('button', { class: 'btn small', text: 'Seleccionar los que se ven', onclick: () => { visibles().forEach(vt => selV.add(vt.k)); pinta(); } });
   const chipsF = h('div', { class: 'chips' }, [['T', 'Todos'], ['N', 'Sin votar'], ['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => h('button', { class: vFiltro === k ? 'on' : '', text: `${l} (${cont[k]})`, onclick: () => { vFiltro = k; renderAll(); } })));
-  box.push(h('div', { class: 'card' }, h('h2', { text: `Registrar votos (${pl(vs.length, 'persona', 'personas')} en la sala)` }), h('p', { class: 'muted', text: 'Para uno solo, toca su voto. Para varios a la vez, marca las casillas y usa la barra de abajo. Cada registro queda en la auditoría con hora y operador.' }),
+  box.push(h('div', { class: 'card' }, h('h2', { text: `Registrar votos (${pl(vs.length, 'persona presente', 'personas presentes')})` }), h('p', { class: 'muted', text: 'Para uno solo, toca su voto. Para varios a la vez, marca las casillas y usa la barra de abajo. Cada registro queda en la auditoría con hora y operador.' }),
     h('input', { type: 'search', placeholder: 'Buscar persona o inmueble', value: vBuscar, oninput: e => { vBuscar = e.target.value; pinta(); } }), chipsF,
     dis ? null : h('div', { class: 'row', style: 'margin-bottom:6px' }, btnVis, h('button', { class: 'btn small', text: 'Quitar selección', onclick: () => { selV.clear(); pinta(); } })),
     lista));
@@ -821,7 +844,7 @@ function viewReporte() {
 }
 
 // ---------- render ----------
-// ---------- votación por correo (servicio en n8n) ----------
+// ---------- votación por enlace (servicio de votación) ----------
 const API_DEF = window.ASAMBLEA_API || 'https://n8n.legaltech.com.ve/webhook/asamblea';
 const VOTAR_DEF = window.ASAMBLEA_VOTAR || new URL('votar.html', location.href).href;
 const cfgGet = (k, def) => { try { return localStorage.getItem('wcon-' + k) || def; } catch (e) { return def; } };
@@ -849,17 +872,22 @@ function setContactos(a, filas, fuentes) { a.contactos = a.contactos || {}; fila
 
 // Propietarios con enlace: se agrupan por correo (varios inmuebles del mismo correo comparten enlace)
 function gruposDe(a, d) {
-  const filas = d.frozen ? d.units : d.rows; const m = new Map(); const sin = [];
+  const filas = d.frozen ? d.units : d.rows; const m = new Map(); const sin = []; const manuales = [];
   filas.forEach((r) => {
     const c = (a.contactos && a.contactos[r.id]) || {};
-    const correos = [c.c1, c.c2].map((x) => String(x || '').trim().toLowerCase()).filter((x) => EMAIL_RE.test(x));
-    if (!correos.length) { sin.push(r); return; }
+    const malos = new Set((a.revision && a.revision.malos) || []);
+    const correos = [c.c1, c.c2].map((x) => String(x || '').trim().toLowerCase()).filter((x) => EMAIL_RE.test(x) && !malos.has(x));
+    if (!correos.length) { if (a.manuales && a.manuales[r.id]) manuales.push(r); else sin.push(r); return; }
     const k = correos[0]; if (!m.has(k)) m.set(k, { k, nombre: r.prop || k, correos: new Set(), units: [], nombres: new Set() });
     const g = m.get(k); correos.forEach((x) => g.correos.add(x)); g.units.push(r.id); g.nombres.add(norm(r.prop));
   });
-  const grupos = [...m.values()].map((g) => ({ k: g.k, nombre: g.nombre, correos: [...g.correos], units: g.units, mixto: g.nombres.size > 1 })).sort((x, y) => x.nombre.localeCompare(y.nombre, 'es'));
-  const base = d.frozen ? d.T : (Number(d.meta.baseTotal) || 100); const cubierta = grupos.reduce((s, g) => s + g.units.reduce((z, id) => z + (Number((filas.find((r) => r.id === id) || {}).ali) || 0), 0), 0);
-  return { grupos, sin, cobertura: base ? cubierta / base * 100 : 0, mixtos: grupos.filter((g) => g.mixto) };
+  const grupos = [...m.values()].map((g) => ({ k: g.k, nombre: g.nombre, correos: [...g.correos], units: g.units, mixto: g.nombres.size > 1 }));
+  const base = d.frozen ? d.T : (Number(d.meta.baseTotal) || 100);
+  const cubrir = (gs) => gs.reduce((s, g) => s + g.units.reduce((z, id) => z + (Number((filas.find((r) => r.id === id) || {}).ali) || 0), 0), 0);
+  const coberturaCorreo = base ? cubrir(grupos) / base * 100 : 0;
+  manuales.forEach((r) => grupos.push({ k: 'manual:' + r.id, nombre: r.prop || r.inm, correos: [], units: [r.id], mixto: false, manual: true }));
+  grupos.sort((x, y) => x.nombre.localeCompare(y.nombre, 'es'));
+  return { grupos, sin, sinTodos: [...sin, ...manuales], cobertura: base ? cubrir(grupos) / base * 100 : 0, coberturaCorreo, mixtos: grupos.filter((g) => g.mixto) };
 }
 
 // Lo que se publica en el servicio: quién puede votar por qué, y el punto abierto
@@ -877,7 +905,7 @@ function armarSnapshot(a, d, o) {
     if (!us.length && !rep.length) return;
     const v = {}; if (pt) us.forEach((x) => { if (pt.votos[x.i]) v[x.i] = pt.votos[x.i]; });
     const h = d.puntos.filter((p) => p.cerrado).map((p) => ({ t: p.titulo, v: Object.fromEntries(us.filter((x) => p.votos[x.i]).map((x) => [x.i, p.votos[x.i]])) })).filter((x) => Object.keys(x.v).length);
-    mapa[th] = { n: g.nombre, e: g.correos[0], g: us.some((x) => por[x.i].est !== 'A') ? 1 : 0, u: us, v, h, r: rep };
+    mapa[th] = { n: g.nombre, e: g.correos[0], g: (us.some((x) => x.t === 'p' && por[x.i].est !== 'A') || d.remotoH.has(th)) ? 1 : 0, u: us, v, h, r: rep };
   });
   return { estado, asamblea: { id: a.id, nombre: d.meta.nombre, fecha: d.meta.fecha, ayuda: remotoCfg(a).ayuda || '' }, punto: pt ? { id: pt.id, titulo: pt.titulo, umbral: pt.umbral, cambio: pt.permiteCambio } : null, mapa };
 }
@@ -945,21 +973,146 @@ setInterval(actualizarChipRemoto, 5000);
 const etiquetaUnidad = (u) => `${u.inm} · ${fmtA(u.ali)} %`;
 function loteDe(a, d, g) { const filas = d.frozen ? d.byId : Object.fromEntries(d.rows.map((r) => [r.id, r])); return { g: g.k, t: tokenDe(a, g.k), n: g.nombre, c: g.correos, i: g.units.map((id) => etiquetaUnidad(filas[id])).filter(Boolean) }; }
 const baseCorreo = (a, d) => ({ nombre: d.meta.nombre, fecha: d.meta.fecha, ayuda: remotoCfg(a).ayuda || '', mensaje: remotoCfg(a).mensaje || '' });
+
+// ---------- revisión de correos antes de enviar ----------
+const LOTE_ENVIO = 10;
+const PAUSA_ENVIO_MS = () => (typeof window.ASAMBLEA_PAUSA_MS === 'number' ? window.ASAMBLEA_PAUSA_MS : 6000);
+const DOM_POPULARES = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'live.com', 'hotmail.es', 'outlook.es', 'yahoo.es', 'msn.com', 'protonmail.com'];
+const DOM_LEGIT = new Set([...DOM_POPULARES, 'mail.com', 'gmx.com', 'aol.com', 'zoho.com', 'yandex.com', 'me.com', 'mac.com', 'live.com.ve', 'cantv.net', 'movistar.net', 'email.com', 'pm.me']);
+const TYPOS = { 'gmial.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmil.com': 'gmail.com', 'gnail.com': 'gmail.com', 'gamil.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com', 'gmail.cm': 'gmail.com', 'gmail.om': 'gmail.com', 'gmaill.com': 'gmail.com', 'gimail.com': 'gmail.com', 'hotmial.com': 'hotmail.com', 'hotmai.com': 'hotmail.com', 'hotmail.con': 'hotmail.com', 'hotmal.com': 'hotmail.com', 'hotmil.com': 'hotmail.com', 'hotmail.co': 'hotmail.com', 'hotmaill.com': 'hotmail.com', 'outlok.com': 'outlook.com', 'outllok.com': 'outlook.com', 'outlook.con': 'outlook.com', 'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.con': 'yahoo.com', 'yahoo.co': 'yahoo.com', 'iclod.com': 'icloud.com', 'icloud.con': 'icloud.com' };
+const DOM_DESECHABLES = new Set(['mailinator.com', 'guerrillamail.com', '10minutemail.com', 'tempmail.com', 'yopmail.com', 'trashmail.com', 'sharklasers.com', 'getnada.com']);
+const CUENTAS_GENERICAS = /^(info|admin|administracion|administrador|contacto|ventas|soporte|noreply|no-reply|webmaster|postmaster|abuse|spam|test|prueba)$/;
+function lev(a, b) { const m = a.length, n = b.length; if (!m) return n; if (!n) return m; let prev = Array.from({ length: n + 1 }, (_, j) => j); for (let i = 1; i <= m; i++) { const cur = [i]; for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; } return prev[n]; }
+function sintaxisCorreo(e) {
+  if (!e || e.length > 254 || /\s/.test(e)) return false; const p = e.split('@'); if (p.length !== 2) return false; const [l, dom] = p;
+  if (!l || l.length > 64 || l.startsWith('.') || l.endsWith('.') || l.includes('..') || !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(l)) return false;
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(dom) && !dom.split('.').some((x) => x.startsWith('-') || x.endsWith('-'));
+}
+function sugerirDominio(dom) { if (TYPOS[dom]) return TYPOS[dom]; if (DOM_LEGIT.has(dom) || dom.length < 8) return ''; let mejor = ''; for (const p of DOM_POPULARES) if (lev(dom, p) === 1) mejor = p; return mejor; }
+const cacheDns = new Map();
+async function consultaDoh(nombre, tipo) {
+  const urls = [`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(nombre)}&type=${tipo}`, `https://dns.google/resolve?name=${encodeURIComponent(nombre)}&type=${tipo}`];
+  for (const url of urls) {
+    try { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4500); const r = await fetch(url, { headers: { Accept: 'application/dns-json' }, signal: ctl.signal, cache: 'no-store' }); clearTimeout(t); if (!r.ok) continue; return await r.json(); } catch (e) { /* se prueba con el otro servicio */ }
+  }
+  return null;
+}
+async function dominioRecibeCorreo(dom) {
+  if (cacheDns.has(dom)) return cacheDns.get(dom);
+  let res; const mx = await consultaDoh(dom, 'MX');
+  if (!mx) return { r: 'sin' };
+  if (mx.Status === 3) res = { r: 'no', why: 'El dominio no existe' };
+  else { const reg = (mx.Answer || []).filter((x) => x.type === 15);
+    if (reg.length) res = reg.every((x) => /^0\s+\.?$/.test(String(x.data).trim())) ? { r: 'no', why: 'El dominio declara que no recibe correo' } : { r: 'si' };
+    else { const ar = await consultaDoh(dom, 'A'); if (!ar) return { r: 'sin' }; res = (ar.Answer || []).some((x) => x.type === 1) ? { r: 'dudoso', why: 'El dominio no tiene servidor de correo propio' } : { r: 'no', why: 'El dominio no recibe correo' }; } }
+  cacheDns.set(dom, res); return res;
+}
+async function analizarCorreo(email) {
+  if (!sintaxisCorreo(email)) return { estado: 'malo', motivo: 'No parece un correo válido' };
+  const [l, dom] = email.split('@'); const sug = sugerirDominio(dom);
+  if (sug) return { estado: 'malo', motivo: `El dominio parece mal escrito (¿“${sug}”?)`, sug: `${l}@${sug}` };
+  if (DOM_DESECHABLES.has(dom)) return { estado: 'malo', motivo: 'Es un correo temporal que dejará de existir' };
+  const mx = await dominioRecibeCorreo(dom);
+  if (mx.r === 'no') return { estado: 'malo', motivo: mx.why };
+  if (mx.r === 'sin') return { estado: 'sin', motivo: 'No se pudo comprobar el dominio (sin conexión con el servicio de consulta)' };
+  if (mx.r === 'dudoso') return { estado: 'revisar', motivo: mx.why };
+  if (CUENTAS_GENERICAS.test(l)) return { estado: 'revisar', motivo: 'Es una cuenta genérica: puede leerla más de una persona' };
+  return { estado: 'ok', motivo: '' };
+}
+function mapaCorreos(a) {
+  const d = derive(a); const filas = d.frozen ? d.units : d.rows; const m = new Map();
+  filas.forEach((r) => { const c = (a.contactos && a.contactos[r.id]) || {}; [c.c1, c.c2].forEach((x) => { const e = String(x || '').trim().toLowerCase(); if (!e) return; if (!m.has(e)) m.set(e, []); m.get(e).push(r); }); });
+  return m;
+}
+function cambiarCorreo(a, viejo, nuevo) {
+  Object.values(a.contactos || {}).forEach((c) => { ['c1', 'c2'].forEach((k) => { if (String(c[k] || '').trim().toLowerCase() === viejo) c[k] = nuevo; }); }); saveLocal();
+}
+async function revisarCorreos(a) {
+  if (R.rev && R.rev.corriendo) return;
+  const mapa = mapaCorreos(a); const emails = [...mapa.keys()];
+  if (!emails.length) { toast('Todavía no hay correos para revisar', 'err'); return; }
+  R.rev = { corriendo: true, prog: 'Preparando…' }; renderAll();
+  const items = {}; let hechos = 0; const cola = emails.slice();
+  await Promise.all(Array.from({ length: 6 }, async () => { while (cola.length) { const e = cola.shift(); items[e] = await analizarCorreo(e); hechos++; R.rev.prog = `Comprobando ${hechos} de ${emails.length}…`; if (hechos % 4 === 0) renderAll(); } }));
+  a.revision = { ts: Date.now(), items, malos: emails.filter((e) => items[e].estado === 'malo') };
+  saveLocal(); R.rev = { corriendo: false, prog: '' }; renderAll();
+  const c = { ok: 0, revisar: 0, malo: 0, sin: 0 }; Object.values(items).forEach((x) => c[x.estado]++);
+  toast(c.malo || c.revisar || c.sin ? `Revisión lista: ${c.ok} listos, ${c.revisar} por revisar, ${c.malo} con problema` : `Revisión lista: los ${c.ok} correos parecen válidos`, c.malo ? 'err' : 'ok');
+}
+const askCorreo = (actual) => modal((b, close) => {
+  const inp = h('input', { type: 'email', value: actual, autocomplete: 'off', 'aria-label': 'Correo correcto' }); const msg = h('div', { class: 'muted', style: 'font-size:12.5px;min-height:18px;margin-top:4px', role: 'alert' });
+  const guardar = () => { const n = inp.value.trim().toLowerCase(); if (!EMAIL_RE.test(n) || !sintaxisCorreo(n)) { msg.textContent = 'Ese correo no parece válido.'; return; } close(n); };
+  inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') guardar(); });
+  b.append(h('h3', { text: 'Corregir el correo' }), h('p', { class: 'muted', text: `Escribe la dirección correcta para ${actual}.` }), inp, msg, h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'btn primary', text: 'Guardar', onclick: guardar }), h('button', { class: 'btn', text: 'Cancelar', onclick: () => close(null) })));
+});
+function bloqueRevision(a) {
+  const corriendo = !!(R.rev && R.rev.corriendo); const rv = a.revision; const mapa = mapaCorreos(a);
+  const caja = h('div', { class: 'rv' });
+  caja.append(h('div', { class: 'row', style: 'margin:10px 0 4px;align-items:center' },
+    h('button', { class: 'btn small', disabled: corriendo || !mapa.size, onclick: () => revisarCorreos(a) }, corriendo ? 'Comprobando…' : (rv ? 'Volver a revisar' : 'Revisar correos')),
+    h('span', { class: 'muted', style: 'margin-left:8px', text: corriendo ? R.rev.prog : (rv ? `Última revisión: ${hm(rv.ts)}` : 'Antes de enviar, comprueba que los correos existan: cuida la reputación de tu cuenta de Gmail.') })));
+  if (!rv || corriendo) return caja;
+  const vistos = [...mapa.keys()].filter((e) => rv.items[e]); const c = { ok: 0, revisar: 0, malo: 0, sin: 0 }; vistos.forEach((e) => c[rv.items[e].estado]++);
+  caja.append(h('div', { class: 'row', style: 'gap:6px;flex-wrap:wrap;margin:6px 0' },
+    h('span', { class: 'chip ok', text: `✓ ${c.ok} listos` }), c.revisar ? h('span', { class: 'chip', text: `⚠ ${c.revisar} por revisar` }) : null,
+    c.malo ? h('span', { class: 'chip', style: 'background:#fde8e8;color:#9b1c1c', text: `✖ ${c.malo} con problema` }) : null, c.sin ? h('span', { class: 'chip', text: `? ${c.sin} sin comprobar` }) : null));
+  vistos.filter((e) => rv.items[e].estado !== 'ok').forEach((e) => {
+    const it = rv.items[e]; const quien = mapa.get(e).map((r) => `${r.inm} · ${r.prop || 'sin nombre'}`).join(', ');
+    caja.append(h('div', { style: 'border-top:1px solid #e3e7ef;padding:8px 0' },
+      h('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap' }, h('b', { style: 'word-break:break-all', text: e }), h('span', { class: 'chip', style: it.estado === 'malo' ? 'background:#fde8e8;color:#9b1c1c' : '', text: it.estado === 'malo' ? 'No se enviará' : it.estado === 'revisar' ? 'Revisar' : 'Sin comprobar' })),
+      h('div', { class: 'muted', style: 'font-size:12.5px', text: `${it.motivo} · ${quien}` }),
+      h('div', { class: 'row', style: 'gap:6px;margin-top:6px;flex-wrap:wrap' },
+        it.sug ? h('button', { class: 'btn small', text: `Usar ${it.sug}`, onclick: async () => { cambiarCorreo(a, e, it.sug); await revisarCorreos(a); } }) : null,
+        h('button', { class: 'btn small', text: 'Corregir', onclick: async () => { const n = await askCorreo(e); if (!n) return; cambiarCorreo(a, e, n); await revisarCorreos(a); } }),
+        h('button', { class: 'btn small', text: 'Quitar', onclick: async () => { cambiarCorreo(a, e, ''); await revisarCorreos(a); } }))));
+  });
+  return caja;
+}
+
+// ---------- enlace personal para quien no tiene correo (se envía a mano, por ejemplo por WhatsApp) ----------
+function crearEnlaceManual(a, ids) { a.manuales = a.manuales || {}; ids.forEach((id) => { a.manuales[id] = true; }); saveLocal(); programarPublicacion(300); renderAll(); toast(ids.length > 1 ? `${ids.length} enlaces listos: cópialos o envíalos por WhatsApp` : 'Enlace listo: cópialo o envíalo por WhatsApp', 'ok'); }
+function quitarEnlaceManual(a, id) { if (a.manuales) delete a.manuales[id]; saveLocal(); programarPublicacion(300); renderAll(); }
+async function regenerarManual(a, g) {
+  if (!(await askConfirm('Generar un enlace nuevo', `El enlace anterior de ${g.nombre} deja de funcionar. Tendrás que enviarle el nuevo.`, 'Generar enlace nuevo', true))) return;
+  a.tokens[g.k] = nuevoToken(); saveLocal(); if (!(await ensureOp())) return; append('ENLACE_REGENERADO', { nombre: g.nombre, units: g.units }); programarPublicacion(300); renderAll(); toast('Enlace nuevo listo: cópialo o envíalo por WhatsApp', 'ok');
+}
+function mensajeEnlace(a, g) {
+  const b = baseCorreo(a, derive(a)); const url = votarUrl() + '?t=' + tokenDe(a, g.k);
+  return `Hola ${g.nombre}, este es su enlace personal para participar y votar en la asamblea «${b.nombre}»${b.fecha ? ' (' + b.fecha + ')' : ''}:\n${url}\n\nEs personal: no lo reenvíe. Funciona cuando se abra la asamblea.${b.ayuda ? '\nAyuda: ' + b.ayuda : ''}`;
+}
+function compartirWhatsApp(a, g) { window.open('https://wa.me/?text=' + encodeURIComponent(mensajeEnlace(a, g)), '_blank', 'noopener'); }
+function bloqueManuales(a, d, G) {
+  const filas = G.sinTodos; const pend = filas.filter((r) => !(a.manuales && a.manuales[r.id]));
+  const caja = h('details', { class: 'manuales', open: pend.length > 0 });
+  caja.append(h('summary', { text: `Sin correo (${filas.length}): enviar su enlace por WhatsApp` }),
+    h('p', { class: 'muted', text: 'Crea el enlace personal de cada uno y envíalo tú desde tu WhatsApp. Cada enlace sirve solo para ese propietario y funciona cuando abras la asamblea. Quien no quiera usar celular puede votar en sala o con poder.' }));
+  if (pend.length > 1) caja.append(h('div', { class: 'row', style: 'margin:6px 0' }, h('button', { class: 'btn small', text: `Crear los ${pend.length} enlaces`, onclick: () => crearEnlaceManual(a, pend.map((r) => r.id)) })));
+  filas.forEach((r) => {
+    const tiene = !!(a.manuales && a.manuales[r.id]); const g = { k: 'manual:' + r.id, nombre: r.prop || r.inm, units: [r.id], correos: [], manual: true };
+    caja.append(h('div', { class: 'mrow', style: 'border-top:1px solid var(--line);padding:8px 0' },
+      h('div', { style: 'display:flex;justify-content:space-between;gap:8px' }, h('b', { text: `${r.inm} · ${r.prop || 'sin nombre'}` }), h('span', { class: 'muted', text: `${fmtA(r.ali)} %` })),
+      h('div', { class: 'row', style: 'gap:6px;margin-top:6px;flex-wrap:wrap' }, tiene
+        ? [h('button', { class: 'btn small', text: 'Copiar enlace', onclick: () => copiar(votarUrl() + '?t=' + tokenDe(a, g.k)) }), h('button', { class: 'btn small primary', text: 'Enviar por WhatsApp', onclick: () => compartirWhatsApp(a, g) }), h('button', { class: 'btn small', text: 'Quitar enlace', onclick: () => quitarEnlaceManual(a, r.id) })]
+        : [h('button', { class: 'btn small', text: 'Crear enlace', onclick: () => crearEnlaceManual(a, [r.id]) })])));
+  });
+  return caja;
+}
 async function enviarConvocatoria(a, grupos) {
   const d = derive(a); R.ocupado = true; R.progreso = { total: grupos.length, hechos: 0, ok: 0, fallidos: 0, errores: [] }; renderAll();
   const okPub = await publicarAhora({ forzar: true });
   if (!okPub) { R.progreso.errores.push({ g: '', destino: '', error: R.errPub || 'No se pudo publicar en el servicio.' }); R.ocupado = false; renderAll(); return; }
   a.envios = a.envios || {};
-  for (let i = 0; i < grupos.length; i += 20) {
-    const trozo = grupos.slice(i, i + 20);
+  for (let i = 0; i < grupos.length; i += LOTE_ENVIO) {
+    const trozo = grupos.slice(i, i + LOTE_ENVIO);
     try {
       const r = await llamarApi('convocar', { datos: JSON.stringify({ ...baseCorreo(a, d), lote: trozo.map((g) => loteDe(a, d, g)) }) });
       if (!r.ok) throw new Error('El servicio rechazó el envío (' + (r.motivo || '?') + ').');
       (r.resultados || []).forEach((x) => { a.envios[x.destino] = { ok: x.ok, ts: Date.now(), error: x.error || '' }; if (x.ok) R.progreso.ok++; else { R.progreso.fallidos++; R.progreso.errores.push(x); } });
     } catch (e) { trozo.forEach((g) => g.correos.forEach((c) => { a.envios[c] = { ok: false, ts: Date.now(), error: e.message }; R.progreso.fallidos++; R.progreso.errores.push({ g: g.k, destino: c, error: e.message }); })); }
     R.progreso.hechos = Math.min(grupos.length, i + trozo.length); saveLocal(); renderAll();
+    if (i + LOTE_ENVIO < grupos.length) await esperar(PAUSA_ENVIO_MS());
   }
-  const { cobertura } = gruposDe(a, d);
+  const cobertura = gruposDe(a, d).coberturaCorreo;
   if (!(await ensureOp())) { R.ocupado = false; renderAll(); return; }
   append('REMOTO_CONVOCATORIA', { propietarios: grupos.length, enviados: R.progreso.ok, fallidos: R.progreso.fallidos, cobertura: Number(cobertura.toFixed(2)) });
   R.ocupado = false; renderAll(); toast(R.progreso.fallidos ? `Convocatoria: ${R.progreso.ok} enviados y ${R.progreso.fallidos} fallidos. Revisa la lista y reintenta.` : `Convocatoria enviada: ${pl(R.progreso.ok, 'correo', 'correos')}`, R.progreso.fallidos ? 'err' : 'ok');
@@ -980,12 +1133,12 @@ async function reenviarA(a, g, nuevo) {
 // ---- pantalla “Correo” ----
 async function conectar(clave) {
   setClave(clave); R.errSync = ''; R.errPub = '';
-  try { const r = await llamarApi('ping'); if (!r.ok) { setClave(''); R.conectado = false; return r.motivo === 'sin_configurar' ? 'El servicio todavía no tiene configurada la huella de la clave (nodo Entrada).' : 'La clave no coincide con la del servicio.'; } R.conectado = true; R.estadoSrv = r.estado; R.rev = r.rev; remotoCfg(cur()).activo = true; saveLocal(); return ''; }
+  try { const r = await llamarApi('ping'); if (!r.ok) { setClave(''); R.conectado = false; return r.motivo === 'sin_configurar' ? 'El servicio todavía no tiene configurada la clave: pide a quien lo administra que la configure.' : 'La clave no coincide con la del servicio.'; } R.conectado = true; R.estadoSrv = r.estado; R.rev = r.rev; remotoCfg(cur()).activo = true; saveLocal(); return ''; }
   catch (e) { R.conectado = false; return 'No se pudo conectar con el servicio: ' + e.message; }
 }
 function pasoCard(n, titulo, hecho, ...kids) { return h('div', { class: 'card' }, h('h2', {}, h('span', { class: 'paso' + (hecho ? ' ok' : ''), text: hecho ? '✓' : String(n) }), ' ' + titulo), ...kids); }
 function viewCorreo() {
-  const a = cur(); const d = derive(a); const cfg = remotoCfg(a); const box = []; const G = gruposDe(a, d); const conectado = R.conectado && !!getClave();
+  const a = cur(); const d = derive(a); const cfg = remotoCfg(a); const box = []; const G = gruposDe(a, d); const GC = G.grupos.filter((g) => !g.manual); const conectado = R.conectado && !!getClave();
   const rowsAll = d.frozen ? d.units : d.rows;
   const sinPadron = !rowsAll.length;
 
@@ -997,11 +1150,11 @@ function viewCorreo() {
   inpNueva.addEventListener('input', () => { hu.textContent = inpNueva.value ? sha256(inpNueva.value) : ''; });
   const avApi = h('input', { type: 'text', value: apiUrl() }), avVotar = h('input', { type: 'text', value: votarUrl() });
   box.push(pasoCard(1, 'Conexión con el servicio de votación', conectado,
-    h('p', { class: 'muted', text: 'Es el servicio en n8n que recibe los votos de los propietarios desde sus celulares. Tu clave solo vive en esta pestaña.' }),
+    h('p', { class: 'muted', text: 'Es el servicio que recibe los votos de los propietarios desde sus celulares. Tu clave solo vive en esta pestaña.' }),
     h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Clave de la abogada' }), inpClave), bCon), msgC,
     conectado ? h('div', { class: 'okline', text: `✔ Conectado · el servicio está en “${({ preparacion: 'preparación', abierta: 'asamblea abierta', cerrada: 'cerrada', sin_publicar: 'sin publicar' })[R.estadoSrv] || R.estadoSrv}”` }) : null,
-    h('details', {}, h('summary', { text: 'Primera vez: crear la clave del servicio' }), h('p', { class: 'muted', text: 'Escribe una clave larga que solo tú conozcas. Copia la huella que aparece y pégala en el nodo “Entrada” del workflow de n8n, en CLAVE_HASH. Luego usa esa misma clave arriba.' }), inpNueva, h('div', { style: 'margin-top:6px' }, hu)),
-    h('details', {}, h('summary', { text: 'Ajustes avanzados' }), h('div', { class: 'field' }, h('label', { text: 'Dirección del servicio (webhook de n8n)' }), avApi), h('div', { class: 'field', style: 'margin-top:8px' }, h('label', { text: 'Dirección de la página de votación (votar.html)' }), avVotar), h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Guardar ajustes', onclick: () => { cfgSet('api', avApi.value.trim() === API_DEF ? '' : avApi.value.trim()); cfgSet('votar', avVotar.value.trim() === VOTAR_DEF ? '' : avVotar.value.trim()); toast('Ajustes guardados'); renderAll(); } })))));
+    h('details', {}, h('summary', { text: 'Primera vez: crear la clave del servicio' }), h('p', { class: 'muted', text: 'Escribe una clave larga que solo tú conozcas. Copia la huella que aparece y entrégasela a quien administra el servicio para que la configure (campo CLAVE_HASH). Luego usa esa misma clave arriba.' }), inpNueva, h('div', { style: 'margin-top:6px' }, hu)),
+    h('details', {}, h('summary', { text: 'Ajustes avanzados' }), h('div', { class: 'field' }, h('label', { text: 'Dirección del servicio de votación' }), avApi), h('div', { class: 'field', style: 'margin-top:8px' }, h('label', { text: 'Dirección de la página de votación (votar.html)' }), avVotar), h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Guardar ajustes', onclick: () => { cfgSet('api', avApi.value.trim() === API_DEF ? '' : avApi.value.trim()); cfgSet('votar', avVotar.value.trim() === VOTAR_DEF ? '' : avVotar.value.trim()); toast('Ajustes guardados'); renderAll(); } })))));
 
   if (sinPadron) { box.push(h('div', { class: 'card' }, h('h2', { text: 'Para enviar la convocatoria, primero carga el padrón' }), h('p', { class: 'muted', text: 'Puedes crear la clave y conectarte ahora. Los pasos de correos, convocatoria y apertura usan los inmuebles y propietarios del padrón.' }), h('button', { class: 'btn primary', text: 'Ir al padrón', onclick: () => { tab = 'padron'; renderAll(); } }))); return box; }
   // 2. propietarios y correos
@@ -1014,7 +1167,9 @@ function viewCorreo() {
   box.push(pasoCard(2, 'Propietarios y correos', G.grupos.length > 0 && !G.sin.length,
     h('p', { class: 'muted', text: 'Cada propietario recibe un enlace personal en su correo. Si dos inmuebles comparten el mismo correo, comparten el enlace y votan juntos.' }), kpi,
     G.mixtos.length ? h('div', { class: 'note' }, `Atención: ${G.mixtos.map((g) => g.k).join(', ')} se usa para propietarios con nombres distintos. Quien reciba ese enlace podrá votar por todos esos inmuebles.`) : null,
-    G.sin.length ? h('div', { class: 'note', text: `Sin correo: ${G.sin.slice(0, 8).map((r) => r.inm).join(', ')}${G.sin.length > 8 ? ' y ' + (G.sin.length - 8) + ' más' : ''}. Votarán en sala o con poder.` }) : null,
+    bloqueRevision(a, rowsAll),
+    (a.revision && a.revision.malos.length) ? h('div', { class: 'note', text: `${pl(a.revision.malos.length, 'correo con problema no recibirá', 'correos con problemas no recibirán')} la convocatoria hasta que lo corrijas.` }) : null,
+    G.sinTodos.length ? bloqueManuales(a, d, G) : null,
     h('details', {}, h('summary', { text: `Editar correos de los ${pl(rowsAll.length, 'inmueble', 'inmuebles')}` }), tabla),
     h('details', {}, h('summary', { text: 'Pegar correos desde Excel' }), h('p', { class: 'muted', text: 'Tres columnas: Inmueble, Correo 1 y Correo 2 (opcional).' }), ta, h('div', { class: 'row', style: 'margin-top:6px' }, h('button', { class: 'btn small', text: 'Aplicar correos', onclick: () => { let n = 0, mal = 0; a.contactos = a.contactos || {}; ta.value.split(/\r?\n/).forEach((l) => { const c = splitLine(l.trim()); if (c.length < 2) return; const r = rowsAll.find((x) => norm(x.inm) === norm(c[0])); if (!r) return; const c1 = (c[1] || '').trim(), c2 = (c[2] || '').trim(); if ((c1 && !EMAIL_RE.test(c1)) || (c2 && !EMAIL_RE.test(c2))) { mal++; return; } a.contactos[r.id] = { c1, c2 }; n++; }); saveLocal(); msgP.textContent = `${pl(n, 'inmueble actualizado', 'inmuebles actualizados')}${mal ? `; ${pl(mal, 'línea con correo no válido', 'líneas con correo no válido')}` : ''}.`; renderAll(); } }), msgP))));
 
@@ -1029,7 +1184,7 @@ function viewCorreo() {
     h('div', { class: 'field', style: 'margin-top:8px' }, h('label', { text: 'Mensaje adicional en el correo (opcional)' }), taMsg),
     h('div', { class: 'row', style: 'margin-top:10px' },
       h('button', { class: 'btn', text: 'Enviarme un correo de prueba', disabled: !conectado || R.ocupado, onclick: async () => { const dest = await modal((b, close) => { const i = h('input', { type: 'text', inputmode: 'email', placeholder: 'tu@correo.com' }); const er = h('div', { class: 'err' }); const ok = () => { if (!EMAIL_RE.test(i.value.trim())) { er.textContent = 'Escribe un correo válido.'; return; } close(i.value.trim()); }; i.addEventListener('keydown', (e) => { if (e.key === 'Enter') ok(); }); b.append(h('h3', { text: 'Correo de prueba' }), h('p', { class: 'muted', text: 'Te llega un correo igual al de los propietarios para que veas cómo se ve. El botón de la prueba no abre una asamblea real.' }), i, er, h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'btn primary', text: 'Enviar prueba', onclick: ok }), h('button', { class: 'btn', text: 'Cancelar', onclick: () => close(null) }))); }); if (!dest) return; try { await enviarPrueba(a, dest); toast('Correo de prueba enviado a ' + dest); } catch (e) { toast('No se pudo: ' + e.message); } } }),
-      h('button', { class: 'btn primary', text: `Enviar convocatoria a ${pl(G.grupos.length, 'propietario', 'propietarios')}`, disabled: !conectado || !G.grupos.length || R.ocupado, onclick: async () => { if (!(await askConfirm('¿Enviar la convocatoria?', `Se enviarán ${pl(G.grupos.reduce((s, g) => s + g.correos.length, 0), 'correo', 'correos')} a ${pl(G.grupos.length, 'propietario', 'propietarios')} (${fmt(G.cobertura)} % de la alícuota). Cada uno recibe un enlace personal que se activa cuando abras la asamblea.`, 'Enviar'))) return; enviarConvocatoria(a, G.grupos); } })),
+      h('button', { class: 'btn primary', text: `Enviar convocatoria a ${pl(GC.length, 'propietario', 'propietarios')}`, disabled: !conectado || !GC.length || R.ocupado, onclick: async () => { if (!(await askConfirm('¿Enviar la convocatoria?', `Se enviarán ${pl(GC.reduce((s, g) => s + g.correos.length, 0), 'correo', 'correos')} a ${pl(GC.length, 'propietario', 'propietarios')} (${fmt(G.coberturaCorreo)} % de la alícuota). Cada uno recibe un enlace personal que se activa cuando abras la asamblea. Se envían de a ${LOTE_ENVIO} con una pausa entre tandas para cuidar la reputación de tu cuenta de Gmail.${a.revision ? '' : ' Aún no revisaste los correos: se recomienda pulsar “Revisar correos” antes de enviar.'}`, 'Enviar'))) return; enviarConvocatoria(a, GC); } })),
     progreso,
     pr && !R.ocupado && pr.fallidos ? h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Reintentar los que fallaron', onclick: () => { const claves = new Set(pr.errores.map((e) => e.g).filter(Boolean)); const fallos = G.grupos.filter((g) => claves.has(g.k)); if (fallos.length) enviarConvocatoria(a, fallos); } })) : null,
     !conectado ? h('div', { class: 'muted', style: 'margin-top:6px', text: 'Conéctate en el paso 1 para enviar.' }) : null));
@@ -1049,13 +1204,13 @@ function viewCorreo() {
   // 5. en vivo
   if (d.remotoAbierto) {
     const ab = d.puntos.filter((p) => !p.cerrado); const pt = ab.length ? ab[ab.length - 1] : null; const todos = G.grupos.map((g) => {
-      const us = g.units.map((id) => d.byId[id]).filter(Boolean); const ent = us.some((u) => u.via === 'correo'); const yaVoto = pt ? us.every((u) => pt.votos[u.id]) : false; return { g, us, ent, yaVoto, ali: us.reduce((s, u) => s + u.ali, 0) };
+      const us = g.units.map((id) => d.byId[id]).filter(Boolean); const th = sha256(tokenDe(a, g.k)).slice(0, 16); const ent = us.some((u) => u.via === 'correo') || d.remotoH.has(th); const yaVoto = pt ? us.every((u) => pt.votos[u.id]) : false; return { g, us, th, ent, yaVoto, ali: us.reduce((s, u) => s + u.ali, 0) };
     });
     const nEnt = todos.filter((x) => x.ent).length; const votados = pt ? d.units.filter((u) => pt.votos[u.id] && pt.via && pt.via[u.id]).length : 0;
     const lista = h('div', { class: 'tw', style: 'max-height:380px;overflow:auto' });
     const vis = todos.filter((x) => R.filtroV === 'T' || (R.filtroV === 'N' && !x.ent) || (R.filtroV === 'V' && pt && x.ent && !x.yaVoto));
-    vis.forEach((x) => lista.append(h('div', { class: 'vrow' }, h('div', { class: 'vn' }, h('b', { text: x.g.nombre }), h('span', { class: 'muted', text: ` · ${x.us.map((u) => u.inm).join(', ')} · ${fmt(x.ali)} %` })), h('div', { class: 'row' }, h('span', { class: 'chip ' + (x.ent ? 'ok' : ''), text: x.ent ? 'Ingresó' : 'No ha ingresado' }), (x.ent && x.us.some(u => u.ubic)) ? h('span', { class: 'chip rep', text: 'Declara: ' + (x.us.find(u => u.ubic).ubic === 'S' ? 'en la sala' : 'a distancia') }) : null, pt ? h('span', { class: 'chip ' + (x.yaVoto ? 'ok' : 'warn'), text: x.yaVoto ? 'Votó' : 'Sin votar' }) : null,
-      h('button', { class: 'btn small', text: 'Copiar enlace', onclick: () => copiar(votarUrl() + '?t=' + tokenDe(a, x.g.k)) }), h('button', { class: 'btn small', text: 'Reenviar correo', disabled: d.closed, onclick: async () => { try { await reenviarA(a, x.g, false); } catch (e) { toast('No se pudo: ' + e.message); } } }), h('button', { class: 'btn small danger', text: 'Enlace nuevo', disabled: d.closed, onclick: async () => { if (!(await askConfirm('Generar un enlace nuevo', `El enlace anterior de ${x.g.nombre} deja de funcionar y se le envía uno nuevo por correo.`, 'Generar y enviar', true))) return; try { await reenviarA(a, x.g, true); renderAll(); } catch (e) { toast('No se pudo: ' + e.message); } } })))));
+    vis.forEach((x) => lista.append(h('div', { class: 'vrow' }, h('div', { class: 'vn' }, h('b', { text: x.g.nombre }), h('span', { class: 'muted', text: ` · ${x.us.map((u) => u.inm).join(', ')} · ${fmt(x.ali)} %` })), h('div', { class: 'row' }, h('span', { class: 'chip ' + (x.ent ? 'ok' : ''), text: x.ent ? 'Ingresó' : 'No ha ingresado' }), (x.ent && (x.us.some(u => u.ubic) || d.remotoU[x.th])) ? h('span', { class: 'chip rep', text: 'Declara: ' + ((((x.us.find(u => u.ubic) || {}).ubic) || d.remotoU[x.th]) === 'S' ? 'en la sala' : 'a distancia') }) : null, pt ? h('span', { class: 'chip ' + (x.yaVoto ? 'ok' : 'warn'), text: x.yaVoto ? 'Votó' : 'Sin votar' }) : null,
+      h('button', { class: 'btn small', text: 'Copiar enlace', onclick: () => copiar(votarUrl() + '?t=' + tokenDe(a, x.g.k)) }), x.g.manual ? h('button', { class: 'btn small', text: 'Enviar por WhatsApp', onclick: () => compartirWhatsApp(a, x.g) }) : h('button', { class: 'btn small', text: 'Reenviar correo', disabled: d.closed, onclick: async () => { try { await reenviarA(a, x.g, false); } catch (e) { toast('No se pudo: ' + e.message); } } }), x.g.manual ? h('button', { class: 'btn small danger', text: 'Enlace nuevo', disabled: d.closed, onclick: () => regenerarManual(a, x.g) }) : h('button', { class: 'btn small danger', text: 'Enlace nuevo', disabled: d.closed, onclick: async () => { if (!(await askConfirm('Generar un enlace nuevo', `El enlace anterior de ${x.g.nombre} deja de funcionar y se le envía uno nuevo por correo.`, 'Generar y enviar', true))) return; try { await reenviarA(a, x.g, true); renderAll(); } catch (e) { toast('No se pudo: ' + e.message); } } })))));
     box.push(pasoCard(5, 'En vivo', false,
       h('div', { class: 'kpis' }, h('div', { class: 'kpi' }, h('b', { text: `${nEnt} / ${G.grupos.length}` }), h('span', { text: 'propietarios ingresaron' })), h('div', { class: 'kpi' }, h('b', { text: fmt(calcQ(d).pA) + ' %' }), h('span', { text: `quórum · mesa ${fmt(calcQ(d).pS)} % + enlace ${fmt(calcQ(d).pC)} %` })), pt ? h('div', { class: 'kpi' }, h('b', { text: String(votados) }), h('span', { text: 'inmuebles votaron por correo' })) : null),
       h('div', { class: 'row' }, h('button', { class: 'btn small', text: 'Sincronizar ahora', onclick: async () => { const n = await sincronizar(true); toast(R.errSync ? 'No se pudo sincronizar: ' + R.errSync : n ? `Sincronizado: ${pl(n, 'anotación nueva', 'anotaciones nuevas')} en el registro` : 'Sincronizado: no hay novedades todavía'); renderAll(); } }), h('span', { class: 'muted', id: 'syncInfo', text: R.errSync ? 'Error: ' + R.errSync : R.ultimoSync ? `Última sincronización: ${hms(R.ultimoSync)}` : 'Sin sincronizar todavía' })),
@@ -1070,12 +1225,202 @@ setTimeout(async () => { const a = cur(); if (a && a.remoto && a.remoto.activo &
 function renderAll() {
   if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); }
   renderHeader(); actualizarChipRemoto(); renderTabs(); const v = tab === 'asistencia' ? viewAsistencia() : tab === 'votacion' ? viewVotacion() : tab === 'correo' ? viewCorreo() : tab === 'auditoria' ? viewAuditoria() : tab === 'reporte' ? viewReporte() : viewPadron();
-  $('#view').replaceChildren(...v);
+  $('#view').replaceChildren(...[cardSiguientePaso(), ...v].filter(Boolean)); actualizarPantalla();
 }
 $('#asmSel').addEventListener('change', e => { store.current = e.target.value; puntoSel = ''; saveLocal(); renderAll(); });
 $('#asmNew').addEventListener('click', () => { nuevaAsm('Nueva asamblea'); renderAll(); });
-loadLocal(); if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); }
-renderAll(); initCloud();
+function arrancar() { if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); } renderAll(); initCloud(); }
+// ---------- acceso con usuario y contraseña (datos cifrados en este dispositivo) ----------
+const LS_AUTH = 'wcon-auth', LS_CIF = 'wcon-asamblea-v2c', LS_FALLOS = 'wcon-fallos', ITER_PBKDF2 = 250000;
+let claveCifrado = null, ultimaActividad = Date.now(), guardTimer = null, guardando = Promise.resolve();
+const b64 = (buf) => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+async function derivarClave(usuario, clave, salt, iter) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(usuario.trim().toLowerCase() + '\u0000' + clave), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function cifrarTexto(key, texto) { const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(texto)); return { i: b64(iv), d: b64(ct) }; }
+async function descifrarTexto(key, o) { return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(o.i) }, key, unb64(o.d))); }
+function guardarCifrado() { clearTimeout(guardTimer); guardTimer = setTimeout(volcarCifrado, 120); }
+function volcarCifrado() {
+  if (!claveCifrado) return Promise.resolve(); const txt = JSON.stringify(store);
+  guardando = guardando.then(async () => { try { localStorage.setItem(LS_CIF, JSON.stringify(await cifrarTexto(claveCifrado, txt))); } catch (e) { memOnly = true; } });
+  return guardando;
+}
+window.addEventListener('pagehide', () => { if (claveCifrado) volcarCifrado(); });
+function esperaFallos() { try { const f = JSON.parse(localStorage.getItem(LS_FALLOS) || 'null'); if (f && f.n >= 3) { const s = Math.ceil((f.t + Math.min(60, 2 ** (f.n - 2)) * 1000 - Date.now()) / 1000); return s > 0 ? s : 0; } } catch (e) { /* sin registro */ } return 0; }
+function registrarFallo() { let f = { n: 0, t: 0 }; try { f = JSON.parse(localStorage.getItem(LS_FALLOS) || 'null') || f; } catch (e) { /* nuevo */ } f.n++; f.t = Date.now(); try { localStorage.setItem(LS_FALLOS, JSON.stringify(f)); } catch (e) { /* sin espacio */ } }
+function limpiarFallos() { try { localStorage.removeItem(LS_FALLOS); } catch (e) { /* nada */ } }
+function mostrarBloqueo(nodo) { const L = $('#lock'); L.replaceChildren(nodo); L.hidden = false; document.body.classList.add('bloqueado'); const f = L.querySelector('input'); if (f) f.focus(); }
+function quitarBloqueo() { const L = $('#lock'); L.hidden = true; L.replaceChildren(); document.body.classList.remove('bloqueado'); }
+function campoLock(id, etiqueta, tipo, auto) { return h('div', { class: 'field' }, h('label', { for: id, text: etiqueta }), h('input', { id, type: tipo, autocomplete: auto, spellcheck: 'false', autocapitalize: 'off' })); }
+function pantallaCrear(hayPrevios) {
+  const err = h('div', { class: 'lockerr', role: 'alert' }); const btn = h('button', { class: 'btn primary', type: 'submit', text: 'Crear acceso y entrar' });
+  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
+    ev.preventDefault(); err.textContent = ''; const us = $('#lkU').value.trim(), c1 = $('#lkP1').value, c2 = $('#lkP2').value;
+    if (us.length < 3) { err.textContent = 'El usuario debe tener al menos 3 caracteres.'; return; }
+    if (c1.length < 10) { err.textContent = 'La contraseña debe tener al menos 10 caracteres.'; return; }
+    if (c1.toLowerCase().includes(us.toLowerCase())) { err.textContent = 'La contraseña no debe contener el usuario.'; return; }
+    if (c1 !== c2) { err.textContent = 'Las contraseñas no coinciden.'; return; }
+    btn.disabled = true; btn.textContent = 'Protegiendo…';
+    try { await crearAcceso(us, c1); } catch (e) { err.textContent = 'No se pudo crear el acceso: ' + e.message; btn.disabled = false; btn.textContent = 'Crear acceso y entrar'; }
+  } }, campoLock('lkU', 'Usuario', 'text', 'username'), campoLock('lkP1', 'Contraseña (mínimo 10 caracteres)', 'password', 'new-password'), campoLock('lkP2', 'Repite la contraseña', 'password', 'new-password'), err, btn);
+  return h('div', { class: 'lockcard' }, h('h1', { text: 'Protege esta consola' }),
+    h('p', { class: 'muted', text: 'Crea tu usuario y contraseña. Se te pedirán cada vez que abras esta página, y tus datos (padrón, correos, enlaces) quedarán cifrados en este dispositivo.' }),
+    hayPrevios ? h('div', { class: 'note', text: 'Ya hay datos guardados en este dispositivo: se protegerán con esta contraseña.' }) : null, form,
+    h('p', { class: 'muted small', text: 'Si olvidas la contraseña no se puede recuperar: solo podrás restaurar tus datos desde una copia de seguridad (Auditoría → Respaldo).' }));
+}
+function pantallaEntrar(soloDesbloquear) {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH) || '{}'); const err = h('div', { class: 'lockerr', role: 'alert' }); const btn = h('button', { class: 'btn primary', type: 'submit', text: soloDesbloquear ? 'Desbloquear' : 'Entrar' });
+  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
+    ev.preventDefault(); err.textContent = ''; const espera = esperaFallos(); if (espera > 0) { err.textContent = `Demasiados intentos. Espera ${espera} s e inténtalo de nuevo.`; return; }
+    btn.disabled = true; btn.textContent = 'Verificando…';
+    try { await entrar($('#lkU').value, $('#lkP').value, soloDesbloquear); } catch (e) { err.textContent = e.message; btn.disabled = false; btn.textContent = soloDesbloquear ? 'Desbloquear' : 'Entrar'; $('#lkP').value = ''; $('#lkP').focus(); }
+  } }, campoLock('lkU', 'Usuario', 'text', 'username'), campoLock('lkP', 'Contraseña', 'password', 'current-password'), err, btn);
+  const olvide = h('button', { class: 'linkbtn', type: 'button', text: 'Olvidé mi contraseña', onclick: olvideContrasena });
+  const u = form.querySelector('#lkU'); if (soloDesbloquear && au.u) u.value = au.u;
+  return h('div', { class: 'lockcard' }, h('h1', { text: soloDesbloquear ? 'Consola bloqueada' : 'Consola de asambleas' }), h('p', { class: 'muted', text: soloDesbloquear ? 'Escribe tu contraseña para seguir.' : 'Ingresa con tu usuario y contraseña.' }), form, olvide);
+}
+async function entrar(usuario, clave, soloDesbloquear) {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH)); let key;
+  try { key = await derivarClave(usuario, clave, unb64(au.s), au.it); const ok = await descifrarTexto(key, au.c); if (ok !== 'wcon-ok' || usuario.trim().toLowerCase() !== String(au.u).toLowerCase()) throw new Error('x'); } catch (e) { registrarFallo(); throw new Error('Usuario o contraseña incorrectos.'); }
+  limpiarFallos();
+  if (soloDesbloquear) { quitarBloqueo(); return; }
+  const cif = localStorage.getItem(LS_CIF);
+  if (cif) { try { store = JSON.parse(await descifrarTexto(key, JSON.parse(cif))); } catch (e) { throw new Error('No se pudieron leer los datos guardados.'); } }
+  claveCifrado = key; window.__cifrado = true; quitarBloqueo(); activarBotonSeguridad(); ultimaActividad = Date.now(); iniciarCallback();
+}
+async function crearAcceso(usuario, clave) {
+  const salt = crypto.getRandomValues(new Uint8Array(16)); const key = await derivarClave(usuario, clave, salt, ITER_PBKDF2); const c = await cifrarTexto(key, 'wcon-ok');
+  loadLocal(); const habiaPrevios = !!localStorage.getItem(LS);
+  claveCifrado = key; window.__cifrado = true; await volcarCifrado();
+  localStorage.setItem(LS_AUTH, JSON.stringify({ v: 1, u: usuario.trim(), s: b64(salt), it: ITER_PBKDF2, c }));
+  if (habiaPrevios) localStorage.removeItem(LS);
+  limpiarFallos(); quitarBloqueo(); activarBotonSeguridad(); ultimaActividad = Date.now(); iniciarCallback();
+}
+async function olvideContrasena() {
+  const ok = await askConfirm('¿Restablecer el acceso?', 'Se borrarán de ESTE dispositivo las asambleas, correos y enlaces guardados. Solo podrás recuperarlos con una copia de seguridad (Auditoría → Respaldo). No afecta lo que ya esté publicado en el servicio de votación.', 'Borrar y restablecer', true);
+  if (!ok) return; [LS_AUTH, LS_CIF, LS, LS_FALLOS].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* nada */ } });
+  store = { asms: {}, current: '', op: '' }; mostrarBloqueo(pantallaCrear(false));
+}
+const menuSeguridad = () => modal((b, close) => {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH) || '{}');
+  b.append(h('h3', { text: 'Seguridad de la consola' }), h('p', { class: 'muted', text: `Sesión de ${au.u}. Tus datos están cifrados en este dispositivo y se piden usuario y contraseña al abrir la página.` }),
+    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px' }, h('button', { class: 'btn primary', text: 'Bloquear ahora', onclick: () => { close(null); bloquearAhora(); } }), h('button', { class: 'btn', text: 'Cambiar contraseña', onclick: () => { close(null); cambiarContrasena(); } }), h('button', { class: 'btn', text: 'Cerrar', onclick: () => close(null) })));
+});
+function bloquearAhora() { mostrarBloqueo(pantallaEntrar(true)); }
+const cambiarContrasena = () => modal((b, close) => {
+  const err = h('div', { class: 'lockerr', role: 'alert' }); const au = JSON.parse(localStorage.getItem(LS_AUTH));
+  const f = (id, et) => h('div', { class: 'field' }, h('label', { for: id, text: et }), h('input', { id, type: 'password', autocomplete: id === 'cpA' ? 'current-password' : 'new-password' }));
+  const guardar = h('button', { class: 'btn primary', type: 'submit', text: 'Guardar contraseña' });
+  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
+    ev.preventDefault(); err.textContent = ''; const ac = $('#cpA').value, n1 = $('#cpN').value, n2 = $('#cpR').value;
+    if (n1.length < 10) { err.textContent = 'La nueva contraseña debe tener al menos 10 caracteres.'; return; } if (n1.toLowerCase().includes(String(au.u).toLowerCase())) { err.textContent = 'La contraseña no debe contener el usuario.'; return; } if (n1 !== n2) { err.textContent = 'Las contraseñas nuevas no coinciden.'; return; }
+    guardar.disabled = true;
+    try { const k0 = await derivarClave(au.u, ac, unb64(au.s), au.it); if ((await descifrarTexto(k0, au.c)) !== 'wcon-ok') throw new Error('x'); } catch (e) { err.textContent = 'La contraseña actual no es correcta.'; guardar.disabled = false; return; }
+    const salt = crypto.getRandomValues(new Uint8Array(16)); const key = await derivarClave(au.u, n1, salt, ITER_PBKDF2); const c = await cifrarTexto(key, 'wcon-ok');
+    claveCifrado = key; await volcarCifrado(); localStorage.setItem(LS_AUTH, JSON.stringify({ ...au, s: b64(salt), it: ITER_PBKDF2, c })); close(true); toast('Contraseña cambiada', 'ok');
+  } }, f('cpA', 'Contraseña actual'), f('cpN', 'Contraseña nueva (mínimo 10 caracteres)'), f('cpR', 'Repite la contraseña nueva'), err, h('div', { class: 'row', style: 'margin-top:10px' }, guardar, h('button', { class: 'btn', type: 'button', text: 'Cancelar', onclick: () => close(null) })));
+  b.append(h('h3', { text: 'Cambiar contraseña' }), form);
+});
+function activarBotonSeguridad() { const bt = $('#asmLock'); bt.hidden = false; bt.onclick = menuSeguridad; }
+['pointerdown', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { ultimaActividad = Date.now(); }, { passive: true }));
+setInterval(() => { if (window.__cifrado && !document.body.classList.contains('bloqueado') && Date.now() - ultimaActividad > 20 * 60 * 1000) { let abierta = false; try { abierta = derive(cur()).remotoAbierto; } catch (e) { /* sin asamblea */ } if (!abierta) bloquearAhora(); } }, 30000);
+let iniciarCallback = () => {};
+function iniciarBloqueo(arrancar) {
+  iniciarCallback = arrancar;
+  if (window.ASAMBLEA_SIN_BLOQUEO) { loadLocal(); arrancar(); return; }
+  if (!(window.crypto && crypto.subtle)) { loadLocal(); arrancar(); toast('Este navegador no permite el cifrado: abre la página con https para proteger tus datos.', 'err'); return; }
+  if (localStorage.getItem(LS_AUTH)) { mostrarBloqueo(pantallaEntrar(false)); return; }
+  let previos = false; try { const p = JSON.parse(localStorage.getItem(LS) || 'null'); previos = !!(p && p.asms && Object.keys(p.asms).length); } catch (e) { /* sin datos */ }
+  mostrarBloqueo(pantallaCrear(previos));
+}
+
+
+// ---------- asistente de pasos (siguiente acción sugerida) ----------
+function pasoSiguiente(a, d) {
+  const c = calcQ(d); const rem = remotoCfg(a); const abiertos = d.puntos.filter((p) => !p.cerrado);
+  const hayCorreos = Object.values(a.contactos || {}).some((x) => x && (x.c1 || x.c2));
+  const convocada = a.events.some((e) => e.type === 'REMOTO_CONVOCATORIA');
+  const quorumOk = d.T > 0 && c.pA >= d.meta.quorumReq;
+  if (d.closed) return { pestana: 'reporte', n: 6, titulo: 'La asamblea está cerrada', texto: 'Imprime el reporte para que lo firmen y guarda el archivo de respaldo.', cta: 'Ir al reporte' };
+  if (!d.frozen) return d.rows.length
+    ? { pestana: 'padron', n: 1, titulo: 'Congela el padrón', texto: 'Revisa la alícuota de cada inmueble y congélalo: desde ahí cualquier cambio queda anotado.', cta: 'Ir al padrón' }
+    : { pestana: 'padron', n: 1, titulo: 'Carga el padrón', texto: 'Pega los inmuebles y propietarios, o prueba con datos de ejemplo.', cta: 'Ir al padrón' };
+  if (!d.remotoAbierto && !a.sinEnlace && !(c.nP + c.nR) && !d.puntos.length) {
+    if (!rem.activo) return { pestana: 'correo', n: 2, titulo: 'Conecta el voto por enlace (opcional)', texto: 'Si algunos propietarios votarán desde su celular, conecta el servicio y envíales su enlace. Si todos votarán en sala, puedes omitirlo.', cta: 'Ir a Correo', omitir: true };
+    if (hayCorreos && !a.revision) return { pestana: 'correo', n: 2, titulo: 'Revisa los correos antes de enviar', texto: 'Así evitas rebotes que dañan la reputación de tu cuenta de Gmail.', cta: 'Ir a Correo' };
+    if (!convocada) return { pestana: 'correo', n: 2, titulo: 'Envía la convocatoria', texto: 'Cada propietario recibe su enlace personal. A quien no tiene correo le puedes crear un enlace para enviarlo por WhatsApp.', cta: 'Ir a Correo' };
+    return { pestana: 'correo', n: 2, titulo: 'Abre la asamblea a los propietarios', texto: 'Hazlo cuando empiece la asamblea: antes, sus enlaces dicen que todavía no ha iniciado.', cta: 'Ir a Correo' };
+  }
+  if (!quorumOk) return { pestana: 'asistencia', n: 3, titulo: 'Registra la asistencia', texto: `Falta ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} % para llegar al quórum (${fmt(d.meta.quorumReq)} %).`, cta: 'Ir a Asistencia' };
+  if (!d.puntos.length) return { pestana: 'votacion', n: 4, titulo: 'Agrega el primer punto a votar', texto: 'Hay quórum. Escribe el punto del orden del día y ábrelo a votación.', cta: 'Ir a Votación' };
+  if (abiertos.length) return { pestana: 'votacion', n: 4, titulo: 'Hay una votación en curso', texto: 'Cuando terminen de votar, cierra el punto para sellar el resultado.', cta: 'Ir a Votación' };
+  return { pestana: 'votacion', n: 4, titulo: 'Agrega otro punto o cierra la asamblea', texto: 'Todos los puntos están cerrados. Si no hay más, ve al reporte y cierra la asamblea.', cta: 'Ir a Votación', alt: { pestana: 'reporte', cta: 'Cerrar y firmar' } };
+}
+const NOMBRE_PESTANA = { padron: 'Padrón', correo: 'Correo', asistencia: 'Asistencia', votacion: 'Votación', auditoria: 'Auditoría', reporte: 'Reporte' };
+function cardSiguientePaso() {
+  const a = cur(); if (!a) return null; const d = derive(a); const p = pasoSiguiente(a, d); if (!p) return null;
+  const aqui = tab === p.pestana;
+  return h('section', { class: 'next', 'aria-label': 'Siguiente paso' },
+    h('span', { class: 'et', text: `Siguiente paso · pestaña ${p.n} ${NOMBRE_PESTANA[p.pestana]}` }), h('h2', { text: p.titulo }), h('p', { text: p.texto }),
+    (!aqui || p.omitir || p.alt) ? h('div', { class: 'row' },
+      !aqui ? h('button', { class: 'btn primary', text: p.cta, onclick: () => { tab = p.pestana; renderAll(); window.scrollTo(0, 0); } }) : null,
+      p.alt ? h('button', { class: 'btn', text: p.alt.cta, onclick: () => { tab = p.alt.pestana; renderAll(); window.scrollTo(0, 0); } }) : null,
+      p.omitir ? h('button', { class: 'btn small', text: 'No usaré voto por enlace', onclick: () => { a.sinEnlace = true; saveLocal(); renderAll(); } }) : null) : null);
+}
+// ---------- pantalla de sala (para proyectar) ----------
+let pantallaWin = null;
+const PANTALLA_HTML = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pantalla de sala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0A1328;color:#F2F5FB;font:500 clamp(16px,1.7vw,24px)/1.35 Inter,system-ui,sans-serif;padding:3vh 4vw;display:flex;flex-direction:column;justify-content:space-between;gap:2.5vh}
+.cap{font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A9B6CE;font-size:clamp(13px,1.4vw,20px)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:2vw;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:.6em;background:#16234A;border:1px solid #2B3D75;padding:.4em 1em;border-radius:999px;font-weight:700}
+.dot{width:.6em;height:.6em;border-radius:50%;background:#5BE0B8}
+main{display:flex;gap:5vw;flex-wrap:wrap;align-items:stretch;flex:1}
+.q{flex:0 1 30vw;min-width:280px;display:flex;flex-direction:column;justify-content:center;gap:1.4vh}
+.num{font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:clamp(48px,6.2vw,130px);line-height:1;color:#fff;white-space:nowrap}
+.bar{position:relative;height:1.4vh;min-height:12px;border-radius:999px;background:#1B2A52}.bar i{display:block;height:100%;border-radius:999px;background:#7FA2FF}.bar b{position:absolute;top:-.8vh;width:4px;height:3.2vh;min-height:24px;background:#fff;border-radius:2px}
+.ok{color:#5BE0B8;font-weight:700;font-size:clamp(18px,2vw,28px)}.no{color:#FFD08A;font-weight:700;font-size:clamp(18px,2vw,28px)}
+.p{flex:1 1 40vw;min-width:300px;display:flex;flex-direction:column;justify-content:center;gap:2.5vh}
+h1{margin:0;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:clamp(28px,3.6vw,56px);line-height:1.12}
+.r{display:flex;flex-direction:column;gap:.8vh}.rt{display:flex;justify-content:space-between;align-items:baseline;gap:2vw;font-weight:700;font-size:clamp(18px,2.2vw,32px)}.rt span:last-child{font-family:'Space Grotesk',Inter,sans-serif;font-size:clamp(22px,2.9vw,44px)}
+.rb{height:2vh;min-height:14px;border-radius:999px;background:#1B2A52;overflow:hidden}.rb i{display:block;height:100%}
+.pie{border-top:1px solid #22305C;padding-top:2vh;color:#E3E9F5;font-size:clamp(15px,1.6vw,24px)}
+.ver{font-weight:700;font-size:clamp(20px,2.4vw,36px)}
+</style></head><body>
+<div class="top"><span class="cap" id="asm"></span><span class="pill"><span class="dot"></span><span id="est"></span></span></div>
+<main><section class="q" aria-label="Quórum"><span class="cap">Quórum</span><span class="num" id="q" role="status"></span><div class="bar" id="qb"><i id="qf"></i><b id="qm"></b></div><span id="qs"></span><span class="cap" id="qi" style="text-transform:none;letter-spacing:0"></span></section>
+<section class="p" aria-label="Punto en votación"><div><span class="cap" id="pn"></span><h1 id="pt"></h1></div><div id="rs"></div><span class="cap" id="pp" style="text-transform:none;letter-spacing:0"></span></section></main>
+<div class="pie" id="pie">Vota desde tu celular con el enlace que recibiste. Si estás en la sala sin celular, la mesa registra tu voto.</div></body></html>`;
+function abrirPantalla() {
+  pantallaWin = window.open('', 'wcon-pantalla', 'width=1280,height=720');
+  if (!pantallaWin) { toast('El navegador bloqueó la ventana: permite las ventanas emergentes de esta página.', 'err'); return; }
+  pantallaWin.document.open(); pantallaWin.document.write(PANTALLA_HTML); pantallaWin.document.close(); actualizarPantalla();
+}
+function actualizarPantalla() {
+  const w = pantallaWin; if (!w || w.closed || !w.document || !w.document.getElementById('asm')) return; const a = cur(); if (!a) return;
+  const d = derive(a); const c = calcQ(d); const doc = w.document; const set = (id, t) => { const e = doc.getElementById(id); if (e && e.textContent !== t) e.textContent = t; };
+  const abiertos = d.puntos.filter((p) => !p.cerrado); const p = abiertos[abiertos.length - 1] || d.puntos[d.puntos.length - 1] || null;
+  set('asm', `Asamblea de propietarios · ${d.meta.nombre || ''}`); set('est', d.closed ? 'Asamblea cerrada' : abiertos.length ? 'Votación abierta' : d.frozen ? 'Asamblea en sesión' : 'En preparación');
+  const ok = d.T > 0 && c.pA >= d.meta.quorumReq; const totalInm = d.units.length || d.rows.length;
+  set('q', `${fmt(c.pA)} %`); doc.getElementById('qf').style.width = Math.min(100, c.pA) + '%'; doc.getElementById('qm').style.left = Math.min(100, Math.max(0, d.meta.quorumReq)) + '%';
+  const qs = doc.getElementById('qs'); qs.className = ok ? 'ok' : 'no'; set('qs', ok ? `✔ Hay quórum · mínimo ${fmt(d.meta.quorumReq)} %` : `Faltan ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} puntos para el quórum (mínimo ${fmt(d.meta.quorumReq)} %)`);
+  set('qi', `${c.nP + c.nR} de ${totalInm} inmuebles presentes${c.nR ? ' · ' + c.nR + ' en representación' : ''}`);
+  const rs = doc.getElementById('rs');
+  if (!p) { set('pn', 'Esperando'); set('pt', 'Aún no hay un punto en votación'); rs.replaceChildren(); set('pp', ''); return; }
+  const t = tallyOf(d, p); const base = t.aA || 0; const pc = (x) => (base ? x / base * 100 : 0);
+  const filas = [['✔', 'A favor', t.r.F.P + t.r.F.R, '#7FA2FF'], ['✖', 'En contra', t.r.C.P + t.r.C.R, '#FFA877'], ['–', 'Abstención', t.r.X.P + t.r.X.R, '#C3CEE0']];
+  set('pn', `Punto ${d.puntos.indexOf(p) + 1} de ${d.puntos.length}${p.cerrado ? ' · cerrado' : ''}`); set('pt', p.titulo || '');
+  rs.replaceChildren(...filas.map(([ic, et, v, col]) => { const f = doc.createElement('div'); f.className = 'r'; const rt = doc.createElement('div'); rt.className = 'rt'; const l = doc.createElement('span'); l.textContent = `${ic} ${et}`; const n = doc.createElement('span'); n.textContent = `${fmt(pc(v))} %`; rt.append(l, n); const rb = doc.createElement('div'); rb.className = 'rb'; const i = doc.createElement('i'); i.style.width = Math.min(100, pc(v)) + '%'; i.style.background = col; rb.append(i); f.append(rt, rb); return f; }));
+  const sin = t.r.N.P + t.r.N.R;
+  set('pp', p.cerrado ? `${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)} % a favor` : `Porcentaje de la alícuota presente${sin ? ' · ' + fmt(pc(sin)) + ' % aún sin votar' : ''}`);
+}
+setInterval(actualizarPantalla, 1500);
+
+$('#asmPantalla').addEventListener('click', abrirPantalla);
+iniciarBloqueo(arrancar);
 window.__asm = { R, gruposDe, armarSnapshot, publicarAhora, sincronizar, tokenDe, buildConstanciaHTML, eventosDeUnidad, store: () => store, derive, calcQ, tallyLive, verify, sha256, canon, append, buildReportHTML, buildCSV, buildJSON, parsePegado, huella, desc, votantes };
 })();
 </script>
