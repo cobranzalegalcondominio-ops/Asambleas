@@ -164,14 +164,30 @@ body.bloqueado .ov{z-index:300}
 .next h2{margin:0;font-size:18px;color:var(--ink)}.next p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
 .next .row{margin-top:6px;gap:8px;flex-wrap:wrap}
 #asmPantalla[hidden]{display:none}
+:root{--bg:#f4f6fa;--ink:#0e1a33;--muted:#55627a;--line:#dde3ee;--accent:#2152e0;--shadow:0 1px 2px rgba(15,25,45,.06),0 10px 24px rgba(15,25,45,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1328;--panel:#111c38;--ink:#eef2fa;--muted:#a9b6ce;--line:#22305c;--accent:#7fa2ff;--accent-ink:#0a1328;--shadow:0 1px 2px rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--bg:#0a1328;--panel:#111c38;--ink:#eef2fa;--muted:#a9b6ce;--line:#22305c;--accent:#7fa2ff;--accent-ink:#0a1328}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+h1,h2,#asmSel,.next h2{font-family:"Space Grotesk",Inter,sans-serif}
+.card{border-radius:20px;border:1px solid var(--line)}
+.card h2{font-size:19px;font-weight:700}
+.btn{min-height:44px;border-radius:12px;font-weight:600}.btn.small{min-height:40px}.btn.primary{font-weight:700}
+.chip{font-weight:600;padding:5px 11px}
+.hrow select{font-size:17px;font-weight:700;border-radius:12px;min-height:44px}
+header{box-shadow:0 1px 0 var(--line)}
+.next{border-radius:20px;padding:18px 20px}.next h2{font-size:22px}.next .btn.primary{min-height:52px;font-size:16px}
+#tabs button{border-radius:14px}
+#asmCerrar{margin-left:auto;background:var(--ink);border-color:var(--ink);color:var(--panel);font-weight:700}
+#asmCerrar[hidden]{display:none}
 details.card>summary{cursor:pointer;font-weight:650;font-size:15px}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <div id="lock" hidden></div>
 <header><div class="wrap">
   <div class="hrow"><select id="asmSel" aria-label="Asamblea"></select><button class="btn small" id="asmNew">＋ Nueva</button><button class="btn small" id="asmLock" hidden aria-label="Seguridad y bloqueo">🔒</button><button class="btn small" id="asmPantalla" aria-label="Abrir la pantalla de sala para proyectar" title="Pantalla de sala">🖥</button></div>
-  <div class="hrow" style="margin-top:6px"><span class="chip" id="estChip">—</span><span class="chip" id="intChip">—</span><span class="chip" id="sync">—</span><span class="chip hide" id="remChip"></span></div>
+  <div class="hrow" style="margin-top:6px"><span class="chip" id="estChip">—</span><span class="chip" id="intChip">—</span><span class="chip" id="sync">—</span><span class="chip hide" id="remChip"></span><button class="btn small" id="asmCerrar" hidden>Cerrar asamblea</button></div>
   <div class="qbar" id="qbar"><i class="p"></i><i class="r"></i><span class="qmark" id="qmark"></span></div>
   <div class="qtxt" id="qtxt"></div>
 </div></header>
@@ -695,7 +711,8 @@ body{font:13px/1.45 Arial,Helvetica,sans-serif;color:#111;margin:24px auto;max-w
 table{border-collapse:collapse;width:100%;margin:6px 0 10px}th,td{border:1px solid #bbb;padding:4px 6px;text-align:left;vertical-align:top}th{background:#eef1f6}tr.an td{color:#777;text-decoration:line-through}
 .k{display:grid;grid-template-columns:200px 1fr;gap:2px 10px}.k b{color:#444}.hash{font-family:Consolas,monospace}.borrador{border:2px solid #c22727;color:#c22727;padding:8px;margin:10px 0;font-weight:700;text-align:center}
 .int{padding:8px;border-radius:4px;margin:8px 0;background:${v.ok ? '#dcf5e7' : '#fde4e4'}}.sig{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:46px}.sig div{border-top:1px solid #000;padding-top:4px;text-align:center}
-@page{size:A4;margin:16mm 14mm 18mm;@bottom-center{content:"Huella ${hu} · Página " counter(page) " de " counter(pages);font:10px Arial;color:#555}}@media print{body{margin:0}tr{break-inside:avoid}}</style></head><body>
+@page{size:A4;margin:16mm 14mm 18mm;@bottom-center{content:"Huella ${hu} · Página " counter(page) " de " counter(pages);font:10px Arial;color:#555}}@media print{body{margin:0}tr{break-inside:avoid}}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</head><body>
 <h1>Constancia de participación en asamblea</h1>${d.closed ? '' : '<div class="borrador">BORRADOR · La asamblea no está cerrada ni sellada.</div>'}
 <div class="k"><b>Asamblea</b><span>${esc(d.meta.nombre)}</span><b>Fecha convocada</b><span>${esc(d.meta.fecha)}</span><b>Inmueble</b><span>${esc(u.inm)}</span><b>Propietario registrado</b><span>${esc(u.prop || '—')}</span><b>Alícuota</b><span>${fmtA(u.ali)} % de ${fmt(q.T)} %</span><b>Emitida</b><span>${fdt(Date.now())}</span></div>
 <h2>1. Asistencia de este inmueble</h2>${est.length ? `<table><thead><tr><th>Condición</th><th>Quién y con qué poder</th><th>Ingreso</th><th>Salida</th></tr></thead><tbody>${estRows}</tbody></table>` : '<p>No quedó registrada asistencia de este inmueble (ausente).</p>'}
@@ -787,7 +804,8 @@ function buildReportHTML(a) {
 body{font:13px/1.45 Arial,Helvetica,sans-serif;color:#111;margin:24px auto;max-width:900px;padding:0 16px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;border-bottom:2px solid #14213a;padding-bottom:3px;margin-top:26px}h3{font-size:14px;margin:16px 0 4px}
 table{border-collapse:collapse;width:100%;margin:6px 0 10px}th,td{border:1px solid #bbb;padding:4px 6px;text-align:left;vertical-align:top}th{background:#eef1f6}td.r,th.r{text-align:right}.k{display:grid;grid-template-columns:200px 1fr;gap:2px 10px}.k b{color:#444}
 .res{font-weight:700;padding:6px 8px;border-radius:4px}.res.ok{background:#dcf5e7}.res.no{background:#fde4e4}.hash{font-family:Consolas,monospace}.sig{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:50px}.sig div{border-top:1px solid #000;padding-top:4px;text-align:center}
-.int{padding:8px;border-radius:4px;margin:8px 0;background:${v.ok ? '#dcf5e7' : '#fde4e4'}}section{break-inside:avoid}@page{size:A4;margin:16mm 14mm 18mm;@bottom-center{content:"Huella ${huella(d.closed ? d.closeHash : v.last)} · Página " counter(page) " de " counter(pages);font:10px Arial;color:#555}}.borrador{border:2px solid #c22727;color:#c22727;padding:8px;margin:10px 0;font-weight:700;text-align:center}.firma{break-before:page}@media print{body{margin:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body>
+.int{padding:8px;border-radius:4px;margin:8px 0;background:${v.ok ? '#dcf5e7' : '#fde4e4'}}section{break-inside:avoid}@page{size:A4;margin:16mm 14mm 18mm;@bottom-center{content:"Huella ${huella(d.closed ? d.closeHash : v.last)} · Página " counter(page) " de " counter(pages);font:10px Arial;color:#555}}.borrador{border:2px solid #c22727;color:#c22727;padding:8px;margin:10px 0;font-weight:700;text-align:center}.firma{break-before:page}@media print{body{margin:0}h2{break-after:avoid}tr{break-inside:avoid}}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</head><body>
 <h1>Reporte de asamblea de propietarios</h1>${d.closed ? '' : '<div class="borrador">BORRADOR · La asamblea no está cerrada ni sellada. No firmar hasta cerrarla.</div>'}<div class="k"><b>Asamblea</b><span>${esc(d.meta.nombre)}</span><b>Fecha convocada</b><span>${esc(d.meta.fecha)}</span><b>Apertura del registro</b><span>${fdt(d.openedAt)}</span><b>Cierre</b><span>${d.closed ? fdt(d.closedAt) : 'Sin cerrar'}</span><b>Operadores de la mesa</b><span>${esc(ops.join(', ') || '—')}</span><b>Generado</b><span>${fdt(Date.now())}</span></div>
 <h2>1. Padrón</h2><div class="k"><b>Inmuebles</b><span>${d.units.length}</span><b>Alícuota total del edificio</b><span>${fmt(q.T)} %</span><b>Alícuota cargada en el padrón</b><span>${fmt(d.sumAli)} %${d.sumAli < q.T - 0.005 ? " (padrón incompleto: lo no cargado cuenta como ausente)" : ""}</span><b>Huella del padrón</b><span class="hash">${huella(d.padronHash)}</span></div>
 <h2>2. Quórum</h2><div class="k"><b>Mínimo requerido</b><span>${fmt(d.meta.quorumReq)} % de la alícuota</span><b>Presentes</b><span>${pl(q.nP, 'inmueble', 'inmuebles')} · ${fmt(q.pP)} %</span><b>En representación</b><span>${pl(q.nR, 'inmueble', 'inmuebles')} · ${fmt(q.pR)} %</span><b>Medio de ingreso</b><span>Mesa: ${pl(q.nS, 'inmueble', 'inmuebles')} · ${fmt(q.pS)} % | Enlace: ${pl(q.nC, 'inmueble', 'inmuebles')} · ${fmt(q.pC)} % (declaran estar en la sala: ${pl(q.nCS, 'inmueble', 'inmuebles')} · ${fmt(q.pCS)} %; a distancia: ${pl(q.nCD, 'inmueble', 'inmuebles')} · ${fmt(q.pCD)} %)</span><b>Quórum ${d.closed ? 'al cierre' : 'a la hora de este reporte'}</b><span><b>${fmt(q.pA)} %</b> → ${q.pA >= d.meta.quorumReq ? 'HAY QUÓRUM' : 'NO HAY QUÓRUM'}</span><b>Quórum alcanzado por primera vez</b><span>${d.quorumHit ? hm(d.quorumHit) : 'No se alcanzó'}</span><b>Máximo registrado</b><span>${fmt(d.maxPct)} %</span></div>
@@ -837,7 +855,7 @@ function viewReporte() {
     h('p', { class: 'muted', text: 'Para firmar: 1) cierra y sella la asamblea más abajo, 2) imprime, 3) firmen todos la última hoja, 4) envía la huella de cierre a la junta. Guarda también el archivo JSON: es la prueba para verificar la cadena de huellas.' })));
   box.push(h('div', { class: 'card' }, h('h2', { text: 'Resumen para el acta' }), ta, h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', text: 'Copiar resumen', onclick: () => { copiar(txt); ta.focus(); ta.select(); } }))));
   box.push(cardConstancia(a));
-  if (!d.closed) box.push(h('div', { class: 'card' }, h('h2', { text: 'Cerrar y sellar la asamblea' }), h('p', { class: 'muted', text: 'Al cerrar se registra el quórum final y se genera la huella de cierre. Envíala a la junta. Reabrir exige un motivo y queda anotado.' }), h('button', { class: 'btn primary', text: 'Cerrar y sellar asamblea', onclick: async () => { const abiertos = d.puntos.filter(p => !p.cerrado); if (!(await askConfirm('¿Cerrar la asamblea?', `Quórum final ${fmt(q.pA)} %.${abiertos.length ? ' Hay ' + abiertos.length + ' punto(s) sin cerrar.' : ''} Se sella el registro.`, 'Cerrar y sellar')) || !(await ensureOp())) return; if (remotoActivo(d)) { toast('Cerrando el acceso de los propietarios y trayendo los últimos votos…'); await cerrarAsambleaRemota(); } const dd = derive(cur()), qq = calcQ(dd); append('ASAMBLEA_CERRADA', { pA: Number(qq.pA.toFixed(4)), pP: Number(qq.pP.toFixed(4)), pR: Number(qq.pR.toFixed(4)), nP: qq.nP, nR: qq.nR, eventos: a.events.length }); toast('Asamblea cerrada y sellada: imprime el reporte y envía la huella de cierre a la junta', 'ok'); renderAll(); } })));
+  if (!d.closed) box.push(h('div', { class: 'card' }, h('h2', { text: 'Cerrar y sellar la asamblea' }), h('p', { class: 'muted', text: 'Al cerrar se registra el quórum final y se genera la huella de cierre. Envíala a la junta. Reabrir exige un motivo y queda anotado.' }), h('button', { class: 'btn primary', text: 'Cerrar y sellar asamblea', onclick: () => cerrarAsamblea() })));
   else box.push(cierreBanner(a, d));
   box.push(h('div', { class: 'card' }, h('h2', { text: 'Vista previa de asistencia' }), h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Inmueble' }), h('th', { text: 'Condición' }), h('th', { text: 'Alícuota %' }))), h('tbody', {}, d.units.map(u => h('tr', {}, h('td', { text: u.inm }), h('td', { text: condFinal(u) + (u.rep ? ' · ' + u.rep.nombre : '') }), h('td', { text: fmtA(u.ali) }))))))));
   return box;
@@ -846,6 +864,8 @@ function viewReporte() {
 // ---------- render ----------
 // ---------- votación por enlace (servicio de votación) ----------
 const API_DEF = window.ASAMBLEA_API || 'https://n8n.legaltech.com.ve/webhook/asamblea';
+const ACCESO_DEF = window.ASAMBLEA_ACCESO || API_DEF.replace(/\/asamblea\/?$/, '/asamblea-acceso');
+const accesoUrl = () => cfgGet('acceso', ACCESO_DEF);
 const VOTAR_DEF = window.ASAMBLEA_VOTAR || new URL('votar.html', location.href).href;
 const cfgGet = (k, def) => { try { return localStorage.getItem('wcon-' + k) || def; } catch (e) { return def; } };
 const cfgSet = (k, v) => { try { if (v) localStorage.setItem('wcon-' + k, v); else localStorage.removeItem('wcon-' + k); } catch (e) {} };
@@ -859,11 +879,12 @@ const R = { msgConexion: '', conectado: false, estadoSrv: '', rev: 0, ultimoSync
 const enlaceId = (k) => sha256('enlace|' + k).slice(0, 12);
 const remotoCfg = (a) => (a.remoto = a.remoto || { activo: false, ayuda: '', mensaje: '' });
 
-async function llamarApi(accion, extra, usarClave) {
+async function llamarApi(accion, extra, usarClave, reintento) {
   const body = new URLSearchParams({ accion, ...(usarClave === false ? {} : { clave: getClave() }), ...(extra || {}) });
   const r = await fetch(apiUrl(), { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body, cache: 'no-store' });
   let d = null; try { d = await r.json(); } catch (e) { d = null; }
   if (!d) throw new Error('El servicio no respondió bien (código ' + r.status + ').');
+  if (usarClave !== false && !reintento && R.sesion && d.ok === false && (d.motivo === 'sesion_vencida' || d.motivo === 'clave') && await renovarSesion()) return llamarApi(accion, extra, usarClave, true);
   return d;
 }
 function nuevoToken() { const b = new Uint8Array(16); (self.crypto || window.msCrypto).getRandomValues(b); return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
@@ -1070,7 +1091,7 @@ function bloqueRevision(a) {
 }
 
 // ---------- enlace personal para quien no tiene correo (se envía a mano, por ejemplo por WhatsApp) ----------
-function crearEnlaceManual(a, ids) { a.manuales = a.manuales || {}; ids.forEach((id) => { a.manuales[id] = true; }); saveLocal(); programarPublicacion(300); renderAll(); toast(ids.length > 1 ? `${ids.length} enlaces listos: cópialos o envíalos por WhatsApp` : 'Enlace listo: cópialo o envíalo por WhatsApp', 'ok'); }
+function crearEnlaceManual(a, ids) { a.manuales = a.manuales || {}; ids.forEach((id) => { a.manuales[id] = true; }); if (R.conectado && getClave()) remotoCfg(a).activo = true; saveLocal(); programarPublicacion(300); renderAll(); toast(ids.length > 1 ? `${ids.length} enlaces listos: cópialos o envíalos por WhatsApp` : 'Enlace listo: cópialo o envíalo por WhatsApp', 'ok'); }
 function quitarEnlaceManual(a, id) { if (a.manuales) delete a.manuales[id]; saveLocal(); programarPublicacion(300); renderAll(); }
 async function regenerarManual(a, g) {
   if (!(await askConfirm('Generar un enlace nuevo', `El enlace anterior de ${g.nombre} deja de funcionar. Tendrás que enviarle el nuevo.`, 'Generar enlace nuevo', true))) return;
@@ -1080,10 +1101,20 @@ function mensajeEnlace(a, g) {
   const b = baseCorreo(a, derive(a)); const url = votarUrl() + '?t=' + tokenDe(a, g.k);
   return `Hola ${g.nombre}, este es su enlace personal para participar y votar en la asamblea «${b.nombre}»${b.fecha ? ' (' + b.fecha + ')' : ''}:\n${url}\n\nEs personal: no lo reenvíe. Funciona cuando se abra la asamblea.${b.ayuda ? '\nAyuda: ' + b.ayuda : ''}`;
 }
-function compartirWhatsApp(a, g) { window.open('https://wa.me/?text=' + encodeURIComponent(mensajeEnlace(a, g)), '_blank', 'noopener'); }
+async function asegurarPublicado(a) {   // el enlace solo funciona si el servicio ya tiene publicada esta asamblea
+  if (!(R.conectado && getClave())) { toast('Este enlace todavía no funciona: conecta el servicio de votación en Correo, paso 1.', 'err'); return false; }
+  remotoCfg(a).activo = true; saveLocal();
+  const ok = await publicarAhora({ forzar: true }); if (!ok) toast('No se pudo publicar el enlace en el servicio: ' + (R.errPub || 'sin conexión'), 'err'); return !!ok;
+}
+async function copiarEnlaceManual(a, g) { if (await asegurarPublicado(a)) copiar(votarUrl() + '?t=' + tokenDe(a, g.k)); }
+async function compartirWhatsApp(a, g) {
+  const w = window.open('about:blank', '_blank');   // se abre ya, en el clic, para que el navegador no la bloquee
+  if (!(await asegurarPublicado(a))) { if (w) w.close(); return; }
+  const url = 'https://wa.me/?text=' + encodeURIComponent(mensajeEnlace(a, g)); if (w) w.location.href = url; else window.open(url, '_blank');
+}
 function bloqueManuales(a, d, G) {
   const filas = G.sinTodos; const pend = filas.filter((r) => !(a.manuales && a.manuales[r.id]));
-  const caja = h('details', { class: 'manuales', open: pend.length > 0 });
+  const caja = h('details', { class: 'manuales', open: true });
   caja.append(h('summary', { text: `Sin correo (${filas.length}): enviar su enlace por WhatsApp` }),
     h('p', { class: 'muted', text: 'Crea el enlace personal de cada uno y envíalo tú desde tu WhatsApp. Cada enlace sirve solo para ese propietario y funciona cuando abras la asamblea. Quien no quiera usar celular puede votar en sala o con poder.' }));
   if (pend.length > 1) caja.append(h('div', { class: 'row', style: 'margin:6px 0' }, h('button', { class: 'btn small', text: `Crear los ${pend.length} enlaces`, onclick: () => crearEnlaceManual(a, pend.map((r) => r.id)) })));
@@ -1092,7 +1123,7 @@ function bloqueManuales(a, d, G) {
     caja.append(h('div', { class: 'mrow', style: 'border-top:1px solid var(--line);padding:8px 0' },
       h('div', { style: 'display:flex;justify-content:space-between;gap:8px' }, h('b', { text: `${r.inm} · ${r.prop || 'sin nombre'}` }), h('span', { class: 'muted', text: `${fmtA(r.ali)} %` })),
       h('div', { class: 'row', style: 'gap:6px;margin-top:6px;flex-wrap:wrap' }, tiene
-        ? [h('button', { class: 'btn small', text: 'Copiar enlace', onclick: () => copiar(votarUrl() + '?t=' + tokenDe(a, g.k)) }), h('button', { class: 'btn small primary', text: 'Enviar por WhatsApp', onclick: () => compartirWhatsApp(a, g) }), h('button', { class: 'btn small', text: 'Quitar enlace', onclick: () => quitarEnlaceManual(a, r.id) })]
+        ? [h('button', { class: 'btn small', text: 'Copiar enlace', onclick: () => copiarEnlaceManual(a, g) }), h('button', { class: 'btn small primary', text: 'Enviar por WhatsApp', onclick: () => compartirWhatsApp(a, g) }), h('button', { class: 'btn small', text: 'Quitar enlace', onclick: () => quitarEnlaceManual(a, r.id) })]
         : [h('button', { class: 'btn small', text: 'Crear enlace', onclick: () => crearEnlaceManual(a, [r.id]) })])));
   });
   return caja;
@@ -1131,9 +1162,14 @@ async function reenviarA(a, g, nuevo) {
 }
 
 // ---- pantalla “Correo” ----
-async function conectar(clave) {
+async function renovarSesion() {
+  if (!R.sesion || !R.sesion.kd) return false; if (R.renovando) return R.renovando;
+  R.renovando = (async () => { try { const d = await pedirSesion(R.sesion.usuario, R.sesion.kd); if (d && d.ok) { setClave(d.token); R.sesion.exp = d.exp; R.sesion.offline = false; return true; } return false; } catch (e) { return false; } finally { R.renovando = null; } })();
+  return R.renovando;
+}
+async function conectar(clave, silencioso) {
   setClave(clave); R.errSync = ''; R.errPub = '';
-  try { const r = await llamarApi('ping'); if (!r.ok) { setClave(''); R.conectado = false; return r.motivo === 'sin_configurar' ? 'El servicio todavía no tiene configurada la clave: pide a quien lo administra que la configure.' : 'La clave no coincide con la del servicio.'; } R.conectado = true; R.estadoSrv = r.estado; R.rev = r.rev; remotoCfg(cur()).activo = true; saveLocal(); return ''; }
+  try { const r = await llamarApi('ping'); if (!r.ok) { setClave(''); R.conectado = false; return r.motivo === 'sin_configurar' ? 'El servicio todavía no tiene configurada la clave: pide a quien lo administra que la configure.' : 'La clave no coincide con la del servicio.'; } R.conectado = true; R.estadoSrv = r.estado; R.rev = r.rev; if (!silencioso) { remotoCfg(cur()).activo = true; saveLocal(); } return ''; }
   catch (e) { R.conectado = false; return 'No se pudo conectar con el servicio: ' + e.message; }
 }
 function pasoCard(n, titulo, hecho, ...kids) { return h('div', { class: 'card' }, h('h2', {}, h('span', { class: 'paso' + (hecho ? ' ok' : ''), text: hecho ? '✓' : String(n) }), ' ' + titulo), ...kids); }
@@ -1146,14 +1182,17 @@ function viewCorreo() {
   const msgC = h('div', { class: 'err', text: R.msgConexion || '' }); const inpClave = h('input', { type: 'password', id: 'cClave', autocomplete: 'off', placeholder: 'Tu clave de la abogada', value: getClave() });
   const bCon = h('button', { class: 'btn primary', text: conectado ? 'Reconectar' : 'Conectar', onclick: async () => { bCon.disabled = true; bCon.textContent = 'Conectando…'; const e = await conectar(inpClave.value.trim()); R.msgConexion = e; msgC.textContent = e; bCon.disabled = false; renderAll(); if (!e) { programarPublicacion(300); toast('Conectado con el servicio de votación', 'ok'); } else toast(e, 'err'); } });
   inpClave.addEventListener('keydown', (e) => { if (e.key === 'Enter') bCon.click(); });
+  const sesion = !!R.sesion;
+  const bSes = h('button', { class: 'btn', text: conectado ? 'Reconectar' : 'Conectar', onclick: async () => { bSes.disabled = true; let ok = true; if (!getClave()) ok = await renovarSesion(); const e = ok ? await conectar(getClave(), true) : 'No se pudo renovar la sesión con el servicio.'; R.msgConexion = e; msgC.textContent = e; bSes.disabled = false; renderAll(); if (!e) toast('Conectado con el servicio de votación', 'ok'); else toast(e, 'err'); } });
   const hu = h('code', { class: 'hash', style: 'word-break:break-all' }); const inpNueva = h('input', { type: 'text', placeholder: 'Escribe aquí una clave nueva (larga)', autocomplete: 'off' });
   inpNueva.addEventListener('input', () => { hu.textContent = inpNueva.value ? sha256(inpNueva.value) : ''; });
   const avApi = h('input', { type: 'text', value: apiUrl() }), avVotar = h('input', { type: 'text', value: votarUrl() });
   box.push(pasoCard(1, 'Conexión con el servicio de votación', conectado,
-    h('p', { class: 'muted', text: 'Es el servicio que recibe los votos de los propietarios desde sus celulares. Tu clave solo vive en esta pestaña.' }),
-    h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Clave de la abogada' }), inpClave), bCon), msgC,
+    h('p', { class: 'muted', text: 'Es el servicio que recibe los votos de los propietarios desde sus celulares. Tu sesión solo vive en esta pestaña.' }),
+    sesion ? h('div', { class: 'row', style: 'align-items:center;gap:10px;flex-wrap:wrap' }, h('span', { class: 'muted', text: `Sesión de ${R.sesion.nombre} · autorizada por el servicio${R.sesion.offline && !getClave() ? ' · sin conexión con el servicio' : ''}` }), bSes) : h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Clave de la abogada' }), inpClave), bCon), msgC,
+    (sesion && conectado && !cfg.activo) ? h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn primary', text: 'Usar el voto por enlace en esta asamblea', onclick: () => { cfg.activo = true; saveLocal(); programarPublicacion(300); renderAll(); toast('Voto por enlace activado en esta asamblea', 'ok'); } })) : null,
     conectado ? h('div', { class: 'okline', text: `✔ Conectado · el servicio está en “${({ preparacion: 'preparación', abierta: 'asamblea abierta', cerrada: 'cerrada', sin_publicar: 'sin publicar' })[R.estadoSrv] || R.estadoSrv}”` }) : null,
-    h('details', {}, h('summary', { text: 'Primera vez: crear la clave del servicio' }), h('p', { class: 'muted', text: 'Escribe una clave larga que solo tú conozcas. Copia la huella que aparece y entrégasela a quien administra el servicio para que la configure (campo CLAVE_HASH). Luego usa esa misma clave arriba.' }), inpNueva, h('div', { style: 'margin-top:6px' }, hu)),
+    sesion ? null : h('details', {}, h('summary', { text: 'Primera vez: crear la clave del servicio' }), h('p', { class: 'muted', text: 'Escribe una clave larga que solo tú conozcas. Copia la huella que aparece y entrégasela a quien administra el servicio para que la configure (campo CLAVE_HASH). Luego usa esa misma clave arriba.' }), inpNueva, h('div', { style: 'margin-top:6px' }, hu)),
     h('details', {}, h('summary', { text: 'Ajustes avanzados' }), h('div', { class: 'field' }, h('label', { text: 'Dirección del servicio de votación' }), avApi), h('div', { class: 'field', style: 'margin-top:8px' }, h('label', { text: 'Dirección de la página de votación (votar.html)' }), avVotar), h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Guardar ajustes', onclick: () => { cfgSet('api', avApi.value.trim() === API_DEF ? '' : avApi.value.trim()); cfgSet('votar', avVotar.value.trim() === VOTAR_DEF ? '' : avVotar.value.trim()); toast('Ajustes guardados'); renderAll(); } })))));
 
   if (sinPadron) { box.push(h('div', { class: 'card' }, h('h2', { text: 'Para enviar la convocatoria, primero carga el padrón' }), h('p', { class: 'muted', text: 'Puedes crear la clave y conectarte ahora. Los pasos de correos, convocatoria y apertura usan los inmuebles y propietarios del padrón.' }), h('button', { class: 'btn primary', text: 'Ir al padrón', onclick: () => { tab = 'padron'; renderAll(); } }))); return box; }
@@ -1225,12 +1264,12 @@ setTimeout(async () => { const a = cur(); if (a && a.remoto && a.remoto.activo &
 function renderAll() {
   if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); }
   renderHeader(); actualizarChipRemoto(); renderTabs(); const v = tab === 'asistencia' ? viewAsistencia() : tab === 'votacion' ? viewVotacion() : tab === 'correo' ? viewCorreo() : tab === 'auditoria' ? viewAuditoria() : tab === 'reporte' ? viewReporte() : viewPadron();
-  $('#view').replaceChildren(...[cardSiguientePaso(), ...v].filter(Boolean)); actualizarPantalla();
+  $('#view').replaceChildren(...[cardSiguientePaso(), ...v].filter(Boolean)); actualizarPantalla(); actualizarBotonCerrar();
 }
 $('#asmSel').addEventListener('change', e => { store.current = e.target.value; puntoSel = ''; saveLocal(); renderAll(); });
 $('#asmNew').addEventListener('click', () => { nuevaAsm('Nueva asamblea'); renderAll(); });
 function arrancar() { if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); } renderAll(); initCloud(); }
-// ---------- acceso con usuario y contraseña (datos cifrados en este dispositivo) ----------
+// ---------- acceso de usuarios autorizados (lo valida el servicio) + datos cifrados en este dispositivo ----------
 const LS_AUTH = 'wcon-auth', LS_CIF = 'wcon-asamblea-v2c', LS_FALLOS = 'wcon-fallos', ITER_PBKDF2 = 250000;
 let claveCifrado = null, ultimaActividad = Date.now(), guardTimer = null, guardando = Promise.resolve();
 const b64 = (buf) => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
@@ -1238,6 +1277,18 @@ const unb64 = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
 async function derivarClave(usuario, clave, salt, iter) {
   const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(usuario.trim().toLowerCase() + '\u0000' + clave), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+// clave derivada que se envía al servicio en lugar de la contraseña (la contraseña nunca sale de este equipo)
+async function derivarAcceso(usuario, clave) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(clave), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('wcon-acceso|' + usuario.trim().toLowerCase()), iterations: ITER_PBKDF2, hash: 'SHA-256' }, base, 256);
+  return [...new Uint8Array(bits)].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+async function pedirSesion(usuario, kd) {
+  let r; try { r = await fetch(accesoUrl(), { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body: new URLSearchParams({ usuario, kd }), cache: 'no-store' }); } catch (e) { const er = new Error('red'); er.red = true; throw er; }
+  let d = null; try { d = await r.json(); } catch (e) { d = null; }
+  if (!d) throw new Error('El servicio de acceso no respondió bien (código ' + r.status + '). Revisa que el workflow de acceso esté activo.');
+  return d;
 }
 async function cifrarTexto(key, texto) { const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(texto)); return { i: b64(iv), d: b64(ct) }; }
 async function descifrarTexto(key, o) { return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(o.i) }, key, unb64(o.d))); }
@@ -1254,75 +1305,95 @@ function limpiarFallos() { try { localStorage.removeItem(LS_FALLOS); } catch (e)
 function mostrarBloqueo(nodo) { const L = $('#lock'); L.replaceChildren(nodo); L.hidden = false; document.body.classList.add('bloqueado'); const f = L.querySelector('input'); if (f) f.focus(); }
 function quitarBloqueo() { const L = $('#lock'); L.hidden = true; L.replaceChildren(); document.body.classList.remove('bloqueado'); }
 function campoLock(id, etiqueta, tipo, auto) { return h('div', { class: 'field' }, h('label', { for: id, text: etiqueta }), h('input', { id, type: tipo, autocomplete: auto, spellcheck: 'false', autocapitalize: 'off' })); }
-function pantallaCrear(hayPrevios) {
-  const err = h('div', { class: 'lockerr', role: 'alert' }); const btn = h('button', { class: 'btn primary', type: 'submit', text: 'Crear acceso y entrar' });
-  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
-    ev.preventDefault(); err.textContent = ''; const us = $('#lkU').value.trim(), c1 = $('#lkP1').value, c2 = $('#lkP2').value;
-    if (us.length < 3) { err.textContent = 'El usuario debe tener al menos 3 caracteres.'; return; }
-    if (c1.length < 10) { err.textContent = 'La contraseña debe tener al menos 10 caracteres.'; return; }
-    if (c1.toLowerCase().includes(us.toLowerCase())) { err.textContent = 'La contraseña no debe contener el usuario.'; return; }
-    if (c1 !== c2) { err.textContent = 'Las contraseñas no coinciden.'; return; }
-    btn.disabled = true; btn.textContent = 'Protegiendo…';
-    try { await crearAcceso(us, c1); } catch (e) { err.textContent = 'No se pudo crear el acceso: ' + e.message; btn.disabled = false; btn.textContent = 'Crear acceso y entrar'; }
-  } }, campoLock('lkU', 'Usuario', 'text', 'username'), campoLock('lkP1', 'Contraseña (mínimo 10 caracteres)', 'password', 'new-password'), campoLock('lkP2', 'Repite la contraseña', 'password', 'new-password'), err, btn);
-  return h('div', { class: 'lockcard' }, h('h1', { text: 'Protege esta consola' }),
-    h('p', { class: 'muted', text: 'Crea tu usuario y contraseña. Se te pedirán cada vez que abras esta página, y tus datos (padrón, correos, enlaces) quedarán cifrados en este dispositivo.' }),
-    hayPrevios ? h('div', { class: 'note', text: 'Ya hay datos guardados en este dispositivo: se protegerán con esta contraseña.' }) : null, form,
-    h('p', { class: 'muted small', text: 'Si olvidas la contraseña no se puede recuperar: solo podrás restaurar tus datos desde una copia de seguridad (Auditoría → Respaldo).' }));
-}
-function pantallaEntrar(soloDesbloquear) {
-  const au = JSON.parse(localStorage.getItem(LS_AUTH) || '{}'); const err = h('div', { class: 'lockerr', role: 'alert' }); const btn = h('button', { class: 'btn primary', type: 'submit', text: soloDesbloquear ? 'Desbloquear' : 'Entrar' });
-  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
-    ev.preventDefault(); err.textContent = ''; const espera = esperaFallos(); if (espera > 0) { err.textContent = `Demasiados intentos. Espera ${espera} s e inténtalo de nuevo.`; return; }
-    btn.disabled = true; btn.textContent = 'Verificando…';
-    try { await entrar($('#lkU').value, $('#lkP').value, soloDesbloquear); } catch (e) { err.textContent = e.message; btn.disabled = false; btn.textContent = soloDesbloquear ? 'Desbloquear' : 'Entrar'; $('#lkP').value = ''; $('#lkP').focus(); }
-  } }, campoLock('lkU', 'Usuario', 'text', 'username'), campoLock('lkP', 'Contraseña', 'password', 'current-password'), err, btn);
-  const olvide = h('button', { class: 'linkbtn', type: 'button', text: 'Olvidé mi contraseña', onclick: olvideContrasena });
-  const u = form.querySelector('#lkU'); if (soloDesbloquear && au.u) u.value = au.u;
-  return h('div', { class: 'lockcard' }, h('h1', { text: soloDesbloquear ? 'Consola bloqueada' : 'Consola de asambleas' }), h('p', { class: 'muted', text: soloDesbloquear ? 'Escribe tu contraseña para seguir.' : 'Ingresa con tu usuario y contraseña.' }), form, olvide);
-}
-async function entrar(usuario, clave, soloDesbloquear) {
-  const au = JSON.parse(localStorage.getItem(LS_AUTH)); let key;
-  try { key = await derivarClave(usuario, clave, unb64(au.s), au.it); const ok = await descifrarTexto(key, au.c); if (ok !== 'wcon-ok' || usuario.trim().toLowerCase() !== String(au.u).toLowerCase()) throw new Error('x'); } catch (e) { registrarFallo(); throw new Error('Usuario o contraseña incorrectos.'); }
-  limpiarFallos();
-  if (soloDesbloquear) { quitarBloqueo(); return; }
-  const cif = localStorage.getItem(LS_CIF);
-  if (cif) { try { store = JSON.parse(await descifrarTexto(key, JSON.parse(cif))); } catch (e) { throw new Error('No se pudieron leer los datos guardados.'); } }
-  claveCifrado = key; window.__cifrado = true; quitarBloqueo(); activarBotonSeguridad(); ultimaActividad = Date.now(); iniciarCallback();
-}
-async function crearAcceso(usuario, clave) {
+// ---- datos de este dispositivo ----
+async function crearBoveda(usuario, clave, conservarDatos) {
   const salt = crypto.getRandomValues(new Uint8Array(16)); const key = await derivarClave(usuario, clave, salt, ITER_PBKDF2); const c = await cifrarTexto(key, 'wcon-ok');
-  loadLocal(); const habiaPrevios = !!localStorage.getItem(LS);
+  if (!conservarDatos) loadLocal(); const habiaPrevios = !!localStorage.getItem(LS);
   claveCifrado = key; window.__cifrado = true; await volcarCifrado();
   localStorage.setItem(LS_AUTH, JSON.stringify({ v: 1, u: usuario.trim(), s: b64(salt), it: ITER_PBKDF2, c }));
   if (habiaPrevios) localStorage.removeItem(LS);
-  limpiarFallos(); quitarBloqueo(); activarBotonSeguridad(); ultimaActividad = Date.now(); iniciarCallback();
+  return key;
 }
-async function olvideContrasena() {
-  const ok = await askConfirm('¿Restablecer el acceso?', 'Se borrarán de ESTE dispositivo las asambleas, correos y enlaces guardados. Solo podrás recuperarlos con una copia de seguridad (Auditoría → Respaldo). No afecta lo que ya esté publicado en el servicio de votación.', 'Borrar y restablecer', true);
-  if (!ok) return; [LS_AUTH, LS_CIF, LS, LS_FALLOS].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* nada */ } });
-  store = { asms: {}, current: '', op: '' }; mostrarBloqueo(pantallaCrear(false));
+async function abrirBovedaExistente(usuario, clave) {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH)); if (usuario.trim().toLowerCase() !== String(au.u).toLowerCase()) return null;
+  let key; try { key = await derivarClave(usuario, clave, unb64(au.s), au.it); if ((await descifrarTexto(key, au.c)) !== 'wcon-ok') return null; } catch (e) { return null; }
+  const cif = localStorage.getItem(LS_CIF); if (cif) { try { store = JSON.parse(await descifrarTexto(key, JSON.parse(cif))); } catch (e) { throw new Error('No se pudieron leer los datos guardados en este dispositivo.'); } }
+  return key;
+}
+const pedirContrasenaAnterior = (usuarioAnterior) => modal((b, close) => {
+  const err = h('div', { class: 'lockerr', role: 'alert' });
+  const f = (id, et, tipo, val) => h('div', { class: 'field' }, h('label', { for: id, text: et }), h('input', { id, type: tipo, value: val || '', autocomplete: 'off', spellcheck: 'false' }));
+  const form = h('form', { novalidate: true, onsubmit: (ev) => { ev.preventDefault(); const u = $('#vaU').value.trim(), c = $('#vaC').value; if (!u || !c) { err.textContent = 'Escribe el usuario y la contraseña anteriores.'; return; } close({ u, c }); } },
+    f('vaU', 'Usuario anterior', 'text', usuarioAnterior), f('vaC', 'Contraseña anterior', 'password'), err,
+    h('div', { class: 'row', style: 'margin-top:10px;flex-wrap:wrap' }, h('button', { class: 'btn primary', type: 'submit', text: 'Recuperar mis datos' }), h('button', { class: 'btn danger', type: 'button', text: 'Borrar datos de este dispositivo', onclick: () => close('borrar') }), h('button', { class: 'btn', type: 'button', text: 'Cancelar', onclick: () => close(null) })));
+  b.append(h('h3', { text: 'Hay datos con otra contraseña' }), h('p', { class: 'muted', text: 'Los datos guardados en este dispositivo están protegidos con una contraseña distinta de la de tu usuario actual. Escribe la anterior para pasarlos a la nueva, o bórralos y restáuralos desde una copia de seguridad.' }), form);
+});
+async function migrarBoveda(usuario, clave) {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH)); const old = await pedirContrasenaAnterior(au.u); if (!old) return null;
+  if (old === 'borrar') { [LS_AUTH, LS_CIF, LS].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* nada */ } }); store = { asms: {}, current: '', op: '' }; return crearBoveda(usuario, clave); }
+  try { const k0 = await derivarClave(old.u, old.c, unb64(au.s), au.it); if ((await descifrarTexto(k0, au.c)) !== 'wcon-ok') throw new Error('x'); store = JSON.parse(await descifrarTexto(k0, JSON.parse(localStorage.getItem(LS_CIF)))); }
+  catch (e) { toast('Esa contraseña anterior no es correcta', 'err'); return null; }
+  return crearBoveda(usuario, clave, true);
+}
+function abrirConsola(ses) {
+  window.__cifrado = true; R.sesion = ses; if (ses.token) setClave(ses.token); else setClave('');
+  if (ses.nombre) store.op = ses.nombre; saveLocal();
+  quitarBloqueo(); activarBotonSeguridad(); ultimaActividad = Date.now(); iniciarCallback();
+  if (ses.token) conectar(ses.token, true).then(() => renderAll());
+}
+// ---- ingreso: el servicio decide quién está autorizado ----
+async function entrarConServicio(usuario, clave) {
+  const kd = await derivarAcceso(usuario, clave); let d;
+  try { d = await pedirSesion(usuario, kd); } catch (e) { if (e.red) { const er = new Error('No se pudo comprobar tu usuario: no hay conexión con el servicio.'); er.red = true; throw er; } throw e; }
+  if (!d.ok) { if (d.motivo === 'sin_configurar') throw new Error('El servicio de acceso todavía no está configurado (falta SECRETO_SESION).'); registrarFallo(); throw new Error('Usuario o contraseña incorrectos, o sin autorización.'); }
+  limpiarFallos(); const us = String(d.usuario || usuario).trim();
+  let key = localStorage.getItem(LS_AUTH) ? await abrirBovedaExistente(us, clave) : await crearBoveda(us, clave);
+  if (!key) { key = await migrarBoveda(us, clave); if (!key) throw new Error('Los datos de este dispositivo siguen protegidos con la contraseña anterior.'); }
+  claveCifrado = key; abrirConsola({ usuario: us, nombre: d.nombre || us, kd, exp: d.exp, token: d.token });
+}
+async function entrarSinConexion(usuario, clave) {
+  const key = await abrirBovedaExistente(usuario, clave); if (!key) { registrarFallo(); throw new Error('Usuario o contraseña incorrectos.'); }
+  limpiarFallos(); const au = JSON.parse(localStorage.getItem(LS_AUTH)); claveCifrado = key;
+  abrirConsola({ usuario: au.u, nombre: au.u, kd: await derivarAcceso(au.u, clave), offline: true, token: '' });
+  toast('Entraste sin conexión: tu usuario no se verificó con el servicio. Usa «Reconectar» en Correo cuando haya internet.', 'err');
+}
+async function desbloquearLocal(usuario, clave) {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH)); let key;
+  try { key = await derivarClave(usuario, clave, unb64(au.s), au.it); if ((await descifrarTexto(key, au.c)) !== 'wcon-ok' || usuario.trim().toLowerCase() !== String(au.u).toLowerCase()) throw new Error('x'); } catch (e) { registrarFallo(); throw new Error('Usuario o contraseña incorrectos.'); }
+  limpiarFallos(); quitarBloqueo();
+}
+function pantallaEntrar(soloDesbloquear) {
+  const au = JSON.parse(localStorage.getItem(LS_AUTH) || '{}'); const err = h('div', { class: 'lockerr', role: 'alert' });
+  const btn = h('button', { class: 'btn primary', type: 'submit', text: soloDesbloquear ? 'Desbloquear' : 'Entrar' });
+  const sinRed = h('button', { class: 'btn', type: 'button', hidden: true, text: 'Entrar sin conexión (solo los datos de este dispositivo)', style: 'width:100%;margin-top:8px', onclick: async () => {
+    err.textContent = ''; const us = $('#lkU').value.trim(), cl = $('#lkP').value; if (!us || !cl) { err.textContent = 'Escribe tu usuario y tu contraseña.'; return; }
+    try { await entrarSinConexion(us, cl); } catch (e) { err.textContent = e.message; } } });
+  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
+    ev.preventDefault(); err.textContent = ''; const espera = esperaFallos(); if (espera > 0) { err.textContent = `Demasiados intentos. Espera ${espera} s e inténtalo de nuevo.`; return; }
+    const us = $('#lkU').value.trim(), cl = $('#lkP').value; if (!us || !cl) { err.textContent = 'Escribe tu usuario y tu contraseña.'; return; }
+    btn.disabled = true; btn.textContent = 'Verificando…';
+    try { if (soloDesbloquear) await desbloquearLocal(us, cl); else await entrarConServicio(us, cl); }
+    catch (e) { err.textContent = e.message; btn.disabled = false; btn.textContent = soloDesbloquear ? 'Desbloquear' : 'Entrar'; if (e.red && localStorage.getItem(LS_AUTH)) sinRed.hidden = false; const p = $('#lkP'); if (p) { p.value = ''; p.focus(); } }
+  } }, campoLock('lkU', 'Usuario', 'text', 'username'), campoLock('lkP', 'Contraseña', 'password', 'current-password'), err, btn, sinRed);
+  if (soloDesbloquear && au.u) form.querySelector('#lkU').value = au.u;
+  return h('div', { class: 'lockcard' }, h('h1', { text: soloDesbloquear ? 'Consola bloqueada' : 'Consola de asambleas' }),
+    h('p', { class: 'muted', text: soloDesbloquear ? 'Escribe tu contraseña para seguir.' : 'Entra con tu usuario autorizado. Solo pueden entrar las personas registradas por el administrador.' }), form,
+    soloDesbloquear ? null : h('button', { class: 'linkbtn', type: 'button', text: 'No puedo entrar', onclick: ayudaAcceso }));
+}
+async function ayudaAcceso() {
+  modal((b, close) => b.append(h('h3', { text: 'Si no puedes entrar' }),
+    h('p', { class: 'muted', text: 'Revisa tu usuario y tu contraseña. Si la olvidaste, pide a quien administra la lista de usuarios que genere una nueva con usuarios.html y la cambie en la hoja «Usuarios». Si tus datos de este dispositivo quedaron con la contraseña anterior, al entrar podrás recuperarlos escribiéndola, o restaurarlos desde una copia de seguridad.' }),
+    h('div', { class: 'row', style: 'flex-wrap:wrap' }, h('button', { class: 'btn danger', text: 'Borrar los datos de este dispositivo', onclick: async () => {
+      if (!(await askConfirm('¿Borrar los datos de este dispositivo?', 'Se borrarán de ESTE dispositivo las asambleas, correos y enlaces guardados. Solo podrás recuperarlos con una copia de seguridad (Auditoría → Respaldo). No afecta lo publicado en el servicio de votación.', 'Borrar', true))) return;
+      [LS_AUTH, LS_CIF, LS, LS_FALLOS].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* nada */ } }); store = { asms: {}, current: '', op: '' }; close(null); toast('Datos de este dispositivo borrados', 'ok'); } }), h('button', { class: 'btn', text: 'Cerrar', onclick: () => close(null) }))));
 }
 const menuSeguridad = () => modal((b, close) => {
-  const au = JSON.parse(localStorage.getItem(LS_AUTH) || '{}');
-  b.append(h('h3', { text: 'Seguridad de la consola' }), h('p', { class: 'muted', text: `Sesión de ${au.u}. Tus datos están cifrados en este dispositivo y se piden usuario y contraseña al abrir la página.` }),
-    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px' }, h('button', { class: 'btn primary', text: 'Bloquear ahora', onclick: () => { close(null); bloquearAhora(); } }), h('button', { class: 'btn', text: 'Cambiar contraseña', onclick: () => { close(null); cambiarContrasena(); } }), h('button', { class: 'btn', text: 'Cerrar', onclick: () => close(null) })));
+  const au = JSON.parse(localStorage.getItem(LS_AUTH) || '{}'); const s = R.sesion || {};
+  b.append(h('h3', { text: 'Seguridad de la consola' }), h('p', { class: 'muted', text: `Sesión de ${s.nombre || au.u}${s.offline ? ' (sin verificar con el servicio)' : ', autorizada por el servicio'}. Tus datos están cifrados en este dispositivo.` }),
+    h('div', { class: 'row', style: 'flex-wrap:wrap;gap:8px' }, h('button', { class: 'btn primary', text: 'Bloquear ahora', onclick: () => { close(null); bloquearAhora(); } }), h('button', { class: 'btn', text: 'Cerrar sesión', onclick: () => { close(null); cerrarSesion(); } }), h('button', { class: 'btn', text: 'Cerrar', onclick: () => close(null) })));
 });
 function bloquearAhora() { mostrarBloqueo(pantallaEntrar(true)); }
-const cambiarContrasena = () => modal((b, close) => {
-  const err = h('div', { class: 'lockerr', role: 'alert' }); const au = JSON.parse(localStorage.getItem(LS_AUTH));
-  const f = (id, et) => h('div', { class: 'field' }, h('label', { for: id, text: et }), h('input', { id, type: 'password', autocomplete: id === 'cpA' ? 'current-password' : 'new-password' }));
-  const guardar = h('button', { class: 'btn primary', type: 'submit', text: 'Guardar contraseña' });
-  const form = h('form', { novalidate: true, onsubmit: async (ev) => {
-    ev.preventDefault(); err.textContent = ''; const ac = $('#cpA').value, n1 = $('#cpN').value, n2 = $('#cpR').value;
-    if (n1.length < 10) { err.textContent = 'La nueva contraseña debe tener al menos 10 caracteres.'; return; } if (n1.toLowerCase().includes(String(au.u).toLowerCase())) { err.textContent = 'La contraseña no debe contener el usuario.'; return; } if (n1 !== n2) { err.textContent = 'Las contraseñas nuevas no coinciden.'; return; }
-    guardar.disabled = true;
-    try { const k0 = await derivarClave(au.u, ac, unb64(au.s), au.it); if ((await descifrarTexto(k0, au.c)) !== 'wcon-ok') throw new Error('x'); } catch (e) { err.textContent = 'La contraseña actual no es correcta.'; guardar.disabled = false; return; }
-    const salt = crypto.getRandomValues(new Uint8Array(16)); const key = await derivarClave(au.u, n1, salt, ITER_PBKDF2); const c = await cifrarTexto(key, 'wcon-ok');
-    claveCifrado = key; await volcarCifrado(); localStorage.setItem(LS_AUTH, JSON.stringify({ ...au, s: b64(salt), it: ITER_PBKDF2, c })); close(true); toast('Contraseña cambiada', 'ok');
-  } }, f('cpA', 'Contraseña actual'), f('cpN', 'Contraseña nueva (mínimo 10 caracteres)'), f('cpR', 'Repite la contraseña nueva'), err, h('div', { class: 'row', style: 'margin-top:10px' }, guardar, h('button', { class: 'btn', type: 'button', text: 'Cancelar', onclick: () => close(null) })));
-  b.append(h('h3', { text: 'Cambiar contraseña' }), form);
-});
+function cerrarSesion() { try { sessionStorage.removeItem('wcon-clave'); } catch (e) { /* nada */ } volcarCifrado().then(() => location.reload()); }
 function activarBotonSeguridad() { const bt = $('#asmLock'); bt.hidden = false; bt.onclick = menuSeguridad; }
 ['pointerdown', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { ultimaActividad = Date.now(); }, { passive: true }));
 setInterval(() => { if (window.__cifrado && !document.body.classList.contains('bloqueado') && Date.now() - ultimaActividad > 20 * 60 * 1000) { let abierta = false; try { abierta = derive(cur()).remotoAbierto; } catch (e) { /* sin asamblea */ } if (!abierta) bloquearAhora(); } }, 30000);
@@ -1331,9 +1402,7 @@ function iniciarBloqueo(arrancar) {
   iniciarCallback = arrancar;
   if (window.ASAMBLEA_SIN_BLOQUEO) { loadLocal(); arrancar(); return; }
   if (!(window.crypto && crypto.subtle)) { loadLocal(); arrancar(); toast('Este navegador no permite el cifrado: abre la página con https para proteger tus datos.', 'err'); return; }
-  if (localStorage.getItem(LS_AUTH)) { mostrarBloqueo(pantallaEntrar(false)); return; }
-  let previos = false; try { const p = JSON.parse(localStorage.getItem(LS) || 'null'); previos = !!(p && p.asms && Object.keys(p.asms).length); } catch (e) { /* sin datos */ }
-  mostrarBloqueo(pantallaCrear(previos));
+  mostrarBloqueo(pantallaEntrar(false));
 }
 
 
@@ -1389,7 +1458,8 @@ h1{margin:0;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-si
 .rb{height:2vh;min-height:14px;border-radius:999px;background:#1B2A52;overflow:hidden}.rb i{display:block;height:100%}
 .pie{border-top:1px solid #22305C;padding-top:2vh;color:#E3E9F5;font-size:clamp(15px,1.6vw,24px)}
 .ver{font-weight:700;font-size:clamp(20px,2.4vw,36px)}
-</style></head><body>
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</head><body>
 <div class="top"><span class="cap" id="asm"></span><span class="pill"><span class="dot"></span><span id="est"></span></span></div>
 <main><section class="q" aria-label="Quórum"><span class="cap">Quórum</span><span class="num" id="q" role="status"></span><div class="bar" id="qb"><i id="qf"></i><b id="qm"></b></div><span id="qs"></span><span class="cap" id="qi" style="text-transform:none;letter-spacing:0"></span></section>
 <section class="p" aria-label="Punto en votación"><div><span class="cap" id="pn"></span><h1 id="pt"></h1></div><div id="rs"></div><span class="cap" id="pp" style="text-transform:none;letter-spacing:0"></span></section></main>
@@ -1419,7 +1489,19 @@ function actualizarPantalla() {
 }
 setInterval(actualizarPantalla, 1500);
 
-$('#asmPantalla').addEventListener('click', abrirPantalla);
+// ---------- cerrar y sellar la asamblea (botón siempre visible en el encabezado) ----------
+const usoEnlaces = (a) => a.events.some((e) => String(e.type).startsWith('REMOTO_'));
+async function cerrarAsamblea() {
+  const a = cur(); const d = derive(a); if (d.closed) return; const q = calcQ(d); const abiertos = d.puntos.filter((p) => !p.cerrado);
+  if (!(await askConfirm('¿Cerrar y sellar la asamblea?', `Quórum final ${fmt(q.pA)} %.${abiertos.length ? ' Hay ' + abiertos.length + ' punto(s) sin cerrar.' : ''} Se sella el registro y los propietarios verán «La asamblea ha finalizado». Reabrir exige un motivo y queda anotado.`, 'Cerrar y sellar')) || !(await ensureOp())) return;
+  if (remotoActivo(d) || usoEnlaces(a)) { toast('Cerrando el acceso de los propietarios y trayendo los últimos votos…'); try { await cerrarAsambleaRemota(); } catch (e) { toast('No se pudo avisar a los propietarios del cierre: ' + e.message, 'err'); } }
+  const dd = derive(cur()), qq = calcQ(dd);
+  append('ASAMBLEA_CERRADA', { pA: Number(qq.pA.toFixed(4)), pP: Number(qq.pP.toFixed(4)), pR: Number(qq.pR.toFixed(4)), nP: qq.nP, nR: qq.nR, eventos: a.events.length });
+  toast('Asamblea cerrada y sellada: imprime el reporte y envía la huella de cierre a la junta', 'ok'); renderAll();
+}
+function actualizarBotonCerrar() { const bt = $('#asmCerrar'); const a = cur(); if (!bt || !a) return; const d = derive(a); bt.hidden = !(d.abierta && !d.closed); }
+
+$('#asmPantalla').addEventListener('click', abrirPantalla); $('#asmCerrar').addEventListener('click', cerrarAsamblea);
 iniciarBloqueo(arrancar);
 window.__asm = { R, gruposDe, armarSnapshot, publicarAhora, sincronizar, tokenDe, buildConstanciaHTML, eventosDeUnidad, store: () => store, derive, calcQ, tallyLive, verify, sha256, canon, append, buildReportHTML, buildCSV, buildJSON, parsePegado, huella, desc, votantes };
 })();
