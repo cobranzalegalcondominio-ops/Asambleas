@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Usuarios autorizados · generar fila</title>
+<style>
+:root{--bg:#f2f4f8;--panel:#fff;--ink:#14213a;--muted:#55627a;--line:#dde2ea;--accent:#2152e0;--ok:#075e52;--okbg:#ddf3ee;--err:#9b1c1c;--shadow:0 1px 2px rgba(15,25,45,.07),0 6px 16px rgba(15,25,45,.05)}
+@media (prefers-color-scheme:dark){:root{--bg:#0d131f;--panel:#171f2e;--ink:#e7ecf6;--muted:#9aa6bb;--line:#2a3549;--accent:#6c9bff;--ok:#7ee0c3;--okbg:#12352e;--err:#ff9a9a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px}
+main{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:20px}
+h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 8px;font-size:17px}p{margin:6px 0}.muted{color:var(--muted);font-size:14px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
+input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+button{font:inherit;font-weight:700;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;width:100%;margin-top:16px}
+.err{color:var(--err);font-size:14px;min-height:20px;margin-top:8px}
+textarea{width:100%;min-height:92px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);word-break:break-all}th{color:var(--muted);font-weight:600}
+.ok{background:var(--okbg);color:var(--ok);border-radius:10px;padding:10px 12px;font-size:14px}
+ol{margin:6px 0;padding-left:20px}li{margin:4px 0}
+</style>
+</head>
+<body>
+<main>
+<section class="card">
+<h1>Usuarios autorizados</h1>
+<p class="muted">Genera la fila de una persona que puede entrar a la consola. Todo se calcula en este navegador: la contraseña no se envía ni se guarda en ninguna parte.</p>
+<ol class="muted">
+<li>Escribe el usuario, el nombre y una contraseña (mínimo 10 caracteres).</li>
+<li>Pulsa <b>Generar fila</b>.</li>
+<li>Copia la fila y pégala en la pestaña <b>Usuarios</b> de tu hoja, debajo de los encabezados.</li>
+</ol>
+<form id="f" novalidate>
+<label for="u">Usuario (letras, números, punto, guion; mínimo 3)</label><input id="u" autocomplete="off" spellcheck="false" autocapitalize="off">
+<label for="n">Nombre que verá en los registros (por ejemplo, Abogada María Pérez)</label><input id="n" autocomplete="off">
+<label for="c1">Contraseña (mínimo 10 caracteres)</label><input id="c1" type="password" autocomplete="new-password">
+<label for="c2">Repite la contraseña</label><input id="c2" type="password" autocomplete="new-password">
+<label for="v">Vence el (opcional, AAAA-MM-DD; vacío = no vence)</label><input id="v" placeholder="2027-12-31" autocomplete="off">
+<div class="err" id="e" role="alert"></div>
+<button class="primary" id="g" type="submit">Generar fila</button>
+</form>
+</section>
+<section class="card" id="res" hidden>
+<h2>Fila para pegar en la hoja «Usuarios»</h2>
+<table><thead><tr><th>usuario</th><th>nombre</th><th>sal</th><th>clave_hash</th><th>activo</th><th>vence</th></tr></thead><tbody><tr id="tr"></tr></tbody></table>
+<p class="muted">Para pegarla de una vez, copia este texto y pégalo en la primera celda vacía de la columna <b>usuario</b>:</p>
+<textarea id="tsv" readonly aria-label="Fila lista para pegar"></textarea>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button id="cp" type="button">Copiar fila</button><span class="ok" id="okc" hidden>Copiada</span></div>
+<p class="muted">Para <b>desactivar</b> a alguien, cambia su celda <b>activo</b> a NO. Para <b>cambiar una contraseña</b>, genera una fila nueva con el mismo usuario y reemplaza <b>sal</b> y <b>clave_hash</b>.</p>
+</section>
+</main>
+<script>
+(function () {
+'use strict';
+const $ = (s) => document.querySelector(s); const ITER = 250000;
+const hex = (buf) => [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, '0')).join('');
+async function derivar(usuario, clave) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(clave), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode('wcon-acceso|' + usuario.trim().toLowerCase()), iterations: ITER, hash: 'SHA-256' }, base, 256));
+}
+async function sha256(t) { return hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t))); }
+$('#f').addEventListener('submit', async (ev) => {
+  ev.preventDefault(); const err = $('#e'); err.textContent = ''; $('#res').hidden = true;
+  const u = $('#u').value.trim(), n = $('#n').value.trim() || u, c1 = $('#c1').value, c2 = $('#c2').value, v = $('#v').value.trim();
+  if (!/^[A-Za-z0-9._-]{3,40}$/.test(u)) { err.textContent = 'El usuario debe tener entre 3 y 40 caracteres: letras, números, punto, guion o guion bajo.'; return; }
+  if (c1.length < 10) { err.textContent = 'La contraseña debe tener al menos 10 caracteres.'; return; }
+  if (c1.toLowerCase().includes(u.toLowerCase())) { err.textContent = 'La contraseña no debe contener el usuario.'; return; }
+  if (c1 !== c2) { err.textContent = 'Las contraseñas no coinciden.'; return; }
+  if (v && (!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(Date.parse(v)))) { err.textContent = 'La fecha de vencimiento debe tener el formato AAAA-MM-DD.'; return; }
+  const b = $('#g'); b.disabled = true; b.textContent = 'Calculando…';
+  try {
+    const sal = hex(crypto.getRandomValues(new Uint8Array(12))); const kd = await derivar(u, c1); const hash = await sha256(sal + '|' + kd);
+    const fila = [u, n.replace(/[\t\r\n]/g, ' '), sal, hash, 'SI', v];
+    $('#tr').replaceChildren(...fila.map((x) => { const td = document.createElement('td'); td.textContent = x; return td; }));
+    $('#tsv').value = fila.join('\t'); $('#res').hidden = false; $('#okc').hidden = true; $('#c1').value = ''; $('#c2').value = '';
+  } catch (e) { err.textContent = 'No se pudo calcular: ' + e.message; }
+  b.disabled = false; b.textContent = 'Generar fila';
+});
+$('#cp').addEventListener('click', async () => { const t = $('#tsv'); t.select(); try { await navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } $('#okc').hidden = false; });
+})();
+</script>
+</body>
+</html>
