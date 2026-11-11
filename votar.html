@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>Asamblea · Votación</title>
+<style>
+:root{--bg:#eef2f8;--card:#fff;--ink:#14213a;--mut:#5b6678;--line:#dde3ee;--pri:#1b5fd1;--pri2:#0f3f95;--ok:#0f8a4f;--okbg:#e2f6ea;--no:#c22727;--nobg:#fdeaea;--ab:#a45f00;--abbg:#fff3dc;--warn:#fff3dc;--warnink:#7a4a00;--shadow:0 10px 30px rgba(20,33,58,.10)}
+@media (prefers-color-scheme:dark){:root{--bg:#0d131f;--card:#171f2e;--ink:#e8edf7;--mut:#9aa6bb;--line:#2a3549;--pri:#6c9bff;--pri2:#9db8ee;--ok:#4ade80;--okbg:#12351f;--no:#ff8a8a;--nobg:#3d1717;--ab:#fbbf24;--abbg:#3a2d0c;--warn:#3a2d0c;--warnink:#fcd34d;--shadow:0 10px 30px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:520px;margin:0 auto;padding:14px 14px 28px}
+.top{background:linear-gradient(135deg,#14213a,#1b4fae);color:#fff;border-radius:20px;padding:20px 20px 18px;box-shadow:var(--shadow)}
+.top small{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#b9ccf3}
+.top h1{margin:6px 0 2px;font-size:22px;line-height:1.25}
+.top .f{font-size:15px;color:#d5e3ff}
+.pill{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700;background:rgba(255,255,255,.16);color:#fff}
+.pill i{width:9px;height:9px;border-radius:50%;background:#fbbf24;display:inline-block}.pill.on i{background:#4ade80}.pill.off i{background:#cbd5e1}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:20px;margin-top:14px}
+.card h2{margin:0 0 6px;font-size:20px;line-height:1.3}
+.card p{margin:0 0 10px}
+.mut{color:var(--mut);font-size:15px}
+.hola{font-size:19px;font-weight:700;margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.chip{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:15px}
+.chip b{font-weight:700}.chip em{font-style:normal;color:var(--mut);font-size:13px;display:block}
+.btn{display:block;width:100%;min-height:58px;border:0;border-radius:16px;padding:14px 18px;font:inherit;font-size:18px;font-weight:700;color:#fff;background:var(--pri);cursor:pointer;text-align:center}
+.btn:active{transform:scale(.99)}.btn[disabled]{opacity:.55;cursor:wait}
+.btn.ok{background:#0f8a4f}.btn.ghost{background:transparent;color:var(--pri);border:2px solid var(--line);font-weight:600}
+.btn.sm{min-height:46px;font-size:16px}
+.votos{display:grid;gap:12px;margin-top:14px}
+.v{display:flex;align-items:center;gap:14px;min-height:70px;border:3px solid var(--line);border-radius:18px;background:var(--card);padding:12px 16px;font:inherit;font-size:20px;font-weight:800;cursor:pointer;color:var(--ink);text-align:left}
+.v span.i{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;font-size:22px;flex:none}
+.v.F{border-color:#0f8a4f}.v.F .i{background:var(--okbg);color:var(--ok)}
+.v.C{border-color:#c22727}.v.C .i{background:var(--nobg);color:var(--no)}
+.v.X{border-color:#b26a00}.v.X .i{background:var(--abbg);color:var(--ab)}
+.v:focus-visible,.btn:focus-visible,.ra:focus-visible{outline:4px solid #93b4ff;outline-offset:2px}
+.punto{font-size:21px;font-weight:800;line-height:1.3;margin:2px 0 8px}
+.estado-voto{display:flex;align-items:center;gap:10px;padding:14px;border-radius:16px;font-weight:800;font-size:19px}
+.estado-voto.F{background:var(--okbg);color:var(--ok)}.estado-voto.C{background:var(--nobg);color:var(--no)}.estado-voto.X{background:var(--abbg);color:var(--ab)}.estado-voto.M{background:var(--bg);color:var(--ink)}
+.lista{margin:10px 0;padding:0;list-style:none}.lista li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:16px}.lista li:first-child{border-top:0}
+.lista b.F{color:var(--ok)}.lista b.C{color:var(--no)}.lista b.X{color:var(--ab)}
+.recibo{font:800 25px ui-monospace,Consolas,monospace;letter-spacing:.06em;text-align:center;background:var(--bg);border-radius:14px;padding:14px 8px;margin:10px 0;word-break:break-all}
+.ok-big{width:68px;height:68px;border-radius:50%;background:var(--okbg);color:var(--ok);display:grid;place-items:center;font-size:38px;margin:0 auto 8px}
+.aviso{background:var(--warn);color:var(--warnink);border-radius:14px;padding:12px 14px;margin-top:12px;font-size:15px}
+.aviso.red{position:sticky;top:8px;z-index:5;box-shadow:var(--shadow)}
+.err{color:var(--no);font-weight:600;margin-top:8px}
+details{margin-top:14px}summary{cursor:pointer;color:var(--pri);font-weight:700;padding:8px 0}
+.unid{border-top:1px solid var(--line);padding:12px 0}.unid:first-of-type{border-top:0}
+.unid .n{font-weight:700;margin-bottom:8px}.unid .n small{font-weight:400;color:var(--mut)}
+.rad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ra{min-height:52px;border:2px solid var(--line);border-radius:14px;background:var(--card);font:inherit;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer}
+.ra.on.F{border-color:#0f8a4f;background:var(--okbg);color:var(--ok)}.ra.on.C{border-color:#c22727;background:var(--nobg);color:var(--no)}.ra.on.X{border-color:#b26a00;background:var(--abbg);color:var(--ab)}
+.pie{text-align:center;color:var(--mut);font-size:13px;margin:18px 6px 0}
+.espera{display:flex;justify-content:center;gap:8px;margin:16px 0 4px}.espera i{width:10px;height:10px;border-radius:50%;background:var(--pri);opacity:.35;animation:p 1.2s infinite}.espera i:nth-child(2){animation-delay:.2s}.espera i:nth-child(3){animation-delay:.4s}
+@keyframes p{0%,100%{opacity:.25}50%{opacity:1}}@media (prefers-reduced-motion:reduce){.espera i{animation:none;opacity:.6}}
+.hoja-bg{position:fixed;inset:0;background:rgba(10,15,25,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.hoja{background:var(--card);width:100%;max-width:520px;border-radius:24px 24px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.3);max-height:92vh;overflow:auto}
+.hoja h3{margin:0 0 4px;font-size:21px}.hoja .gap{display:grid;gap:10px;margin-top:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (min-width:600px){.hoja-bg{align-items:center}.hoja{border-radius:24px}}
+</style>
+</head>
+<body>
+<noscript><div class="wrap"><div class="card"><h2>Se necesita JavaScript</h2><p>Abra este enlace en el navegador de su teléfono (Chrome, Safari o similar).</p></div></div></noscript>
+<div class="wrap" id="wrap"><div id="app" aria-live="polite"></div><div class="pie" id="pie"></div></div>
+<div id="capa"></div>
+<script>
+// ── Única configuración: dirección del servicio de votación (workflow de n8n) ──
+const API = window.VOTAR_API || 'https://n8n.legaltech.com.ve/webhook/asamblea';
+// ─────────────────────────────────────────────────────────────────────────────
+const OPC = { F: { t: 'A favor', e: '✔' }, C: { t: 'En contra', e: '✖' }, X: { t: 'Abstención', e: '–' } };
+const token = (new URLSearchParams(location.search).get('t') || '').trim();
+const $ = (s) => document.querySelector(s);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) { if (v === false || v == null) continue; if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v; else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v === true ? '' : v); }
+  kids.flat().forEach((c) => { if (c != null && c !== false) el.append(c instanceof Node ? c : document.createTextNode(String(c))); });
+  return el;
+}
+const fmtA = (n) => (Number(n) || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+const hora = (ts) => new Date(ts).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const kid = () => (self.crypto && crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 24) : Math.random().toString(36).slice(2) + Date.now().toString(36));
+
+// ---------- estado ----------
+const S = { mis: {}, d: null, rev: 0, invalido: false, sinRed: false, ingresoLocal: false, sel: {}, selPunto: '', detalle: false, enviando: false, error: '', ok: null, kVoto: '', kIngreso: '', cambiando: false, ultimo: 0 };
+let timer = null, fallos = 0, hoja = null;
+
+async function llamar(accion, extra) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body: new URLSearchParams({ accion, t: token, ...(extra || {}) }), cache: 'no-store' });
+  let d = null; try { d = await r.json(); } catch (e) { d = null; }
+  return { status: r.status, d };
+}
+function etiqueta(u) { return u.t === 'r' ? `${u.m} · en representación de ${u.d || 'otro propietario'}` : u.m; }
+
+// ---------- sondeo ----------
+function intervalo() {
+  const d = S.d; let base = 8000;
+  if (!d || d.estado === 'preparacion') base = 15000; else if (d.estado === 'cerrada') base = 60000; else if (d.punto && !yaVoto()) base = 5000; else base = 7000;
+  if (document.hidden) base = Math.max(base, 30000);
+  base = Math.min(60000, base * Math.pow(2, Math.min(fallos, 3)));
+  return base * (0.85 + Math.random() * 0.3);
+}
+function programar() { clearTimeout(timer); timer = setTimeout(() => refrescar(false), intervalo()); }
+async function refrescar(forzar) {
+  clearTimeout(timer);
+  if (hoja && !forzar) { programar(); return; }
+  try {
+    const { d } = await llamar('estado', forzar ? {} : { rev: S.rev || '' });
+    fallos = 0; if (S.sinRed) { S.sinRed = false; render(); }
+    if (!d || d.ok === false) { S.invalido = true; render(); return; }
+    S.ultimo = Date.now();
+    if (!d.igual) aplicar(d);
+  } catch (e) { fallos++; if (!S.sinRed) { S.sinRed = true; render(); } }
+  programar();
+}
+function aplicar(d) {
+  const pid = d.punto ? d.punto.id : '';
+  if (pid !== S.selPunto) { S.mis = {}; S.sel = {}; S.selPunto = pid; S.detalle = false; S.ok = null; S.error = ''; S.cambiando = false; S.kVoto = ''; }
+  S.d = d; S.rev = d.rev; if (d.ingreso) S.ingresoLocal = true;
+  document.title = (d.asamblea && d.asamblea.nombre ? d.asamblea.nombre + ' · ' : '') + 'Votación';
+  render();
+}
+function votosActuales() {
+  const d = S.d; if (!d) return {}; const v = { ...(d.votos || {}) }; const ahora = Date.now();
+  Object.keys(S.mis).forEach((id) => { const m = S.mis[id]; if (ahora - m.ts > 45000 && !(d.votos && d.votos[id])) { delete S.mis[id]; return; } if (S.selPunto === m.p) v[id] = m.o; });
+  return v;
+}
+function yaVoto() { const d = S.d; if (!d || !d.punto) return false; const v = votosActuales(); return d.unidades.every((u) => v[u.i]); }
+
+// ---------- pantallas ----------
+function cabecera() {
+  const d = S.d; const a = (d && d.asamblea) || {}; const e = d ? d.estado : '';
+  const pill = e === 'abierta' ? ['on', 'Asamblea abierta'] : e === 'cerrada' ? ['off', 'Asamblea finalizada'] : ['', 'Aún no inicia'];
+  return h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, a.nombre || 'Asamblea'), a.fecha ? h('div', { class: 'f' }, a.fecha) : null, d ? h('div', { class: 'pill ' + pill[0] }, h('i'), pill[1]) : null);
+}
+function saludo() {
+  const d = S.d; const rp = (d.representados || []);
+  return [h('p', { class: 'hola' }, d.nombre ? `Hola, ${d.nombre}` : 'Hola'),
+    rp.length ? h('p', { class: 'mut' }, 'En esta asamblea ' + (rp.length === 1 ? 'su inmueble ' : 'sus inmuebles ') + rp.map((x) => x.m + (x.p ? ' lo representa ' + x.p : ' tiene representante')).join('; ') + '.') : null,
+    h('div', { class: 'chips', 'aria-label': 'Sus inmuebles' }, d.unidades.map((u) => h('div', { class: 'chip' }, h('b', {}, 'Inmueble ' + u.m), h('em', {}, `${fmtA(u.a)} %${u.t === 'r' ? ' · en representación de ' + (u.d || 'otro propietario') : ''}`))))];
+}
+function resumenVotos(votos) { return h('ul', { class: 'lista' }, S.d.unidades.filter((u) => votos[u.i]).map((u) => h('li', {}, h('span', {}, 'Inmueble ' + u.m), h('b', { class: votos[u.i] }, OPC[votos[u.i]].t)))); }
+
+function pantallaRepresentado() {
+  const d = S.d; return [cabecera(), h('div', { class: 'card' }, h('p', { class: 'hola' }, d.nombre ? `Hola, ${d.nombre}` : 'Hola'), h('h2', {}, 'Su voto está a cargo de su representante'), h('p', {}, 'En esta asamblea ' + (d.representados.length === 1 ? 'su inmueble está representado:' : 'sus inmuebles están representados:')), h('ul', { class: 'lista' }, d.representados.map((x) => h('li', {}, h('span', {}, 'Inmueble ' + x.m), h('b', {}, x.p || 'con representante')))), h('p', { class: 'mut' }, 'No necesita hacer nada. Si esto no es correcto, comuníquese con la administración.'))];
+}
+function pantallaInvalida() {
+  return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Enlace no válido')),
+    h('div', { class: 'card' }, h('h2', {}, 'No pudimos reconocer este enlace'), h('p', {}, 'Es posible que esté incompleto, que haya sido reemplazado o que la asamblea ya no esté disponible.'), h('p', { class: 'mut' }, 'Abra de nuevo el botón desde el correo de convocatoria. Si el problema continúa, pida a la administración que le envíe un enlace nuevo.'))];
+}
+function pantallaCargando() { return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Cargando…')), h('div', { class: 'card' }, h('p', { class: 'mut' }, 'Un momento, estamos abriendo su asamblea.'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')))]; }
+
+function pantallaEspera() {
+  return [cabecera(), h('div', { class: 'card' }, saludo(), h('h2', { style: 'margin-top:14px' }, 'La asamblea todavía no ha iniciado'),
+    h('p', {}, 'Puede dejar esta pantalla abierta: se actualiza sola. Cuando la abogada abra la asamblea, aparecerá aquí el botón para ingresar.'),
+    h('div', { class: 'espera' }, h('i'), h('i'), h('i')),
+    h('button', { class: 'btn ghost sm', type: 'button', onclick: () => refrescar(true) }, 'Actualizar ahora'))];
+}
+function pantallaIngreso() {
+  const b = h('button', { class: 'btn ok', type: 'button', id: 'ingresar' }, 'Ingresar a la asamblea');
+  b.onclick = ingresar;
+  return [cabecera(), h('div', { class: 'card' }, saludo(), h('h2', { style: 'margin-top:14px' }, 'La asamblea está abierta'),
+    h('p', {}, 'Toque el botón para ingresar. Así queda registrada su asistencia y podrá votar cuando se abra cada punto.'), b,
+    S.error ? h('div', { class: 'err', role: 'alert' }, S.error) : null)];
+}
+function pantallaDentro() {
+  const d = S.d;
+  return [cabecera(), h('div', { class: 'card' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h2', { style: 'text-align:center' }, 'Está dentro de la asamblea'),
+    h('p', { class: 'mut', style: 'text-align:center' }, 'Su asistencia quedó registrada.'),
+    h('p', { style: 'text-align:center' }, 'Esperando que se abra la próxima votación…'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')), saludo()),
+    historialCard()].filter(Boolean);
+}
+function historialCard() {
+  const d = S.d; const hs = (d.historial || []).filter((x) => d.unidades.some((u) => x.v && x.v[u.i]));
+  if (!hs.length) return null;
+  return h('div', { class: 'card' }, h('h2', {}, 'Sus votos anteriores'), hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v))));
+}
+function pantallaCerrada() {
+  const d = S.d; const hs = (d.historial || []).filter((x) => d.unidades.some((u) => x.v && x.v[u.i]));
+  return [cabecera(), h('div', { class: 'card' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h2', { style: 'text-align:center' }, 'La asamblea ha finalizado'), h('p', { style: 'text-align:center' }, 'Gracias por participar.')),
+    h('div', { class: 'card' }, h('h2', {}, 'Sus votos registrados'), hs.length ? hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v))) : h('p', { class: 'mut' }, 'No registró votos en esta asamblea.'),
+      h('p', { class: 'mut' }, 'Guarde los comprobantes que le llegaron por correo: sirven para pedir que se compruebe cualquier voto.'))];
+}
+
+function pantallaVotar() {
+  const d = S.d, p = d.punto; const votos = votosActuales(); const voto = yaVoto() && !S.cambiando;
+  const bloque = [];
+  bloque.push(h('div', { class: 'mut', style: 'font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px' }, 'Votación en curso'), h('div', { class: 'punto' }, p.titulo));
+  if (voto) {
+    const vals = [...new Set(d.unidades.map((u) => votos[u.i]))];
+    const uno = vals.length === 1 ? vals[0] : 'M';
+    bloque.push(h('div', { class: 'estado-voto ' + uno }, h('span', { 'aria-hidden': 'true' }, uno === 'M' ? '✓' : OPC[uno].e), uno === 'M' ? 'Su voto está registrado' : 'Su voto: ' + OPC[uno].t));
+    bloque.push(resumenVotos(votos));
+    if (S.ok) bloque.push(h('div', { class: 'mut' }, `Comprobante ${S.ok.recibo} · ${hora(S.ok.hora)}`));
+    bloque.push(p.cambio ? h('button', { class: 'btn ghost', type: 'button', style: 'margin-top:10px', onclick: () => { S.cambiando = true; S.sel = {}; S.detalle = false; render(); } }, 'Cambiar mi voto') : h('p', { class: 'mut' }, 'En esta votación el voto es definitivo.'));
+    bloque.push(h('p', { class: 'mut', style: 'margin-top:12px' }, 'Espere: cuando se abra el siguiente punto aparecerá aquí.'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')));
+  } else {
+    const uno = d.unidades.length === 1;
+    bloque.push(h('p', { class: 'mut' }, uno ? `Su voto vale ${fmtA(d.unidades[0].a)} % de la alícuota.` : `Sus ${d.unidades.length} inmuebles suman ${fmtA(d.unidades.reduce((s, u) => s + u.a, 0))} % de la alícuota.`));
+    if (S.cambiando) bloque.push(h('div', { class: 'aviso' }, 'Está cambiando su voto: el anterior queda en el historial y vale el nuevo.'));
+    if (!S.detalle) {
+      bloque.push(h('div', { class: 'votos', role: 'group', 'aria-label': 'Elija su voto' }, ['F', 'C', 'X'].map((k) => h('button', { class: 'v ' + k, type: 'button', onclick: () => { d.unidades.forEach((u) => { S.sel[u.i] = k; }); confirmar(); } }, h('span', { class: 'i', 'aria-hidden': 'true' }, OPC[k].e), OPC[k].t))));
+      if (!uno) bloque.push(h('details', {}, h('summary', {}, 'Votar distinto por cada inmueble'), h('div', { style: 'margin-top:6px' }, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { S.detalle = true; render(); } }, 'Elegir por inmueble'))));
+    } else {
+      bloque.push(h('div', { style: 'margin-top:8px' }, d.unidades.map((u) => h('div', { class: 'unid' }, h('div', { class: 'n' }, 'Inmueble ' + u.m, h('small', {}, ` · ${fmtA(u.a)} %${u.t === 'r' ? ' · en representación de ' + (u.d || 'otro propietario') : ''}`)),
+        h('div', { class: 'rad', role: 'radiogroup', 'aria-label': 'Voto del inmueble ' + u.m }, ['F', 'C', 'X'].map((k) => h('button', { class: 'ra ' + k + (S.sel[u.i] === k ? ' on' : ''), type: 'button', role: 'radio', 'aria-checked': String(S.sel[u.i] === k), onclick: () => { S.sel[u.i] = k; render(); } }, OPC[k].t)))))));
+      const listo = d.unidades.every((u) => S.sel[u.i]);
+      bloque.push(h('button', { class: 'btn', type: 'button', disabled: !listo, style: 'margin-top:12px', onclick: confirmar }, listo ? 'Revisar mi voto' : 'Elija un voto para cada inmueble'), h('button', { class: 'btn ghost sm', type: 'button', style: 'margin-top:10px', onclick: () => { S.detalle = false; S.sel = {}; render(); } }, 'Votar igual por todos'));
+    }
+    if (S.error) bloque.push(h('div', { class: 'err', role: 'alert' }, S.error));
+  }
+  return [cabecera(), h('div', { class: 'card' }, bloque), h('div', { class: 'card' }, saludo())];
+}
+
+// ---------- hoja de confirmación ----------
+function confirmar() {
+  const d = S.d; const v = {}; d.unidades.forEach((u) => { if (S.sel[u.i]) v[u.i] = S.sel[u.i]; });
+  if (Object.keys(v).length !== d.unidades.length) return;
+  const vals = [...new Set(Object.values(v))]; const total = d.unidades.reduce((s, u) => s + u.a, 0);
+  const bConf = h('button', { class: 'btn ok', type: 'button', id: 'confirmar' }, 'Confirmar mi voto'); const err = h('div', { class: 'err', role: 'alert' });
+  const bCamb = h('button', { class: 'btn ghost', type: 'button' }, 'Volver y cambiar');
+  bCamb.onclick = () => cerrarHoja();
+  bConf.onclick = async () => { bConf.disabled = true; bCamb.disabled = true; bConf.textContent = 'Registrando su voto…'; const r = await enviarVoto(v); if (r === true) return; else { err.textContent = r; bConf.disabled = false; bCamb.disabled = false; bConf.textContent = 'Reintentar'; } };
+  const contenido = h('div', { class: 'hoja', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ht' }, h('h3', { id: 'ht' }, 'Confirme su voto'), h('div', { class: 'mut' }, S.d.punto.titulo),
+    vals.length === 1 ? h('div', { class: 'estado-voto ' + vals[0], style: 'margin-top:14px' }, h('span', { 'aria-hidden': 'true' }, OPC[vals[0]].e), OPC[vals[0]].t.toUpperCase()) : null,
+    resumenVotos(v), h('div', { class: 'mut' }, `Alícuota que vota: ${fmtA(total)} %`), err, h('div', { class: 'gap' }, bConf, bCamb));
+  hoja = h('div', { class: 'hoja-bg', onclick: (e) => { if (e.target === e.currentTarget && !bConf.disabled) cerrarHoja(); } }, contenido);
+  $('#capa').replaceChildren(hoja); bConf.focus();
+}
+function cerrarHoja() { hoja = null; $('#capa').replaceChildren(); render(); }
+
+// ---------- acciones ----------
+async function pedir(accion, extra, intentos) {
+  let ultimo = null;
+  for (let i = 0; i < intentos; i++) {
+    try { const r = await llamar(accion, extra); if (r.status < 500 && r.d) return r; ultimo = r; } catch (e) { ultimo = null; }
+    if (i < intentos - 1) await new Promise((res) => setTimeout(res, 1200 * (i + 1)));
+  }
+  return ultimo || { status: 0, d: null };
+}
+async function ingresar() {
+  const b = $('#ingresar'); if (b) { b.disabled = true; b.textContent = 'Ingresando…'; }
+  S.error = ''; if (!S.kIngreso) S.kIngreso = kid();
+  const r = await pedir('ingresar', { k: S.kIngreso }, 3);
+  if (r.d && r.d.ok) { S.ingresoLocal = true; S.kIngreso = ''; await refrescar(true); return; }
+  const m = r.d && r.d.motivo;
+  S.error = m === 'cerrada' ? 'La asamblea ya terminó.' : m === 'no_abierta' ? 'La asamblea todavía no está abierta.' : 'No pudimos registrar su ingreso. Revise su conexión e inténtelo de nuevo.';
+  render(); if (m) refrescar(true);
+}
+async function enviarVoto(v) {
+  if (!S.kVoto) S.kVoto = kid();
+  const r = await pedir('votar', { k: S.kVoto, punto: S.d.punto.id, v: JSON.stringify(v) }, 3);
+  if (r.d && r.d.ok) {
+    S.ok = { recibo: r.d.recibo, hora: r.d.hora, correo: r.d.correo }; S.error = ''; S.cambiando = false; S.kVoto = '';
+    Object.keys(v).forEach((id) => { S.mis[id] = { o: v[id], p: S.d.punto.id, ts: Date.now() }; }); S.ingresoLocal = true;
+    const resumen = Object.entries(v); S.recibo = { v, ...S.ok }; pantallaRecibo();
+    refrescar(true); return true;
+  }
+  const m = r.d && r.d.motivo;
+  if (m === 'punto_distinto' || m === 'sin_punto') { refrescar(true); return 'La votación cambió. Cierre esta ventana y revise el punto actual.'; }
+  if (m === 'ya_voto') { refrescar(true); return 'Su voto ya estaba registrado y en este punto es definitivo.'; }
+  if (m === 'cerrada' || m === 'no_abierta') { refrescar(true); return 'La votación ya se cerró.'; }
+  return 'No pudimos registrar su voto. Revise su conexión y toque Reintentar: no se duplicará.';
+}
+function pantallaRecibo() {
+  const r = S.recibo; if (!r) return;
+  const copiar = h('button', { class: 'btn ghost sm', type: 'button' }, 'Copiar comprobante');
+  copiar.onclick = async () => { try { await navigator.clipboard.writeText(r.recibo); copiar.textContent = 'Copiado ✓'; } catch (e) { copiar.textContent = r.recibo; } };
+  const cerrar = h('button', { class: 'btn', type: 'button' }, 'Listo');
+  cerrar.onclick = () => { S.recibo = null; hoja = null; $('#capa').replaceChildren(); render(); };
+  const c = h('div', { class: 'hoja', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'rt' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h3', { id: 'rt', style: 'text-align:center' }, 'Su voto quedó registrado'),
+    h('div', { class: 'mut', style: 'text-align:center' }, S.d.punto ? S.d.punto.titulo : ''), resumenVotos(r.v), h('div', { class: 'mut', style: 'text-align:center' }, 'Comprobante'), h('div', { class: 'recibo' }, r.recibo),
+    h('div', { class: 'mut', style: 'text-align:center' }, hora(r.hora) + (r.correo ? ` · Lo enviamos a ${r.correo}` : '')), h('div', { class: 'gap' }, cerrar, copiar));
+  hoja = h('div', { class: 'hoja-bg' }, c); $('#capa').replaceChildren(hoja); cerrar.focus();
+}
+
+// ---------- dibujo ----------
+function render() {
+  const app = $('#app'); let vista;
+  if (S.invalido) vista = pantallaInvalida();
+  else if (!S.d) vista = pantallaCargando();
+  else if (S.d.estado === 'cerrada') vista = pantallaCerrada();
+  else if (S.d.estado === 'preparacion') vista = pantallaEspera();
+  else if (!S.d.unidades.length) vista = pantallaRepresentado();
+  else if (!S.d.ingreso && !S.ingresoLocal) vista = pantallaIngreso();
+  else if (!S.d.punto) vista = pantallaDentro();
+  else vista = pantallaVotar();
+  const aviso = S.sinRed ? h('div', { class: 'aviso red', role: 'status' }, 'Sin conexión: reintentando… no cierre esta página.') : null;
+  app.replaceChildren(...[aviso, ...vista].filter(Boolean));
+  $('#pie').textContent = S.d && S.d.asamblea && S.d.asamblea.ayuda ? '¿Necesita ayuda? Escriba a ' + S.d.asamblea.ayuda : 'Este enlace es personal: no lo comparta.';
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !S.invalido) refrescar(false); });
+window.addEventListener('online', () => refrescar(true));
+if (!token || token.length < 20) { S.invalido = true; render(); } else { render(); refrescar(true); }
+window.__votar = { S, refrescar };
+</script>
+</body>
+</html>
