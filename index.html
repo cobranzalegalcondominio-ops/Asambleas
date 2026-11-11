@@ -179,6 +179,7 @@ header{box-shadow:0 1px 0 var(--line)}
 #tabs button{border-radius:14px}
 #asmCerrar{margin-left:auto;background:var(--ink);border-color:var(--ink);color:var(--panel);font-weight:700}
 #asmCerrar[hidden]{display:none}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;color:var(--ink)}
 details.card>summary{cursor:pointer;font-weight:650;font-size:15px}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -442,7 +443,7 @@ function splitLine(l) {
 function parsePegado(txt) {
   const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean); const rows = [], bad = [];
   if (!lines.length) return { rows, bad, edificios: [] };
-  const head = /inmueble|apto|apart|unidad|propietario|alicuota|coeficiente|edificio|titular/.test(norm(lines[0])) && !/\d/.test(lines[0]);
+  const head = /inmueble|apto|apart|unidad|propietario|alicuota|coeficiente|edificio|titular/.test(norm(lines[0])) && !splitLine(lines[0]).some(numLike);
   let ci = 0, cp = 1, ca = 2, ce = -1, cc = [-1, -1];
   if (head) { const c0 = splitLine(lines[0]); if (c0.length > 1) { const H = c0.map(norm); const fi = re => H.findIndex(x => re.test(x)); const i1 = fi(/inmueble|apto|apart|unidad|local|casa/), p1 = fi(/propietario|nombre|titular/), a1 = fi(/alicuota|coeficiente|porcentaje|%/); ce = fi(/edificio|condominio|conjunto/); cc = H.map((x, i) => /correo|email|e-mail|mail/.test(x) ? i : -1).filter(i => i >= 0).concat([-1, -1]).slice(0, 2); if (i1 >= 0) ci = i1; if (p1 >= 0) cp = p1; if (a1 >= 0) ca = a1; } }
   const seen = new Set();
@@ -456,7 +457,7 @@ function parsePegado(txt) {
     if (!inm) { bad.push({ n, l, why: 'Falta el número de inmueble' }); return; }
     if (isNaN(ali) || ali <= 0) { bad.push({ n, l, why: 'La alícuota está vacía o no es un número' }); return; }
     if (ali > 100) { bad.push({ n, l, why: 'La alícuota supera 100' }); return; }
-    const k = norm(inm); if (seen.has(k)) { bad.push({ n, l, why: 'Inmueble repetido en lo pegado' }); return; } seen.add(k);
+    const k = norm(ce >= 0 ? c[ce] : '') + '|' + norm(inm); if (seen.has(k)) { bad.push({ n, l, why: 'Inmueble repetido en lo pegado' + (ce >= 0 ? ' (en el mismo edificio)' : '') }); return; } seen.add(k);
     rows.push({ ed: ce >= 0 ? (c[ce] || '') : '', inm: String(inm), prop: String(prop || ''), ali, c1: cc[0] >= 0 ? String(c[cc[0]] || '') : '', c2: cc[1] >= 0 ? String(c[cc[1]] || '') : '' });
   });
   return { rows, bad, edificios: [...new Set(rows.map(r => r.ed).filter(Boolean))] };
@@ -507,7 +508,7 @@ function tarjetaPegar(d) {
     out.append(h('div', { class: 'row', style: 'margin-top:8px' }, bAdd, bRep), dups ? h('p', { class: 'muted', text: `${dups === 1 ? '1 ya estaba' : dups + ' ya estaban'} en el padrón y no se duplicará${dups === 1 ? '' : 'n'} al agregar.` }) : null);
   };
   return h('details', { class: 'card', open: d.rows.length === 0 }, h('summary', { text: '¿Tienes el padrón en Excel o Google Sheets? Pégalo aquí' }),
-    h('p', { class: 'muted', text: 'Copia las celdas con tres columnas en este orden: Inmueble, Propietario y Alícuota (en %). Primero te muestro lo que entendí y tú confirmas.' }), ta,
+    h('p', { class: 'muted', text: 'Copia las celdas desde Excel o Google Sheets: Inmueble, Propietario y Alícuota (en %). Si incluyes la fila de encabezados, también entiendo las columnas Edificio, Correo 1 y Correo 2. Primero te muestro lo que entendí y tú confirmas.' }), h('div', { class: 'row', style: 'margin:4px 0 8px' }, h('a', { class: 'btn small', href: 'Plantilla_Padron.xlsx', download: 'Plantilla_Padron.xlsx', text: 'Descargar plantilla de Excel' })), ta,
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', text: 'Revisar lo pegado', onclick: () => mostrar(parsePegado(ta.value), '') })), out);
 }
 function viewPadron() {
@@ -925,16 +926,18 @@ function armarSnapshot(a, d, o) {
     const rep = []; g.units.forEach((id) => { const u = por[id]; if (u && u.est === 'R' && !(u.rep && u.rep.enlace === enlaceId(g.k))) rep.push({ m: u.inm, p: (u.rep && u.rep.nombre) || '' }); });
     if (!us.length && !rep.length) return;
     const v = {}; if (pt) us.forEach((x) => { if (pt.votos[x.i]) v[x.i] = pt.votos[x.i]; });
-    const h = d.puntos.filter((p) => p.cerrado).map((p) => ({ t: p.titulo, v: Object.fromEntries(us.filter((x) => p.votos[x.i]).map((x) => [x.i, p.votos[x.i]])) })).filter((x) => Object.keys(x.v).length);
+    const h = (estado === 'cerrada' ? d.puntos : d.puntos.filter((p) => p.cerrado)).map((p) => ({ t: p.titulo, v: Object.fromEntries(us.filter((x) => p.votos[x.i]).map((x) => [x.i, p.votos[x.i]])) })).filter((x) => Object.keys(x.v).length);
     mapa[th] = { n: g.nombre, e: g.correos[0], g: (us.some((x) => x.t === 'p' && por[x.i].est !== 'A') || d.remotoH.has(th)) ? 1 : 0, u: us, v, h, r: rep };
   });
-  return { estado, asamblea: { id: a.id, nombre: d.meta.nombre, fecha: d.meta.fecha, ayuda: remotoCfg(a).ayuda || '' }, punto: pt ? { id: pt.id, titulo: pt.titulo, umbral: pt.umbral, cambio: pt.permiteCambio } : null, mapa };
+  return { estado, asamblea: { id: a.id, nombre: d.meta.nombre, fecha: d.meta.fecha, ayuda: ((x) => (x.includes('@') ? x.toLowerCase() : x))(String(remotoCfg(a).ayuda || '').trim()) }, punto: pt ? { id: pt.id, titulo: pt.titulo, umbral: pt.umbral, cambio: pt.permiteCambio } : null, mapa };
 }
 async function publicarAhora(o) {
-  const a = cur(); if (!a || !getClave() || !remotoCfg(a).activo) return false;
+  const a = cur(); if (!a) return false;
+  if (!getClave()) { if (o && o.forzar) R.errPub = 'No hay sesión con el servicio: vuelve a conectar en Correo, paso 1.'; return false; }
+  if (!remotoCfg(a).activo) { if (o && o.forzar) R.errPub = 'El voto por enlace no está activado en esta asamblea.'; return false; }
   const d = derive(a); const txt = JSON.stringify(armarSnapshot(a, d, o)); const firma = a.id + '|' + sha256(txt);
   if (!(o && o.forzar) && R.ultimaPub === firma) return true;
-  try { const r = await llamarApi('publicar', { datos: txt }); if (!r.ok) throw new Error(r.motivo === 'clave' ? 'La clave no coincide con la del servicio.' : 'El servicio rechazó la publicación (' + (r.motivo || '?') + ').'); R.ultimaPub = firma; R.rev = r.rev; R.estadoSrv = r.estado; R.conectado = true; R.errPub = ''; }
+  try { const r = await llamarApi('publicar', { datos: txt }); if (!r.ok) throw new Error(r.motivo === 'clave' ? (R.sesion ? 'El servicio no reconoce tu sesión: revisa que el nodo Entrada tenga el mismo SECRETO_SESION que el workflow de acceso.' : 'La clave no coincide con la del servicio.') : 'El servicio rechazó la publicación (' + (r.motivo || '?') + ').'); R.ultimaPub = firma; R.rev = r.rev; R.estadoSrv = r.estado; R.conectado = true; R.errPub = ''; }
   catch (e) { R.errPub = e.message || 'Sin conexión'; R.conectado = false; actualizarChipRemoto(); return false; }
   actualizarChipRemoto(); return true;
 }
@@ -1101,6 +1104,7 @@ function mensajeEnlace(a, g) {
   const b = baseCorreo(a, derive(a)); const url = votarUrl() + '?t=' + tokenDe(a, g.k);
   return `Hola ${g.nombre}, este es su enlace personal para participar y votar en la asamblea «${b.nombre}»${b.fecha ? ' (' + b.fecha + ')' : ''}:\n${url}\n\nEs personal: no lo reenvíe. Funciona cuando se abra la asamblea.${b.ayuda ? '\nAyuda: ' + b.ayuda : ''}`;
 }
+function activarVotoEnlace(a) { if (!(R.conectado && getClave())) return false; if (!remotoCfg(a).activo) { remotoCfg(a).activo = true; saveLocal(); } return true; }   // enviar, abrir o reenviar implica usar el voto por enlace
 async function asegurarPublicado(a) {   // el enlace solo funciona si el servicio ya tiene publicada esta asamblea
   if (!(R.conectado && getClave())) { toast('Este enlace todavía no funciona: conecta el servicio de votación en Correo, paso 1.', 'err'); return false; }
   remotoCfg(a).activo = true; saveLocal();
@@ -1129,6 +1133,7 @@ function bloqueManuales(a, d, G) {
   return caja;
 }
 async function enviarConvocatoria(a, grupos) {
+  activarVotoEnlace(a);
   const d = derive(a); R.ocupado = true; R.progreso = { total: grupos.length, hechos: 0, ok: 0, fallidos: 0, errores: [] }; renderAll();
   const okPub = await publicarAhora({ forzar: true });
   if (!okPub) { R.progreso.errores.push({ g: '', destino: '', error: R.errPub || 'No se pudo publicar en el servicio.' }); R.ocupado = false; renderAll(); return; }
@@ -1154,6 +1159,7 @@ async function enviarPrueba(a, destino) {
   if (!r.ok) throw new Error('El servicio rechazó la prueba (' + (r.motivo || '?') + ').'); const x = (r.resultados || [])[0]; if (!x || !x.ok) throw new Error((x && x.error) || 'No se pudo enviar.'); return true;
 }
 async function reenviarA(a, g, nuevo) {
+  activarVotoEnlace(a);
   const d = derive(a); if (nuevo) { a.tokens[g.k] = nuevoToken(); saveLocal(); if (!(await ensureOp())) return; append('ENLACE_REGENERADO', { nombre: g.nombre, units: g.units }); }
   if (!(await publicarAhora({ forzar: true }))) { toast('No se pudo publicar: ' + (R.errPub || 'sin conexión')); return; }
   const r = await llamarApi('convocar', { datos: JSON.stringify({ ...baseCorreo(a, d), lote: [loteDe(a, d, g)] }) }); const x = (r.resultados || [])[0];
@@ -1169,7 +1175,7 @@ async function renovarSesion() {
 }
 async function conectar(clave, silencioso) {
   setClave(clave); R.errSync = ''; R.errPub = '';
-  try { const r = await llamarApi('ping'); if (!r.ok) { setClave(''); R.conectado = false; return r.motivo === 'sin_configurar' ? 'El servicio todavía no tiene configurada la clave: pide a quien lo administra que la configure.' : 'La clave no coincide con la del servicio.'; } R.conectado = true; R.estadoSrv = r.estado; R.rev = r.rev; if (!silencioso) { remotoCfg(cur()).activo = true; saveLocal(); } return ''; }
+  try { const r = await llamarApi('ping'); if (!r.ok) { setClave(''); R.conectado = false; return r.motivo === 'sin_configurar' ? 'El servicio todavía no tiene configurada la clave: pide a quien lo administra que la configure.' : (R.sesion ? 'El servicio no reconoce tu sesión: revisa que el nodo Entrada tenga el mismo SECRETO_SESION que el workflow de acceso.' : 'La clave no coincide con la del servicio.'); } R.conectado = true; R.estadoSrv = r.estado; R.rev = r.rev; if (!silencioso) { remotoCfg(cur()).activo = true; saveLocal(); } return ''; }
   catch (e) { R.conectado = false; return 'No se pudo conectar con el servicio: ' + e.message; }
 }
 function pasoCard(n, titulo, hecho, ...kids) { return h('div', { class: 'card' }, h('h2', {}, h('span', { class: 'paso' + (hecho ? ' ok' : ''), text: hecho ? '✓' : String(n) }), ' ' + titulo), ...kids); }
@@ -1233,9 +1239,12 @@ function viewCorreo() {
   const check = (ok, t) => h('div', { text: (ok ? '✔ ' : '⚠ ') + t, style: 'color:' + (ok ? 'var(--pres)' : 'var(--warn)') });
   const abrirBtn = h('button', { class: 'btn primary', style: 'min-height:54px;font-size:16px', text: 'Abrir la asamblea a los propietarios', disabled: !listoP || !conectado || d.closed, onclick: async () => {
     const ok = await askConfirm('¿Abrir la asamblea a los propietarios?', `Desde este momento los propietarios que tengan su enlace podrán ingresar y votar desde su celular. ${nOk ? '' : 'Aún no has enviado la convocatoria por correo. '}Quedará anotado en el registro.`, 'Abrir ahora'); if (!ok || !(await ensureOp())) return;
-    append('REMOTO_ABIERTO', {}); const p = await publicarAhora({ forzar: true }); if (!p) toast('No se pudo publicar: ' + (R.errPub || 'sin conexión') + '. Reintenta desde esta pantalla.'); else toast('Asamblea abierta a los propietarios'); sincronizar(true); renderAll(); } });
+    activarVotoEnlace(a); append('REMOTO_ABIERTO', {}); const p = await publicarAhora({ forzar: true }); if (!p) toast('No se pudo publicar: ' + (R.errPub || 'sin conexión') + '. Reintenta desde esta pantalla.'); else toast('Asamblea abierta a los propietarios'); sincronizar(true); renderAll(); } });
   box.push(pasoCard(4, 'Abrir la asamblea a los propietarios', d.remotoAbierto,
-    d.remotoAbierto ? h('div', { class: 'okline', text: d.closed ? '🔒 La asamblea terminó y el acceso está cerrado.' : '✔ Abierta: los propietarios ya pueden ingresar y votar desde su celular.' }) : [
+    d.remotoAbierto ? [h('div', { class: 'okline', text: d.closed ? '🔒 La asamblea terminó y el acceso está cerrado.' : '✔ Abierta: los propietarios ya pueden ingresar y votar desde su celular.' }),
+      (d.closed && conectado && cfg.activo) ? h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Actualizar lo que ven los propietarios', onclick: async () => {
+        if (!(await askConfirm('¿Volver a publicar el cierre?', 'Se vuelve a publicar esta asamblea cerrada para que cada propietario vea el resumen de sus votos. Si hoy tienes OTRA asamblea abierta en el servicio, quedará reemplazada y sus enlaces dejarán de funcionar.', 'Publicar', true))) return;
+        const ok = await publicarAhora({ estado: 'cerrada', sinPunto: true, forzar: true }); toast(ok ? 'Publicado: los propietarios ven su resumen actualizado' : 'No se pudo publicar: ' + (R.errPub || 'sin conexión'), ok ? 'ok' : 'err'); } })) : null] : [
       h('p', { class: 'muted', text: 'Solo tú decides cuándo empieza. Antes de abrir, los propietarios ven “la asamblea todavía no ha iniciado”.' }),
       check(listoP, listoP ? 'Padrón congelado' : 'Falta congelar el padrón (pestaña Padrón)'), check(conectado, conectado ? 'Conectado con el servicio' : 'Falta conectar (paso 1)'), check(nOk > 0, nOk > 0 ? `Convocatoria enviada (${pl(nOk, 'correo', 'correos')})` : 'Convocatoria sin enviar (opcional)'),
       h('div', { style: 'margin-top:10px' }, abrirBtn)]));
@@ -1491,13 +1500,20 @@ setInterval(actualizarPantalla, 1500);
 
 // ---------- cerrar y sellar la asamblea (botón siempre visible en el encabezado) ----------
 const usoEnlaces = (a) => a.events.some((e) => String(e.type).startsWith('REMOTO_'));
+function sellarPunto(idPunto) {   // sella con los votos que hay, igual que «Cerrar votación y sellar resultado»
+  const dd = derive(cur()); const pp = dd.pById[idPunto]; if (!pp || pp.cerrado) return;
+  const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: pp.id, res: { r: t.r, T: t.T, aA: t.aA, nA: t.nA, base: t.base, fav: t.fav, pct: t.pct, ok: t.ok, pend: t.pend, pP: t.pP, pR: t.pR, pA: t.pA, canal: t.canal } });
+}
 async function cerrarAsamblea() {
   const a = cur(); const d = derive(a); if (d.closed) return; const q = calcQ(d); const abiertos = d.puntos.filter((p) => !p.cerrado);
-  if (!(await askConfirm('¿Cerrar y sellar la asamblea?', `Quórum final ${fmt(q.pA)} %.${abiertos.length ? ' Hay ' + abiertos.length + ' punto(s) sin cerrar.' : ''} Se sella el registro y los propietarios verán «La asamblea ha finalizado». Reabrir exige un motivo y queda anotado.`, 'Cerrar y sellar')) || !(await ensureOp())) return;
-  if (remotoActivo(d) || usoEnlaces(a)) { toast('Cerrando el acceso de los propietarios y trayendo los últimos votos…'); try { await cerrarAsambleaRemota(); } catch (e) { toast('No se pudo avisar a los propietarios del cierre: ' + e.message, 'err'); } }
+  if (!(await askConfirm('¿Cerrar y sellar la asamblea?', `Quórum final ${fmt(q.pA)} %.${abiertos.length ? ` Hay ${abiertos.length} punto(s) sin cerrar: se cerrarán y sellarán con los votos que ya hay.` : ''} Los propietarios verán «La asamblea ha finalizado» con el resumen de sus votos. Reabrir exige un motivo y queda anotado.`, 'Cerrar y sellar')) || !(await ensureOp())) return;
+  const conEnlaces = remotoActivo(d) || usoEnlaces(a);
+  if (conEnlaces) { toast('Cerrando el acceso de los propietarios y trayendo los últimos votos…'); try { await cerrarAsambleaRemota(); } catch (e) { toast('No se pudo avisar a los propietarios del cierre: ' + e.message, 'err'); } }
+  derive(cur()).puntos.filter((p) => !p.cerrado).forEach((p) => sellarPunto(p.id));
   const dd = derive(cur()), qq = calcQ(dd);
   append('ASAMBLEA_CERRADA', { pA: Number(qq.pA.toFixed(4)), pP: Number(qq.pP.toFixed(4)), pR: Number(qq.pR.toFixed(4)), nP: qq.nP, nR: qq.nR, eventos: a.events.length });
   toast('Asamblea cerrada y sellada: imprime el reporte y envía la huella de cierre a la junta', 'ok'); renderAll();
+  if (conEnlaces) await publicarAhora({ forzar: true });   // deja a cada propietario el resumen final, con los últimos votos y los puntos sellados
 }
 function actualizarBotonCerrar() { const bt = $('#asmCerrar'); const a = cur(); if (!bt || !a) return; const d = derive(a); bt.hidden = !(d.abierta && !d.closed); }
 
