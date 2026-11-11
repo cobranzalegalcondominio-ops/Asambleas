@@ -361,8 +361,8 @@ function desc(e, d) {
     case 'REMOTO_CERRADO': return 'Se cerró el acceso de los propietarios';
     case 'REMOTO_CONVOCATORIA': return `Convocatoria por correo: ${p.enviados} enviados, ${p.fallidos} fallidos (${pl(p.propietarios, 'propietario', 'propietarios')} con enlace, ${fmt(p.cobertura)} % de la alícuota)`;
     case 'ENLACE_REGENERADO': return `Enlace personal regenerado para ${p.nombre}`;
-    case 'INGRESO_REMOTO': return `Ingreso por enlace${p.ubic ? ' (declaró: ' + (p.ubic === 'S' ? 'en la sala' : 'a distancia') + ')' : ''} · hora del servidor ${hms(Date.parse(p.srv))}: ${(p.units || []).map(id => (d.byId[id] || {}).inm || id).join(', ')}`;
-    case 'VOTO_REMOTO': { const pt = d.pById[p.punto]; const ops = [...new Set(Object.values(p.detalle || {}))].map(o => OPC[o]).join(' / '); return `Voto por enlace ${ops}${pt ? ' en “' + pt.titulo + '”' : ''}: ${(p.inms || []).map(id => (d.byId[id] || {}).inm || id).join(', ')} · comprobante ${p.recibo} (hora del servidor ${hms(Date.parse(p.srv))})`; }
+    case 'INGRESO_REMOTO': return `Ingreso por enlace${p.ubic ? ' (declaró: ' + (p.ubic === 'S' ? 'en la sala' : 'a distancia') + ')' : ''} · hora del servidor ${hms(Date.parse(p.srv))}: ${(p.units || []).map(U).join('; ')}`;
+    case 'VOTO_REMOTO': { const pt = d.pById[p.punto]; return `Voto por enlace${pt ? ' en “' + pt.titulo + '”' : ''}: ${(p.inms || []).map(id => U(id) + ' → ' + (OPC[(p.detalle || {})[id]] || '?')).join('; ')} · comprobante ${p.recibo} (hora del servidor ${hms(Date.parse(p.srv))})`; }
     case 'REMOTO_DESCARTADO': return `Fila ${p.rid} del servicio descartada (${p.tipo === 'VOTO' ? 'voto' : 'ingreso'}): ${p.motivo}`;
     case 'ANULACION': return `ANULA la anotación #${p.ref}. Motivo: ${p.motivo}`;
     default: return e.type;
@@ -495,12 +495,13 @@ function formAgregar(d, base, sum) {
 }
 function tarjetaPegar(d) {
   const ta = h('textarea', { placeholder: 'Inmueble\tPropietario\tAlícuota\n1A\tAna Rivas\t0,70\n1B\tLuis Mendoza\t0,70' }); const out = h('div', {});
-  const mostrar = (r, edSel) => {
+  const mostrar = (r, edSel, noEscalar) => {
     out.replaceChildren(); const rows0 = edSel ? r.rows.filter(x => x.ed === edSel) : r.rows;
     if (!rows0.length && !r.bad.length) { out.append(h('div', { class: 'note', text: 'Pega primero las filas. Cada fila debe traer inmueble, propietario y alícuota.' })); return; }
     if (!edSel && r.edificios.length > 1) { out.append(h('div', { class: 'note', text: 'Tu hoja trae varios edificios. Elige el de esta asamblea:' }), h('div', { class: 'chips' }, r.edificios.map(x => h('button', { text: `${x} (${r.rows.filter(y => y.ed === x).length})`, onclick: () => mostrar(r, x) })))); return; }
-    const esc0 = escalaFracciones(rows0); const rows = esc0.rows; const exist = new Set(d.rows.map(x => norm(x.inm))); const nuevos = rows.filter(x => !exist.has(norm(x.inm))); const dups = rows.length - nuevos.length; const sum = rows.reduce((x, y) => x + y.ali, 0);
-    out.append(h('div', { class: 'note', style: 'background:var(--pres-bg);color:var(--pres)', text: `Detecté ${pl(rows.length, 'inmueble', 'inmuebles')} que suman ${fmt(sum)} %.${esc0.escalado ? ' Los valores venían como fracción y los convertí a porcentaje.' : ''}` }));
+    const esc0 = noEscalar ? { rows: rows0, escalado: false } : escalaFracciones(rows0); const rows = esc0.rows; const exist = new Set(d.rows.map(x => norm(x.inm))); const nuevos = rows.filter(x => !exist.has(norm(x.inm))); const dups = rows.length - nuevos.length; const sum = rows.reduce((x, y) => x + y.ali, 0);
+    out.append(h('div', { class: 'note', style: 'background:var(--pres-bg);color:var(--pres)', text: `Detecté ${pl(rows.length, 'inmueble', 'inmuebles')} que suman ${fmt(sum)} %.${esc0.escalado ? 'Los valores sumaban 1 y parecían fracciones, así que los convertí a porcentaje (por ejemplo 0,30 pasa a 30 %). Si ya estaban en porcentaje, pulsa «Usar tal cual».' : ''}` }));
+    if (esc0.escalado) out.append(h('div', { class: 'row', style: 'margin:6px 0' }, h('button', { class: 'btn small', text: 'Usar tal cual: ya están en porcentaje', onclick: () => mostrar(r, edSel, true) })));
     if (r.bad.length) out.append(h('div', { class: 'note bad' }, h('b', { text: `${pl(r.bad.length, 'línea con problema', 'líneas con problemas')} (no se cargará${r.bad.length === 1 ? '' : 'n'}):` }), r.bad.slice(0, 6).map(x => h('div', { text: `Línea ${x.n}: “${x.l.slice(0, 50)}” → ${x.why}` })), r.bad.length > 6 ? h('div', { text: `y ${r.bad.length - 6} más` }) : null));
     out.append(h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Inmueble' }), h('th', { text: 'Propietario' }), h('th', { text: 'Alícuota %' }))), h('tbody', {}, rows.slice(0, 8).map(x => h('tr', {}, h('td', { text: x.inm }), h('td', { style: 'text-align:left', text: x.prop }), h('td', { text: fmtA(x.ali) }))), rows.length > 8 ? h('tr', {}, h('td', { colspan: '3', style: 'text-align:left', class: 'muted', text: `… y ${rows.length - 8} más` })) : null))));
     const bAdd = h('button', { class: 'btn primary', text: `Agregar ${nuevos.length} al padrón`, disabled: !nuevos.length, onclick: async () => { if (!(await ensureOp())) return; const dd = derive(cur()); const ex2 = new Set(dd.rows.map(x => norm(x.inm))); const nv = rows.filter(x => !ex2.has(norm(x.inm))); const nf = conIds(dd, nv); append('PADRON_AGREGADO', { rows: nf }); setContactos(cur(), nf, nv); renderAll(); toast(`${nv.length} inmuebles agregados`); } });
@@ -770,7 +771,7 @@ function viewAuditoria() {
   [...a.events].reverse().filter(e => filtroEv === 'T' || (GRUPO[e.type] || 'sis') === filtroEv).forEach(e => {
     const an = d.ann.get(e.seq);
     list.append(h('div', { class: 'ev' + (an ? ' an' : '') }, h('div', { class: 'l' }, h('span', { class: 'n', text: '#' + e.seq }), h('span', { class: 'd', text: desc(e, d) }), h('span', { class: 't', text: hms(e.ts) })),
-      h('div', { class: 'm', text: `${e.op || 'sin operador'} · ${huella(e.h)}${an ? ' · anulado por #' + an.by + ': ' + an.motivo : ''}` }),
+      h('div', { class: 'm', text: `${quienRegistro(e)} · ${huella(e.h)}${an ? ' · anulado por #' + an.by + ': ' + an.motivo : ''}` }),
       (!an && ANULABLE.has(e.type) && !(d.closed && e.type !== 'ASAMBLEA_CERRADA')) ? h('button', { class: 'btn small', style: 'margin-top:4px', text: 'Anular con motivo', onclick: async () => { const m = await askReason(`Anular la anotación #${e.seq}`, desc(e, d), 'Anular'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: e.seq, motivo: m }); renderAll(); } }) : null));
   });
   box.push(h('div', { class: 'card' }, h('h2', { text: `Registro de anotaciones (${a.events.length})` }), ch, list));
@@ -798,7 +799,7 @@ function buildReportHTML(a) {
   const puntos = d.puntos.map((p, i) => { const t = tallyOf(d, p); const T = t.T || 1; const pc = x => fmt(x / T * 100); const fl = (lab, k) => `<tr><td>${lab}</td><td class="r">${pc(t.r[k].P)}</td><td class="r">${pc(t.r[k].R)}</td><td class="r"><b>${pc(t.r[k].P + t.r[k].R)}</b></td><td class="r">${t.r[k].n}</td></tr>`;
     return `<section><h3>Punto ${i + 1}: ${esc(p.titulo)}</h3><p>Se aprueba con más de <b>${fmt(p.umbral)} %</b> sobre ${p.base === 'total' ? 'el total de la alícuota del edificio' : 'la alícuota presente y representada'}. ${p.cerrado ? 'Cerrado a las ' + hm(p.cierre.ts) + ' (anotación #' + p.cierre.seq + ', huella ' + huella(p.cierre.hash) + ').' : '<b>Votación sin cerrar.</b>'}</p>
     <table><thead><tr><th>Voto</th><th class="r">Presentes (% alícuota total)</th><th class="r">En representación (% alícuota total)</th><th class="r">Total (%)</th><th class="r">Inmuebles</th></tr></thead><tbody>${fl('A favor', 'F')}${fl('En contra', 'C')}${fl('Abstención', 'X')}${fl('Sin votar', 'N')}</tbody></table>
-    <p class="res ${t.ok ? 'ok' : 'no'}">${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)} % a favor sobre ${p.base === 'total' ? 'el total del edificio' : 'la alícuota asistente'} (${fmt(t.base)} %). ${t.pend ? 'Inmuebles sin votar: ' + t.pend + '.' : ''}</p>${t.canal ? `<p>Votos emitidos (porcentaje de la alícuota total del edificio): mesa <b>${fmt(t.canal.sala.a)} %</b> (${pl(t.canal.sala.n, 'inmueble', 'inmuebles')}) · enlace <b>${fmt(t.canal.correo.a)} %</b> (${pl(t.canal.correo.n, 'inmueble', 'inmuebles')}).</p>` : ''}</section>`; }).join('') || '<p>No se registraron votaciones.</p>';
+    ${detalleVotos(a, d, p)}<p class="res ${t.ok ? 'ok' : 'no'}">${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)} % a favor sobre ${p.base === 'total' ? 'el total del edificio' : 'la alícuota asistente'} (${fmt(t.base)} %). ${t.pend ? 'Inmuebles sin votar: ' + t.pend + '.' : ''}</p>${t.canal ? `<p>Votos emitidos (porcentaje de la alícuota total del edificio): mesa <b>${fmt(t.canal.sala.a)} %</b> (${pl(t.canal.sala.n, 'inmueble', 'inmuebles')}) · enlace <b>${fmt(t.canal.correo.a)} %</b> (${pl(t.canal.correo.n, 'inmueble', 'inmuebles')}).</p>` : ''}</section>`; }).join('') || '<p>No se registraron votaciones.</p>';
   const anul = [...d.ann.entries()].map(([ref, x]) => { const e = a.events[ref - 1]; return `<tr><td>#${ref}</td><td>${esc(e ? desc(e, d) : '')}</td><td>#${x.by} · ${hms(x.ts)}</td><td>${esc(x.motivo)}</td><td>${esc(x.op || '')}</td></tr>`; }).join('');
   const poderes = d.units.filter(u => u.rep).map(u => `<tr><td>${esc(u.inm)}</td><td>${esc(u.rep.nombre)}</td><td>${esc(u.rep.cedula)}</td><td>${esc(u.rep.ref)}</td><td>${u.rep.verificado ? 'Sí' : 'No'}</td><td>${u.rep.fotoSha ? 'Sí' : 'No'}${u.rep.excepcion ? ' · excede máximo' : ''}</td></tr>`).join('');
   return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Reporte de asamblea · ${esc(d.meta.nombre)}</title><style>
@@ -814,7 +815,7 @@ table{border-collapse:collapse;width:100%;margin:6px 0 10px}th,td{border:1px sol
 <h2>3. Asistencia y representaciones</h2><p style="font-size:11px;color:#444;margin:4px 0 8px"><b>Mesa</b> = registrado por la abogada en la consola. <b>Enlace</b> = lo hizo el propietario con su enlace personal; al ingresar declara si está en la sala o a distancia. El sistema registra el medio usado y lo declarado; la presencia física la da fe la mesa.</p><table><thead><tr><th>Inmueble</th><th>Propietario</th><th class="r">Alícuota %</th><th>Condición</th><th>Medio</th><th>Representado por</th><th>Poder</th><th>Ingreso</th></tr></thead><tbody>${rows}</tbody></table>
 ${poderes ? `<h3>Poderes recibidos</h3><table><thead><tr><th>Inmueble</th><th>Representante</th><th>Cédula</th><th>Referencia del poder</th><th>Verificado</th><th>Foto adjunta</th></tr></thead><tbody>${poderes}</tbody></table>` : ''}
 <h2>4. Votaciones</h2>${puntos}
-<h2>5. Auditoría</h2><div class="int">${v.ok ? '✔ Registro íntegro: ' + v.n + ' anotaciones encadenadas sin alteración.' : '✖ REGISTRO ALTERADO a partir de la anotación #' + v.at + '.'}</div><div class="k"><b>Huella de apertura</b><span class="hash">${huella(d.openHash)}</span><b>${d.closed ? 'Huella de cierre' : 'Huella actual'}</b><span class="hash">${huella(d.closed ? d.closeHash : v.last)}</span><b>Anotaciones en el registro</b><span>${a.events.length}</span><b>Anulaciones</b><span>${d.ann.size}</span></div>
+<h2>5. Auditoría</h2>${htmlValidaciones(a, d)}<div class="int">${v.ok ? '✔ Registro íntegro: ' + v.n + ' anotaciones encadenadas sin alteración.' : '✖ REGISTRO ALTERADO a partir de la anotación #' + v.at + '.'}</div><div class="k"><b>Huella de apertura</b><span class="hash">${huella(d.openHash)}</span><b>${d.closed ? 'Huella de cierre' : 'Huella actual'}</b><span class="hash">${huella(d.closed ? d.closeHash : v.last)}</span><b>Anotaciones en el registro</b><span>${a.events.length}</span><b>Anulaciones</b><span>${d.ann.size}</span></div>
 ${anul ? `<h3>Anotaciones anuladas y su motivo</h3><table><thead><tr><th>Anotación</th><th>Qué decía</th><th>Anulado por</th><th>Motivo</th><th>Operador</th></tr></thead><tbody>${anul}</tbody></table>` : '<p>No hubo anulaciones.</p>'}
 <p>Una anotación es cada acción registrada (un ingreso, una representación, una salida, un voto, una anulación o un cierre), con su hora y su operador; su cantidad no es el número de asistentes ni de votos. Cada anotación incluye la huella de la anterior (SHA-256). Para verificar, se recalcula la cadena con el archivo JSON de auditoría adjunto; cualquier cambio posterior hace que las huellas no coincidan.</p>
 <section class="firma"><h2>6. Constancia y firmas</h2>
@@ -1272,7 +1273,7 @@ setTimeout(async () => { const a = cur(); if (a && a.remoto && a.remoto.activo &
 
 function renderAll() {
   if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); }
-  renderHeader(); actualizarChipRemoto(); renderTabs(); const v = tab === 'asistencia' ? viewAsistencia() : tab === 'votacion' ? viewVotacion() : tab === 'correo' ? viewCorreo() : tab === 'auditoria' ? viewAuditoria() : tab === 'reporte' ? viewReporte() : viewPadron();
+  renderHeader(); actualizarChipRemoto(); renderTabs(); const v = tab === 'asistencia' ? viewAsistencia() : tab === 'votacion' ? viewVotacion() : tab === 'correo' ? viewCorreo() : tab === 'auditoria' ? [cardValidaciones(), ...viewAuditoria()] : tab === 'reporte' ? viewReporte() : viewPadron();
   $('#view').replaceChildren(...[cardSiguientePaso(), ...v].filter(Boolean)); actualizarPantalla(); actualizarBotonCerrar();
 }
 $('#asmSel').addEventListener('change', e => { store.current = e.target.value; puntoSel = ''; saveLocal(); renderAll(); });
@@ -1506,7 +1507,7 @@ function sellarPunto(idPunto) {   // sella con los votos que hay, igual que «Ce
 }
 async function cerrarAsamblea() {
   const a = cur(); const d = derive(a); if (d.closed) return; const q = calcQ(d); const abiertos = d.puntos.filter((p) => !p.cerrado);
-  if (!(await askConfirm('¿Cerrar y sellar la asamblea?', `Quórum final ${fmt(q.pA)} %.${abiertos.length ? ` Hay ${abiertos.length} punto(s) sin cerrar: se cerrarán y sellarán con los votos que ya hay.` : ''} Los propietarios verán «La asamblea ha finalizado» con el resumen de sus votos. Reabrir exige un motivo y queda anotado.`, 'Cerrar y sellar')) || !(await ensureOp())) return;
+  if (!(await askConfirm('¿Cerrar y sellar la asamblea?', `Quórum final ${fmt(q.pA)} %.${(d.T > 0 && q.pA < d.meta.quorumReq) ? ` ⚠ NO se alcanzó el quórum mínimo (${fmt(d.meta.quorumReq)} %): la asamblea se cerrará igual y quedará anotado.` : ''}${abiertos.length ? ` Hay ${abiertos.length} punto(s) sin cerrar: se cerrarán y sellarán con los votos que ya hay.` : ''} Los propietarios verán «La asamblea ha finalizado» con el resumen de sus votos. Reabrir exige un motivo y queda anotado.`, 'Cerrar y sellar')) || !(await ensureOp())) return;
   const conEnlaces = remotoActivo(d) || usoEnlaces(a);
   if (conEnlaces) { toast('Cerrando el acceso de los propietarios y trayendo los últimos votos…'); try { await cerrarAsambleaRemota(); } catch (e) { toast('No se pudo avisar a los propietarios del cierre: ' + e.message, 'err'); } }
   derive(cur()).puntos.filter((p) => !p.cerrado).forEach((p) => sellarPunto(p.id));
@@ -1516,6 +1517,62 @@ async function cerrarAsamblea() {
   if (conEnlaces) await publicarAhora({ forzar: true });   // deja a cada propietario el resumen final, con los últimos votos y los puntos sellados
 }
 function actualizarBotonCerrar() { const bt = $('#asmCerrar'); const a = cur(); if (!bt || !a) return; const d = derive(a); bt.hidden = !(d.abierta && !d.closed); }
+
+// ---------- validaciones del registro y conciliación con el servicio ----------
+async function conciliarServicio(a) {   // trae TODAS las filas del servicio y comprueba que cada una esté anotada o descartada con motivo
+  const filas = []; let desde = 0, mas = true, vueltas = 0;
+  while (mas && vueltas++ < 60) {
+    const r = await llamarApi('pull', { asamblea: a.id, desde }); if (!r.ok) throw new Error('El servicio no pudo leer la bandeja (' + (r.motivo || '?') + ').');
+    filas.push(...r.filas); if (r.filas.length) desde = r.filas[r.filas.length - 1].rid; mas = !!r.hay_mas && r.filas.length > 0;
+  }
+  const cubiertos = new Set(a.events.filter((e) => ['INGRESO_REMOTO', 'VOTO_REMOTO', 'REMOTO_DESCARTADO'].includes(e.type)).map((e) => e.p.rid));
+  const faltan = filas.filter((f) => !cubiertos.has(f.rid));
+  a.conciliacion = { ts: Date.now(), filas: filas.length, ingresos: filas.filter((f) => f.tipo === 'INGRESO').length, votos: filas.filter((f) => f.tipo === 'VOTO').length,
+    registradas: a.events.filter((e) => ['INGRESO_REMOTO', 'VOTO_REMOTO'].includes(e.type)).length, descartadas: a.events.filter((e) => e.type === 'REMOTO_DESCARTADO').length, faltan: faltan.map((f) => f.rid) };
+  saveLocal(); return { filas, faltan };
+}
+function validacionesRegistro(a, d) {
+  const out = []; const v = verify(a.events, a.id); const c = calcQ(d);
+  out.push(v.ok ? { e: 'ok', t: `Cadena de huellas íntegra: ${v.n} anotaciones encadenadas, ninguna alterada.` } : { e: 'bad', t: `REGISTRO ALTERADO a partir de la anotación #${v.at}.` });
+  if (d.frozen) {
+    const sum = d.units.reduce((s, u) => s + (Number(u.ali) || 0), 0);
+    out.push(Math.abs(sum - d.T) < 0.005 ? { e: 'ok', t: `Padrón completo: ${fmt(sum)} % de ${fmt(d.T)} % de alícuota.` } : { e: 'warn', t: `Padrón incompleto: solo ${fmt(sum)} % de ${fmt(d.T)} % de alícuota cargada.` });
+    out.push(d.T > 0 && c.pA >= d.meta.quorumReq ? { e: 'ok', t: `Quórum alcanzado: ${fmt(c.pA)} % (mínimo ${fmt(d.meta.quorumReq)} %).` } : { e: 'warn', t: `Quórum NO alcanzado: ${fmt(c.pA)} % (mínimo ${fmt(d.meta.quorumReq)} %).` });
+  }
+  if (d.puntos.length) { const sin = d.puntos.filter((p) => !p.cerrado).length; out.push(sin ? { e: 'warn', t: `${pl(sin, 'punto sin cerrar ni sellar', 'puntos sin cerrar ni sellar')}.` } : { e: 'ok', t: `${d.puntos.length === 1 ? 'El punto está cerrado y sellado' : 'Los ' + d.puntos.length + ' puntos están cerrados y sellados'}.` }); }
+  const nVotos = d.puntos.reduce((s, p) => s + Object.keys(p.votos).length, 0);
+  out.push(d.warns.length ? { e: 'warn', t: `${pl(d.warns.length, 'anotación con aviso', 'anotaciones con aviso')}: ${d.warns.slice(0, 3).join(' · ')}` } : { e: 'ok', t: `Sin anomalías: ${pl(nVotos, 'voto', 'votos')} de inmuebles presentes, ninguno fuera de la asamblea abierta.` });
+  if (usoEnlaces(a)) {
+    const cn = a.conciliacion;
+    out.push(!cn ? { e: 'info', t: 'Conciliación con el servicio: todavía sin comprobar. Pulsa «Conciliar con el servicio».' }
+      : cn.faltan.length ? { e: 'warn', t: `Conciliación (${hm(cn.ts)}): faltan ${pl(cn.faltan.length, 'fila', 'filas')} del servicio por registrar.` }
+      : { e: 'ok', t: `Conciliado con el servicio (${hm(cn.ts)}): ${pl(cn.filas, 'fila recibida', 'filas recibidas')} = ${cn.registradas} anotadas${cn.descartadas ? ' + ' + cn.descartadas + ' descartadas con motivo' : ''}.` });
+  }
+  return out;
+}
+const COLOR_VAL = { ok: 'var(--pres)', warn: 'var(--warn)', bad: 'var(--con)', info: 'var(--muted)' }, ICONO_VAL = { ok: '✔', warn: '⚠', bad: '✖', info: '•' };
+function htmlValidaciones(a, d) { return `<ul style="list-style:none;padding:0;margin:6px 0">${validacionesRegistro(a, d).map((it) => `<li>${ICONO_VAL[it.e]} ${esc(it.t)}</li>`).join('')}</ul>`; }
+function cardValidaciones() {
+  const a = cur(); if (!a) return null; const d = derive(a); const items = validacionesRegistro(a, d); const cn = a.conciliacion;
+  const comprobar = h('button', { class: 'btn small', text: 'Conciliar con el servicio', onclick: async () => { try { const r = await conciliarServicio(a); toast(r.faltan.length ? `Faltan ${r.faltan.length} fila(s) por registrar` : 'Conciliado: todo lo que recibió el servicio está en el registro', r.faltan.length ? 'err' : 'ok'); } catch (e) { toast('No se pudo conciliar: ' + e.message, 'err'); } renderAll(); } });
+  const registrar = h('button', { class: 'btn small primary', text: 'Registrar las faltantes', onclick: async () => {
+    if (!(await ensureOp())) return; try { const r = await conciliarServicio(a); r.faltan.forEach((f) => ingerirFila(a, f)); await conciliarServicio(a); toast('Filas registradas; las que llegaron fuera de la asamblea abierta quedan descartadas con su motivo', 'ok'); } catch (e) { toast('No se pudo: ' + e.message, 'err'); } renderAll(); } });
+  return h('div', { class: 'card' }, h('h2', { text: 'Validaciones del registro' }),
+    h('ul', { style: 'list-style:none;margin:8px 0;padding:0;display:flex;flex-direction:column;gap:6px' }, items.map((it) => h('li', { class: 'val val-' + it.e, style: 'color:' + COLOR_VAL[it.e], text: `${ICONO_VAL[it.e]} ${it.t}` }))),
+    usoEnlaces(a) ? h('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, (R.conectado && getClave()) ? comprobar : h('span', { class: 'muted', text: 'Para conciliar con el servicio, conéctate en Correo.' }), (cn && cn.faltan.length && R.conectado && getClave()) ? registrar : null) : null);
+}
+const quienRegistro = (e) => (['INGRESO_REMOTO', 'VOTO_REMOTO', 'REMOTO_DESCARTADO'].includes(e.type) ? 'Recibido del propietario por su enlace · importado por ' : 'Registrado por ') + (e.op || 'sin operador');
+
+// ---------- votación nominal en el reporte: quién votó qué, por qué medio y con qué respaldo ----------
+function detalleVotos(a, d, p) {
+  const ultimo = (tipo, id) => { for (let i = a.events.length - 1; i >= 0; i--) { const e = a.events[i]; if (e.type === tipo && !d.ann.has(e.seq) && (tipo === 'VOTO_REMOTO' ? e.p.punto === p.id && (e.p.inms || []).includes(id) : e.p.punto === p.id && (e.p.inms || []).includes(id))) return e; } return null; };
+  const filas = d.units.filter((u) => u.est !== 'A' || p.votos[u.id]).map((u) => {
+    const op = p.votos[u.id]; const remoto = !!(p.via && p.via[u.id]); let resp = '';
+    if (op) { const e = ultimo(remoto ? 'VOTO_REMOTO' : 'VOTO_GRUPO', u.id); resp = e ? (remoto ? `Comprobante ${e.p.recibo}` : `Registrado por ${e.op || 'sin operador'} (#${e.seq})`) : ''; }
+    return `<tr><td>${esc(u.inm)}</td><td>${esc(u.prop || 'sin nombre')}${u.rep ? ' (representado por ' + esc(u.rep.nombre) + ')' : ''}</td><td class="r">${fmtA(u.ali)}</td><td>${op ? OPC[op] : 'Sin votar'}</td><td>${op ? (remoto ? 'Enlace' : 'Mesa') : ''}</td><td>${esc(resp)}</td></tr>`;
+  });
+  return filas.length ? `<h4>Votación nominal</h4><table><thead><tr><th>Inmueble</th><th>Propietario</th><th class="r">Alícuota %</th><th>Voto</th><th>Medio</th><th>Respaldo</th></tr></thead><tbody>${filas.join('')}</tbody></table>` : '';
+}
 
 $('#asmPantalla').addEventListener('click', abrirPantalla); $('#asmCerrar').addEventListener('click', cerrarAsamblea);
 iniciarBloqueo(arrancar);
