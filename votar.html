@@ -7,13 +7,15 @@
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
 <title>Asamblea · Votación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef2f8;--card:#fff;--ink:#14213a;--mut:#5b6678;--line:#dde3ee;--pri:#1b5fd1;--pri2:#0f3f95;--ok:#0f8a4f;--okbg:#e2f6ea;--no:#c22727;--nobg:#fdeaea;--ab:#a45f00;--abbg:#fff3dc;--warn:#fff3dc;--warnink:#7a4a00;--shadow:0 10px 30px rgba(20,33,58,.10);--vf:#2152e0;--vfbg:#e8eeff;--vc:#b4400d;--vcbg:#fdebdd;--vx:#475569;--vxbg:#e8ecf2}
-@media (prefers-color-scheme:dark){:root{--bg:#0d131f;--card:#171f2e;--ink:#e8edf7;--mut:#9aa6bb;--line:#2a3549;--pri:#6c9bff;--pri2:#9db8ee;--ok:#4ade80;--okbg:#12351f;--no:#ff8a8a;--nobg:#3d1717;--ab:#fbbf24;--abbg:#3a2d0c;--warn:#3a2d0c;--warnink:#fcd34d;--shadow:0 10px 30px rgba(0,0,0,.4);--vf:#7fa2ff;--vfbg:#16234a;--vc:#ffa877;--vcbg:#3d2312;--vx:#c3cee0;--vxbg:#242e42}}
+:root{--bg:#f4f6fa;--card:#fff;--ink:#0e1a33;--mut:#55627a;--line:#dde3ee;--pri:#2152e0;--pri2:#16389b;--ok:#0f8a4f;--okbg:#e2f6ea;--no:#c22727;--nobg:#fdeaea;--ab:#a45f00;--abbg:#fff3dc;--warn:#fff3dc;--warnink:#7a4a00;--shadow:0 10px 30px rgba(20,33,58,.10);--vf:#2152e0;--vfbg:#e8eeff;--vc:#b4400d;--vcbg:#fdebdd;--vx:#475569;--vxbg:#e8ecf2}
+@media (prefers-color-scheme:dark){:root{--bg:#0a1328;--card:#111c38;--ink:#eef2fa;--mut:#a9b6ce;--line:#22305c;--pri:#7fa2ff;--pri2:#b3c7ff;--ok:#4ade80;--okbg:#12351f;--no:#ff8a8a;--nobg:#3d1717;--ab:#fbbf24;--abbg:#3a2d0c;--warn:#3a2d0c;--warnink:#fcd34d;--shadow:0 10px 30px rgba(0,0,0,.4);--vf:#7fa2ff;--vfbg:#16234a;--vc:#ffa877;--vcbg:#3d2312;--vx:#c3cee0;--vxbg:#242e42}}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 .wrap{max-width:520px;margin:0 auto;padding:14px 14px 28px}
 .top{position:relative;background:#0e1a33;color:#fff;border-radius:20px;padding:20px 20px 18px;box-shadow:var(--shadow)}
+.card{border-radius:22px}body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}h1,h2,.hola{font-family:"Space Grotesk",Inter,system-ui,sans-serif}
 .aplus{position:absolute;top:12px;right:12px;min-width:46px;min-height:42px;border:1px solid #3b4f80;border-radius:10px;background:transparent;color:#fff;font:700 15px system-ui,sans-serif;cursor:pointer}.top small,.top h1{padding-right:54px}
 .top small{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#b9ccf3}
 .top h1{margin:6px 0 2px;font-size:22px;line-height:1.25}
@@ -112,7 +114,7 @@ async function refrescar(forzar) {
   try {
     const { d } = await llamar('estado', forzar ? {} : { rev: S.rev || '' });
     fallos = 0; if (S.sinRed) { S.sinRed = false; render(); }
-    if (!d || d.ok === false) { S.invalido = true; render(); return; }
+    if (!d || d.ok === false) { S.invalido = true; S.motivo = (d && d.motivo) || ''; render(); return; }
     S.ultimo = Date.now();
     if (!d.igual) aplicar(d);
   } catch (e) { fallos++; if (!S.sinRed) { S.sinRed = true; render(); } }
@@ -159,8 +161,11 @@ function pantallaRepresentado() {
   const d = S.d; return [cabecera(), h('div', { class: 'card' }, h('p', { class: 'hola' }, d.nombre ? `Hola, ${d.nombre}` : 'Hola'), h('h2', {}, 'Su voto está a cargo de su representante'), h('p', {}, 'En esta asamblea ' + (d.representados.length === 1 ? 'su inmueble está representado:' : 'sus inmuebles están representados:')), h('ul', { class: 'lista' }, d.representados.map((x) => h('li', {}, h('span', {}, 'Inmueble ' + x.m), h('b', {}, x.p || 'con representante')))), h('p', { class: 'mut' }, 'No necesita hacer nada. Si esto no es correcto, comuníquese con la administración.'))];
 }
 function pantallaInvalida() {
-  return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Enlace no válido')),
-    h('div', { class: 'card' }, h('h2', {}, 'No pudimos reconocer este enlace'), h('p', {}, 'Es posible que esté incompleto, que haya sido reemplazado o que la asamblea ya no esté disponible.'), h('p', { class: 'mut' }, 'Abra de nuevo el botón desde el correo de convocatoria. Si el problema continúa, pida a la administración que le envíe un enlace nuevo.'))];
+  if (S.motivo === 'sin_publicar') return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Todavía no disponible')),
+    h('div', { class: 'card' }, h('h2', {}, 'La asamblea aún no está abierta'), h('p', {}, 'Su enlace es correcto, pero la administración todavía no ha abierto la asamblea.'), h('p', { class: 'mut' }, 'Vuelva a abrir este enlace cuando empiece la asamblea.'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { S.invalido = false; S.motivo = ''; render(); refrescar(true); } }, 'Volver a intentar'))];
+  return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Enlace no disponible')),
+    h('div', { class: 'card' }, h('h2', {}, 'Este enlace ya no está activo'), h('p', {}, 'Puede ser que la asamblea ya haya terminado, o que la administración haya generado un enlace nuevo para usted.'), h('p', { class: 'mut' }, 'Si necesita participar, pida a la administración que le envíe un enlace nuevo. Los enlaces son personales: no los comparta.'))];
 }
 function pantallaCargando() { return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Cargando…')), h('div', { class: 'card' }, h('p', { class: 'mut' }, 'Un momento, estamos abriendo su asamblea.'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')))]; }
 
@@ -193,7 +198,7 @@ function historialCard() {
 function pantallaCerrada() {
   const d = S.d; const hs = (d.historial || []).filter((x) => d.unidades.some((u) => x.v && x.v[u.i]));
   return [cabecera(), h('div', { class: 'card' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h2', { style: 'text-align:center' }, 'La asamblea ha finalizado'), h('p', { style: 'text-align:center' }, 'Gracias por participar.')),
-    h('div', { class: 'card' }, h('h2', {}, 'Sus votos registrados'), hs.length ? hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v))) : h('p', { class: 'mut' }, 'No registró votos en esta asamblea.'),
+    d.archivada ? h('div', { class: 'card' }, h('p', { class: 'mut' }, 'Si necesita el detalle de sus votos, pídalo a la administración indicando el código de su comprobante.')) : h('div', { class: 'card' }, h('h2', {}, 'Sus votos registrados'), hs.length ? hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v))) : h('p', { class: 'mut' }, 'No registró votos en esta asamblea.'),
       h('p', { class: 'mut' }, 'Guarde sus comprobantes: sirven para pedir que se compruebe cualquier voto.'))];
 }
 
