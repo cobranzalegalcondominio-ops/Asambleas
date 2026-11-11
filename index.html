@@ -970,7 +970,7 @@ function pasoCard(n, titulo, hecho, ...kids) { return h('div', { class: 'card' }
 function viewCorreo() {
   const a = cur(); const d = derive(a); const cfg = remotoCfg(a); const box = []; const G = gruposDe(a, d); const conectado = R.conectado && !!getClave();
   const rowsAll = d.frozen ? d.units : d.rows;
-  if (!rowsAll.length) return [h('div', { class: 'card' }, h('h2', { text: 'Primero carga el padrón' }), h('p', { class: 'muted', text: 'La votación por correo usa los inmuebles y propietarios del padrón.' }), h('button', { class: 'btn primary', text: 'Ir al padrón', onclick: () => { tab = 'padron'; renderAll(); } }))];
+  const sinPadron = !rowsAll.length;
 
   // 1. conexión
   const msgC = h('div', { class: 'err', text: R.msgConexion || '' }); const inpClave = h('input', { type: 'password', id: 'cClave', autocomplete: 'off', placeholder: 'Tu clave de la abogada', value: getClave() });
@@ -986,6 +986,7 @@ function viewCorreo() {
     h('details', {}, h('summary', { text: 'Primera vez: crear la clave del servicio' }), h('p', { class: 'muted', text: 'Escribe una clave larga que solo tú conozcas. Copia la huella que aparece y pégala en el nodo “Entrada” del workflow de n8n, en CLAVE_HASH. Luego usa esa misma clave arriba.' }), inpNueva, h('div', { style: 'margin-top:6px' }, hu)),
     h('details', {}, h('summary', { text: 'Ajustes avanzados' }), h('div', { class: 'field' }, h('label', { text: 'Dirección del servicio (webhook de n8n)' }), avApi), h('div', { class: 'field', style: 'margin-top:8px' }, h('label', { text: 'Dirección de la página de votación (votar.html)' }), avVotar), h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Guardar ajustes', onclick: () => { cfgSet('api', avApi.value.trim() === API_DEF ? '' : avApi.value.trim()); cfgSet('votar', avVotar.value.trim() === VOTAR_DEF ? '' : avVotar.value.trim()); toast('Ajustes guardados'); renderAll(); } })))));
 
+  if (sinPadron) { box.push(h('div', { class: 'card' }, h('h2', { text: 'Para enviar la convocatoria, primero carga el padrón' }), h('p', { class: 'muted', text: 'Puedes crear la clave y conectarte ahora. Los pasos de correos, convocatoria y apertura usan los inmuebles y propietarios del padrón.' }), h('button', { class: 'btn primary', text: 'Ir al padrón', onclick: () => { tab = 'padron'; renderAll(); } }))); return box; }
   // 2. propietarios y correos
   const kpi = h('div', { class: 'kpis' });
   const pintaKpi = () => { const g = gruposDe(a, derive(a)); kpi.replaceChildren(h('div', { class: 'kpi' }, h('b', { text: String(g.grupos.length) }), h('span', { text: 'propietarios con enlace' })), h('div', { class: 'kpi' }, h('b', { text: fmt(g.cobertura) + ' %' }), h('span', { text: 'de la alícuota alcanzada' })), h('div', { class: 'kpi' + (g.sin.length ? ' warn' : '') }, h('b', { text: String(g.sin.length) }), h('span', { text: 'inmuebles sin correo' }))); };
