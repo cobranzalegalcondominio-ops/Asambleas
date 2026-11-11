@@ -86,7 +86,7 @@ const hora = (ts) => new Date(ts).toLocaleTimeString('es-VE', { hour: '2-digit',
 const kid = () => (self.crypto && crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 24) : Math.random().toString(36).slice(2) + Date.now().toString(36));
 
 // ---------- estado ----------
-const S = { mis: {}, d: null, rev: 0, invalido: false, sinRed: false, ingresoLocal: false, sel: {}, selPunto: '', detalle: false, enviando: false, error: '', ok: null, kVoto: '', kIngreso: '', cambiando: false, ultimo: 0 };
+const S = { ubic: '', mis: {}, d: null, rev: 0, invalido: false, sinRed: false, ingresoLocal: false, sel: {}, selPunto: '', detalle: false, enviando: false, error: '', ok: null, kVoto: '', kIngreso: '', cambiando: false, ultimo: 0 };
 let timer = null, fallos = 0, hoja = null;
 
 async function llamar(accion, extra) {
@@ -161,16 +161,17 @@ function pantallaEspera() {
     h('button', { class: 'btn ghost sm', type: 'button', onclick: () => refrescar(true) }, 'Actualizar ahora'))];
 }
 function pantallaIngreso() {
-  const b = h('button', { class: 'btn ok', type: 'button', id: 'ingresar' }, 'Ingresar a la asamblea');
-  b.onclick = ingresar;
+  const bS = h('button', { class: 'btn ok', type: 'button', id: 'ingresarSala' }, 'Ingresar: estoy en la sala');
+  const bD = h('button', { class: 'btn', type: 'button', id: 'ingresarDist', style: 'margin-top:10px' }, 'Ingresar: estoy a distancia');
+  bS.onclick = () => ingresar('S'); bD.onclick = () => ingresar('D');
   return [cabecera(), h('div', { class: 'card' }, saludo(), h('h2', { style: 'margin-top:14px' }, 'La asamblea está abierta'),
-    h('p', {}, 'Toque el botón para ingresar. Así queda registrada su asistencia y podrá votar cuando se abra cada punto.'), b,
+    h('p', {}, 'Para registrar su asistencia, indique dónde está. Elija “en la sala” solo si está en el lugar donde se realiza la asamblea; podrá votar desde su celular en ambos casos.'), bS, bD,
     S.error ? h('div', { class: 'err', role: 'alert' }, S.error) : null)];
 }
 function pantallaDentro() {
   const d = S.d;
   return [cabecera(), h('div', { class: 'card' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h2', { style: 'text-align:center' }, 'Está dentro de la asamblea'),
-    h('p', { class: 'mut', style: 'text-align:center' }, 'Su asistencia quedó registrada.'),
+    h('p', { class: 'mut', style: 'text-align:center' }, S.ubic ? 'Su asistencia quedó registrada (' + (S.ubic === 'S' ? 'en la sala' : 'a distancia') + ').' : 'Su asistencia quedó registrada.'),
     h('p', { style: 'text-align:center' }, 'Esperando que se abra la próxima votación…'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')), saludo()),
     historialCard()].filter(Boolean);
 }
@@ -242,11 +243,11 @@ async function pedir(accion, extra, intentos) {
   }
   return ultimo || { status: 0, d: null };
 }
-async function ingresar() {
-  const b = $('#ingresar'); if (b) { b.disabled = true; b.textContent = 'Ingresando…'; }
+async function ingresar(ub) {
+  ['#ingresarSala', '#ingresarDist'].forEach((id) => { const b = $(id); if (b) { b.disabled = true; if ((id === '#ingresarSala') === (ub === 'S')) b.textContent = 'Ingresando…'; } });
   S.error = ''; if (!S.kIngreso) S.kIngreso = kid();
-  const r = await pedir('ingresar', { k: S.kIngreso }, 3);
-  if (r.d && r.d.ok) { S.ingresoLocal = true; S.kIngreso = ''; await refrescar(true); return; }
+  const r = await pedir('ingresar', { k: S.kIngreso, ub: ub || '' }, 3);
+  if (r.d && r.d.ok) { S.ingresoLocal = true; S.ubic = ub || ''; S.kIngreso = ''; await refrescar(true); return; }
   const m = r.d && r.d.motivo;
   S.error = m === 'cerrada' ? 'La asamblea ya terminó.' : m === 'no_abierta' ? 'La asamblea todavía no está abierta.' : 'No pudimos registrar su ingreso. Revise su conexión e inténtelo de nuevo.';
   render(); if (m) refrescar(true);
