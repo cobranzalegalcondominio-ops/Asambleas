@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Consola de la asamblea · Quórum, votos y votación por correo</title>
-<!-- interfaz v11 -->
+<!-- interfaz v12 -->
 <style>
 :root{
   --bg:#f2f4f8;--panel:#ffffff;--ink:#14213a;--muted:#5b6678;--line:#dde2ea;--accent:#1b5fd1;--accent-ink:#ffffff;
@@ -234,6 +234,19 @@ nav button b{display:grid;place-items:center;height:22px}nav button b .ico{width
   .dos>aside{position:sticky;top:calc(var(--hcur,150px) + 12px + env(safe-area-inset-top,0px));max-height:calc(100vh - var(--hcur,150px) - 100px);overflow:auto}
   .dos>aside .card:last-child{margin-bottom:0}
 }
+
+/* ===== v12: opción múltiple, orden del día, escáner ===== */
+:root{--o1:#2152e0;--o2:#b4400d;--o3:#0f766e;--o4:#7c3aed;--o5:#a16207;--o6:#be185d;--o1b:#e8eeff;--o2b:#fdebdd;--o3b:#dff5f1;--o4b:#efe7fe;--o5b:#fbf1d6;--o6b:#fce7f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--o1:#7fa2ff;--o2:#ffa877;--o3:#5eead4;--o4:#c4a8ff;--o5:#fbbf24;--o6:#f9a8d4;--o1b:#16234a;--o2b:#3d2312;--o3b:#0f3a36;--o4b:#2a2147;--o5b:#3a2d0c;--o6b:#3d1630}}
+:root[data-theme="dark"]{--o1:#7fa2ff;--o2:#ffa877;--o3:#5eead4;--o4:#c4a8ff;--o5:#fbbf24;--o6:#f9a8d4;--o1b:#16234a;--o2b:#3d2312;--o3b:#0f3a36;--o4b:#2a2147;--o5b:#3a2d0c;--o6b:#3d1630}
+.seg button.on.O1{background:var(--o1b);border-color:var(--o1);color:var(--o1);font-weight:650}.seg button.on.O2{background:var(--o2b);border-color:var(--o2);color:var(--o2);font-weight:650}.seg button.on.O3{background:var(--o3b);border-color:var(--o3);color:var(--o3);font-weight:650}.seg button.on.O4{background:var(--o4b);border-color:var(--o4);color:var(--o4);font-weight:650}.seg button.on.O5{background:var(--o5b);border-color:var(--o5);color:var(--o5);font-weight:650}.seg button.on.O6{background:var(--o6b);border-color:var(--o6);color:var(--o6);font-weight:650}
+.seg.m{grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}
+.seg button{overflow:hidden;text-overflow:ellipsis;padding:0 8px}.seg.m button{white-space:normal;line-height:1.2;padding:4px 8px}
+@media (min-width:700px){.unit.vfila.m{grid-template-columns:minmax(0,1fr) minmax(300px,50%)}}
+.plan-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.plan-row .pi{font-weight:700;color:var(--muted)}.plan-row .ac{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+@media (max-width:560px){.plan-row{grid-template-columns:26px minmax(0,1fr)}.plan-row .ac{grid-column:1/-1;justify-content:flex-start}}
+.qrlog{max-height:150px;overflow:auto;margin-top:8px;font-size:13px}.qrlog div{padding:4px 0;border-top:1px solid var(--line)}.qrlog .bad{color:var(--con)}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 </head>
@@ -321,11 +334,38 @@ function append(type, p) {
   const ok = saveLocal(); if (!ok) toast('No se pudo guardar en este dispositivo; no cierres la página.'); cloudDirty(); if (cur() && cur().remoto && cur().remoto.activo) programarPublicacion(1200); return e;
 }
 
+// ---------- tipos de punto: sí/no o varias opciones ----------
+const clavesDe = (p) => (p && p.tipo === 'multiple') ? p.opciones.map((o) => o.k).concat('X') : ['F', 'C', 'X'];
+const etq = (p, k) => (p && p.optMap && p.optMap[k]) || ({ F: 'A favor', C: 'En contra', X: 'Abstención' })[k] || String(k || '');
+const COLOR_OPC = { F: 'var(--vf)', C: 'var(--vc)', X: 'var(--vx)', N: 'var(--aus)', O1: 'var(--o1)', O2: 'var(--o2)', O3: 'var(--o3)', O4: 'var(--o4)', O5: 'var(--o5)', O6: 'var(--o6)' };
+const resCierre = (t) => ({ r: t.r, T: t.T, aA: t.aA, nA: t.nA, base: t.base, fav: t.fav, pct: t.pct, ok: t.ok, pend: t.pend, pP: t.pP, pR: t.pR, pA: t.pA, canal: t.canal, multi: !!t.multi, ks: t.ks, gan: t.gan || '', emp: t.emp || [] });
+function veredicto(p, t) {
+  const base = (p && p.base === 'total') ? 'del edificio' : 'de los asistentes';
+  if (t.multi) {
+    if (t.gan) return { ok: true, corto: `Más votada: ${etq(p, t.gan)}`, txt: `MÁS VOTADA: ${etq(p, t.gan)} (${fmt(t.pct)} % ${base})` };
+    if (t.emp && t.emp.length) return { ok: false, corto: 'Empate', txt: `EMPATE entre ${t.emp.map((k) => etq(p, k)).join(' y ')}` };
+    return { ok: false, corto: 'Sin votos', txt: 'Ninguna opción recibió votos' };
+  }
+  return { ok: !!t.ok, corto: t.ok ? 'APROBADO' : 'NO APROBADO', txt: `${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)} % a favor${p ? ` (se necesita más de ${fmt(p.umbral)} %)` : ''}` };
+}
+// "Título" (sí/no) o "Título :: Opción A | Opción B | Opción C" (opción múltiple, de 2 a 6 opciones)
+function parsePunto(txt) {
+  const partes = String(txt || '').split('::'); const titulo = (partes[0] || '').replace(/\s+/g, ' ').trim().slice(0, 300);
+  if (!titulo) return { error: 'Escribe el punto a votar.' };
+  if (partes.length === 1) return { titulo, tipo: 'sino', opciones: [] };
+  const lista = partes.slice(1).join('::').split('|').map((x) => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  if (lista.length < 2) return { error: 'La opción múltiple necesita al menos 2 opciones separadas por | (por ejemplo: Título :: Opción A | Opción B).' };
+  if (lista.length > 6) return { error: 'Máximo 6 opciones por punto.' };
+  if (lista.some((x) => x.length > 60)) return { error: 'Cada opción puede tener hasta 60 letras.' };
+  if (new Set(lista.map(norm)).size !== lista.length) return { error: 'Hay opciones repetidas.' };
+  return { titulo, tipo: 'multiple', opciones: lista.map((t, i) => ({ k: 'O' + (i + 1), t })) };
+}
+
 // ---------- estado derivado del registro ----------
 function derive(a) {
   const ev = a.events; const ann = new Map();
   ev.forEach(e => { if (e.type === 'ANULACION') ann.set(e.p.ref, { by: e.seq, motivo: e.p.motivo, ts: e.ts, op: e.op }); });
-  const d = { maxId: 0, sumAli: 0, meta: { nombre: 'Nueva asamblea', fecha: '', quorumReq: 50, maxRep: 0 }, rows: [], frozen: false, abierta: false, closed: false, units: [], byId: {}, puntos: [], pById: {}, timeline: [], ann, T: 0, warns: [], openedAt: 0, closedAt: 0, openHash: '', closeHash: '', closeSeq: 0, quorumHit: 0, maxPct: 0, padronHash: '', cierre: null, remotoAbierto: false, remotoRid: 0, remotoVotos: 0, remotoIngresos: 0, remotoH: new Set(), remotoU: {} };
+  const d = { maxId: 0, sumAli: 0, meta: { nombre: 'Nueva asamblea', fecha: '', quorumReq: 50, maxRep: 0 }, rows: [], frozen: false, abierta: false, closed: false, units: [], byId: {}, puntos: [], pById: {}, timeline: [], ann, T: 0, warns: [], openedAt: 0, closedAt: 0, openHash: '', closeHash: '', closeSeq: 0, quorumHit: 0, maxPct: 0, padronHash: '', cierre: null, remotoAbierto: false, remotoRid: 0, remotoVotos: 0, remotoIngresos: 0, remotoH: new Set(), remotoU: {}, plan: [], planPend: [] };
   const pct = () => { let s = 0; d.units.forEach(u => { if (u.est !== 'A') s += u.ali; }); return d.T ? s / d.T * 100 : 0; };
   const mark = e => { const q = pct(); d.timeline.push({ t: e.ts, pct: q, seq: e.seq }); if (q > d.maxPct) d.maxPct = q; if (!d.quorumHit && q >= d.meta.quorumReq && d.T > 0) d.quorumHit = e.ts; };
   for (const e of ev) {
@@ -344,12 +384,13 @@ function derive(a) {
         const u = d.byId[p.u]; if (!u || !d.abierta || d.closed) { d.warns.push(`#${e.seq}: anotación fuera de lugar`); break; }
         if (e.type === 'SALIDA') { if (u.est === 'A') { d.warns.push(`#${e.seq}: salida de un inmueble ausente`); break; } u.hist.push({ est: u.est, ingreso: u.ingreso, salida: e.ts, rep: u.rep, via: u.via, ubic: u.ubic }); u.est = 'A'; u.salida = e.ts; u.rep = null; u.via = ''; u.ubic = ''; u.evs.push(e.seq); mark(e); break; }
         if (u.est !== 'A') { d.warns.push(`#${e.seq}: ${u.inm} ya estaba registrado`); break; }
-        u.est = e.type === 'INGRESO' ? 'P' : 'R'; u.ingreso = e.ts; u.salida = 0; u.rep = e.type === 'REPRESENTACION' ? p.rep : null; u.via = 'sala'; u.evs.push(e.seq); mark(e); break;
+        u.est = e.type === 'INGRESO' ? 'P' : 'R'; u.ingreso = e.ts; u.salida = 0; u.rep = e.type === 'REPRESENTACION' ? p.rep : null; u.via = 'sala'; u.qr = e.type === 'INGRESO' && !!p.qr; u.evs.push(e.seq); mark(e); break;
       }
-      case 'PUNTO_ABIERTO': { const pt = { id: p.id, titulo: p.titulo, umbral: Number(p.umbral) || 0, base: p.base || 'asistentes', permiteCambio: p.cambio !== false, via: {}, votos: {}, cerrado: false, ts: e.ts, seq: e.seq, cierre: null, log: [] }; d.puntos.push(pt); d.pById[pt.id] = pt; break; }
+      case 'PUNTO_ABIERTO': { const multi = p.tipo === 'multiple' && Array.isArray(p.opciones) && p.opciones.length >= 2; const opciones = multi ? p.opciones.map((o) => ({ k: o.k, t: o.t })) : []; const pt = { id: p.id, titulo: p.titulo, umbral: Number(p.umbral) || 0, base: p.base || 'asistentes', permiteCambio: p.cambio !== false, via: {}, votos: {}, cerrado: false, ts: e.ts, seq: e.seq, cierre: null, log: [], tipo: multi ? 'multiple' : 'sino', opciones, optMap: Object.fromEntries(opciones.map((o) => [o.k, o.t])), plan: p.plan || '' }; d.puntos.push(pt); d.pById[pt.id] = pt; break; }
       case 'PUNTO_REGLA': { const pt = d.pById[p.id]; if (pt && !pt.cerrado) { pt.umbral = Number(p.umbral) || 0; pt.base = p.base || pt.base; } break; }
-      case 'VOTO_GRUPO': { const pt = d.pById[p.punto]; if (!pt || pt.cerrado) { d.warns.push(`#${e.seq}: voto sobre un punto no abierto`); break; } p.inms.forEach(id => { pt.votos[id] = p.opcion; if (pt.via) delete pt.via[id]; }); pt.log.push(e.seq); break; }
+      case 'VOTO_GRUPO': { const pt = d.pById[p.punto]; if (!pt || pt.cerrado) { d.warns.push(`#${e.seq}: voto sobre un punto no abierto`); break; } if (!clavesDe(pt).includes(p.opcion)) { d.warns.push(`#${e.seq}: opción de voto desconocida`); break; } p.inms.forEach(id => { pt.votos[id] = p.opcion; if (pt.via) delete pt.via[id]; }); pt.log.push(e.seq); break; }
       case 'PUNTO_CERRADO': { const pt = d.pById[p.id]; if (pt && !pt.cerrado) { pt.cerrado = true; pt.cierre = { ts: e.ts, res: p.res, hash: e.h, seq: e.seq }; } break; }
+      case 'ORDEN_PLAN': if (!d.closed) d.plan = (p.items || []).map((it) => ({ id: it.id, titulo: it.titulo, tipo: it.tipo === 'multiple' ? 'multiple' : 'sino', opciones: it.tipo === 'multiple' ? (it.opciones || []) : [] })); break;
       case 'REMOTO_ABIERTO': d.remotoAbierto = true; break;
       case 'REMOTO_CERRADO': d.remotoAbierto = false; break;
       case 'INGRESO_REMOTO': {
@@ -361,7 +402,7 @@ function derive(a) {
       case 'VOTO_REMOTO': {
         d.remotoRid = Math.max(d.remotoRid, p.rid || 0); if (p.h) d.remotoH.add(p.h); const pt = d.pById[p.punto];
         if (!pt || pt.cerrado || !d.abierta || d.closed) { d.warns.push(`#${e.seq}: voto por correo sobre un punto no abierto`); break; }
-        (p.inms || []).forEach(id => { const u = d.byId[id]; if (!u) return; const o = p.detalle && p.detalle[id]; if (!o) return;
+        (p.inms || []).forEach(id => { const u = d.byId[id]; if (!u) return; const o = p.detalle && p.detalle[id]; if (!o || !clavesDe(pt).includes(o)) return;
           if (u.est === 'A') { u.est = 'P'; u.ingreso = e.ts; u.salida = 0; u.rep = null; u.via = 'correo'; u.evs.push(e.seq); d.remotoIngresos++; mark(e); }
           if (!pt.permiteCambio && pt.votos[id]) return; pt.votos[id] = o; pt.via[id] = 'correo'; });
         pt.log.push(e.seq); d.remotoVotos++; break;
@@ -371,16 +412,22 @@ function derive(a) {
       default: break;
     }
   }
+  d.planPend = d.plan.filter((it) => !d.puntos.some((pt) => pt.plan === it.id));
   return d;
 }
 function trk(d, rows) { rows.forEach(r => { const m = /^u(\d+)$/.exec(r.id || ''); if (m && Number(m[1]) > d.maxId) d.maxId = Number(m[1]); }); }
 function calcQ(d) { let aP = 0, aR = 0, nP = 0, nR = 0, aC = 0, nC = 0, aCS = 0, nCS = 0, aCD = 0, nCD = 0; d.units.forEach(u => { if (u.est === 'P') { aP += u.ali; nP++; } else if (u.est === 'R') { aR += u.ali; nR++; } if (u.est !== 'A' && u.via === 'correo') { aC += u.ali; nC++; if (u.ubic === 'S') { aCS += u.ali; nCS++; } else if (u.ubic === 'D') { aCD += u.ali; nCD++; } } }); const T = d.T; return { T, aP, aR, nP, nR, aC, nC, nCS, nCD, pCS: T ? aCS / T * 100 : 0, pCD: T ? aCD / T * 100 : 0, pC: T ? aC / T * 100 : 0, pS: T ? (aP + aR - aC) / T * 100 : 0, nS: nP + nR - nC, aA: aP + aR, pP: T ? aP / T * 100 : 0, pR: T ? aR / T * 100 : 0, pA: T ? (aP + aR) / T * 100 : 0, nA: d.units.length - nP - nR }; }
 function tallyLive(d, p) {
-  const r = { F: { P: 0, R: 0, n: 0 }, C: { P: 0, R: 0, n: 0 }, X: { P: 0, R: 0, n: 0 }, N: { P: 0, R: 0, n: 0 } }; const q = calcQ(d);
+  const ks = clavesDe(p); const r = { N: { P: 0, R: 0, n: 0 } }; ks.forEach((k) => { r[k] = { P: 0, R: 0, n: 0 }; }); const q = calcQ(d);
   const canal = { sala: { a: 0, n: 0 }, correo: { a: 0, n: 0 } };
-  d.units.forEach(u => { if (u.est === 'A') return; const v = p.votos[u.id] || 'N'; r[v][u.est] += u.ali; r[v].n++; if (v !== 'N') { const c = (p.via && p.via[u.id] === 'correo') ? canal.correo : canal.sala; c.a += u.ali; c.n++; } });
-  const base = p.base === 'total' ? q.T : q.aA; const fav = r.F.P + r.F.R; const pct = base ? fav / base * 100 : 0;
-  return { r, T: q.T, aA: q.aA, nA: q.nP + q.nR, base, fav, pct, ok: pct > p.umbral, pend: r.N.n, pP: q.pP, pR: q.pR, pA: q.pA, canal };
+  d.units.forEach(u => { if (u.est === 'A') return; let v = p.votos[u.id] || 'N'; if (!r[v]) v = 'N'; r[v][u.est] += u.ali; r[v].n++; if (v !== 'N') { const c = (p.via && p.via[u.id] === 'correo') ? canal.correo : canal.sala; c.a += u.ali; c.n++; } });
+  const base = p.base === 'total' ? q.T : q.aA;
+  if (p.tipo === 'multiple') {
+    const ops = p.opciones.map((o) => o.k); const tot = (k) => r[k].P + r[k].R; const max = Math.max(...ops.map(tot)); const lideres = max > 0 ? ops.filter((k) => tot(k) === max) : [];
+    return { r, ks, multi: true, gan: lideres.length === 1 ? lideres[0] : '', emp: lideres.length > 1 ? lideres : [], T: q.T, aA: q.aA, nA: q.nP + q.nR, base, fav: max, pct: base ? max / base * 100 : 0, ok: lideres.length === 1, pend: r.N.n, pP: q.pP, pR: q.pR, pA: q.pA, canal };
+  }
+  const fav = r.F.P + r.F.R; const pct = base ? fav / base * 100 : 0;
+  return { r, ks, multi: false, T: q.T, aA: q.aA, nA: q.nP + q.nR, base, fav, pct, ok: pct > p.umbral, pend: r.N.n, pP: q.pP, pR: q.pR, pA: q.pA, canal };
 }
 const tallyOf = (d, p) => p.cerrado && p.cierre ? p.cierre.res : tallyLive(d, p);
 function votantes(d) {
@@ -402,20 +449,21 @@ function desc(e, d) {
     case 'PADRON_EDITADO': return `Inmueble editado: ${p.inm} · ${p.prop || 'sin nombre'} (${fmtA(p.ali)} %)`;
     case 'PADRON_QUITADO': return `Inmueble quitado del padrón: ${p.inm || p.id}`;
     case 'PADRON_CONGELADO': return `Padrón congelado y asamblea abierta · ${p.n} inmuebles · alícuota cargada ${fmt(p.total)} % de ${fmt(p.base != null ? p.base : p.total)} % · huella del padrón ${huella(p.hash)}`;
-    case 'INGRESO': return `Ingreso presente: ${U(p.u)}`;
+    case 'INGRESO': return `Ingreso presente${p.qr ? ' (por código QR en la mesa)' : ''}: ${U(p.u)}`;
+    case 'ORDEN_PLAN': return `Orden del día cargado: ${pl((p.items || []).length, 'punto', 'puntos')}`;
     case 'REPRESENTACION': return `Representado: ${U(p.u)} por ${p.rep.nombre} (C.I. ${p.rep.cedula}) · poder ${p.rep.ref}${p.rep.verificado ? ' · verificado' : ''}${p.rep.enlaceNombre ? ' · votará por correo con el enlace de ' + p.rep.enlaceNombre : ''}${p.rep.fotoSha ? ' · con foto' : ''}${p.rep.excepcion ? ' · EXCEDE el máximo de poderes' : ''}`;
     case 'SALIDA': return `Salida: ${U(p.u)}`;
-    case 'PUNTO_ABIERTO': return `Punto abierto: “${p.titulo}” · se aprueba con más de ${fmt(p.umbral)} % sobre ${p.base === 'total' ? 'el total del edificio' : 'la alícuota asistente'}`;
+    case 'PUNTO_ABIERTO': if (p.tipo === 'multiple') return `Punto abierto (opción múltiple${p.plan ? ', del orden del día' : ''}): “${p.titulo}” · opciones: ${(p.opciones || []).map((o) => o.t).join(' | ')} · gana la opción con más alícuota`; return `Punto abierto${p.plan ? ' (del orden del día)' : ''}: “${p.titulo}” · se aprueba con más de ${fmt(p.umbral)} % sobre ${p.base === 'total' ? 'el total del edificio' : 'la alícuota asistente'}`;
     case 'PUNTO_REGLA': return `Regla del punto cambiada: más de ${fmt(p.umbral)} % sobre ${p.base === 'total' ? 'el total' : 'los asistentes'}`;
-    case 'VOTO_GRUPO': { const pt = d.pById[p.punto]; const ins = p.inms.map(id => (d.byId[id] || {}).inm || id); const insT = ins.slice(0, 12).join(', ') + (ins.length > 12 ? ` y ${ins.length - 12} más` : ''); if (p.personas && p.personas.length > 1) return `Voto ${OPC[p.opcion]}${pt ? ' en “' + pt.titulo + '”' : ''} por selección múltiple: ${p.personas.slice(0, 6).join(', ')}${p.personas.length > 6 ? ` y ${p.personas.length - 6} más` : ''} (${p.personas.length} personas, ${ins.length} inmuebles: ${insT})`; return `Voto ${OPC[p.opcion]}${pt ? ' en “' + pt.titulo + '”' : ''}: ${p.por || 'en bloque'} · ${insT}${p.nota ? ' · ' + p.nota : ''}`; }
-    case 'PUNTO_CERRADO': { const pt = d.pById[p.id]; return `Punto cerrado${pt ? ': “' + pt.titulo + '”' : ''} → ${p.res.ok ? 'APROBADO' : 'NO APROBADO'} (${fmt(p.res.pct)} % a favor)`; }
+    case 'VOTO_GRUPO': { const pt = d.pById[p.punto]; const ins = p.inms.map(id => (d.byId[id] || {}).inm || id); const insT = ins.slice(0, 12).join(', ') + (ins.length > 12 ? ` y ${ins.length - 12} más` : ''); if (p.personas && p.personas.length > 1) return `Voto ${etq(pt, p.opcion)}${pt ? ' en “' + pt.titulo + '”' : ''} por selección múltiple: ${p.personas.slice(0, 6).join(', ')}${p.personas.length > 6 ? ` y ${p.personas.length - 6} más` : ''} (${p.personas.length} personas, ${ins.length} inmuebles: ${insT})`; return `Voto ${etq(pt, p.opcion)}${pt ? ' en “' + pt.titulo + '”' : ''}: ${p.por || 'en bloque'} · ${insT}${p.nota ? ' · ' + p.nota : ''}`; }
+    case 'PUNTO_CERRADO': { const pt = d.pById[p.id]; const vv = veredicto(pt, p.res); return `Punto cerrado${pt ? ': “' + pt.titulo + '”' : ''} → ${p.res.multi ? vv.txt : `${vv.corto} (${fmt(p.res.pct)} % a favor)`}`; }
     case 'ASAMBLEA_CERRADA': return `Asamblea cerrada y sellada · quórum final ${fmt(p.pA)} % · ${p.eventos} anotaciones previas`;
     case 'REMOTO_ABIERTO': return 'La abogada abrió la asamblea a los propietarios (votación por enlace personal)';
     case 'REMOTO_CERRADO': return 'Se cerró el acceso de los propietarios';
     case 'REMOTO_CONVOCATORIA': return `Convocatoria por correo: ${p.enviados} enviados, ${p.fallidos} fallidos (${pl(p.propietarios, 'propietario', 'propietarios')} con enlace, ${fmt(p.cobertura)} % de la alícuota)`;
     case 'ENLACE_REGENERADO': return `Enlace personal regenerado para ${p.nombre}`;
     case 'INGRESO_REMOTO': return `Ingreso por enlace${p.ubic ? ' (declaró: ' + (p.ubic === 'S' ? 'en la sala' : 'a distancia') + ')' : ''} · hora del servidor ${hms(Date.parse(p.srv))}: ${(p.units || []).map(U).join('; ')}`;
-    case 'VOTO_REMOTO': { const pt = d.pById[p.punto]; return `Voto por enlace${pt ? ' en “' + pt.titulo + '”' : ''}: ${(p.inms || []).map(id => U(id) + ' → ' + (OPC[(p.detalle || {})[id]] || '?')).join('; ')} · comprobante ${p.recibo} (hora del servidor ${hms(Date.parse(p.srv))})`; }
+    case 'VOTO_REMOTO': { const pt = d.pById[p.punto]; return `Voto por enlace${pt ? ' en “' + pt.titulo + '”' : ''}: ${(p.inms || []).map(id => U(id) + ' → ' + etq(pt, (p.detalle || {})[id])).join('; ')} · comprobante ${p.recibo} (hora del servidor ${hms(Date.parse(p.srv))})`; }
     case 'REMOTO_DESCARTADO': return `Fila ${p.rid} del servicio descartada (${p.tipo === 'VOTO' ? 'voto' : 'ingreso'}): ${p.motivo}`;
     case 'ANULACION': return `ANULA la anotación #${p.ref}. Motivo: ${p.motivo}`;
     default: return e.type;
@@ -593,6 +641,7 @@ function viewPadron() {
     !lock && !d.rows.length ? h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', text: 'Probar con datos de ejemplo', onclick: cargarEjemplo })) : null));
   if (!lock) {
     box.push(tarjetaPegar(d));
+    box.push(cardOrdenDia(a, d, false));
     const items = [[d.rows.length > 0, `${pl(d.rows.length, 'inmueble cargado', 'inmuebles cargados')}`], [completo, completo ? `La alícuota suma ${fmt(base)} %` : falta > 0 ? `Faltan ${fmt(falta)} % por cargar` : `Sobran ${fmt(-falta)} %`], [d.meta.quorumReq > 0, `Quórum mínimo: ${fmt(d.meta.quorumReq)} %`]];
     box.push(h('div', { class: 'card' }, h('h2', { text: '3. Abrir la asamblea' }), h('p', { class: 'muted', text: 'Al congelar el padrón queda fijo con sus alícuotas y se abre el registro de asistencia. Desde ese momento nada se borra: solo se anula con un motivo.' }),
       h('div', { style: 'margin:8px 0' }, items.map(([ok, t]) => h('div', { text: (ok ? '✔ ' : '⚠ ') + t, style: 'color:' + (ok ? 'var(--pres)' : 'var(--warn)') }))),
@@ -609,6 +658,45 @@ function viewPadron() {
 // ---------- asistencia ----------
 function readPhoto(file) {
   return new Promise((res, rej) => { const fr = new FileReader(); fr.onerror = rej; fr.onload = () => { const img = new Image(); img.onerror = rej; img.onload = () => { const m = 900, k = Math.min(1, m / Math.max(img.width, img.height)); const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); let q = 0.6, out = cv.toDataURL('image/jpeg', q); while (out.length > 150000 && q > 0.3) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); } res(out); }; img.src = fr.result; }; fr.readAsDataURL(file); });
+}
+// ---------- código QR en la entrada ----------
+// El QR del propietario dice: WCON1|<id de la asamblea>|<huella de su enlace>. No contiene su enlace secreto: solo permite a la mesa marcarlo presente.
+async function procesarQR(texto) {
+  const m = /^WCON1\|([^|\s]{3,60})\|([0-9a-f]{16})$/.exec(String(texto || '').trim());
+  if (!m) return { ok: false, msg: 'Ese código no es de esta consola.' };
+  const a = cur(); if (!a) return { ok: false, msg: 'No hay una asamblea abierta.' }; const d = derive(a);
+  if (!d.abierta || d.closed) return { ok: false, msg: d.closed ? 'La asamblea ya está cerrada.' : 'Primero congela el padrón y abre la asamblea.' };
+  if (m[1] !== a.id) return { ok: false, msg: 'Ese código es de otra asamblea.' };
+  const g = gruposDe(a, d).grupos.find((x) => sha256(tokenDe(a, x.k)).slice(0, 16) === m[2]);
+  if (!g) return { ok: false, msg: 'No encuentro a ese propietario (¿se generó un enlace nuevo?). Búscalo a mano.' };
+  const us = g.units.map((id) => d.byId[id]).filter(Boolean); const aus = us.filter((u) => u.est === 'A');
+  if (!us.length) return { ok: false, msg: `${g.nombre}: no tiene inmuebles en esta asamblea.` };
+  if (!aus.length) return { ok: true, ya: true, msg: `${g.nombre}: ya estaba registrado.` };
+  if (!(await ensureOp())) return { ok: false, msg: 'Falta el nombre de quien opera la mesa.' };
+  aus.forEach((u) => append('INGRESO', { u: u.id, qr: 1 })); enfocarBuscar = true; renderAll();
+  return { ok: true, msg: `Presente: ${g.nombre} · ${pl(aus.length, 'inmueble', 'inmuebles')} (${fmt(aus.reduce((z, u) => z + u.ali, 0))} %)` };
+}
+let jsQRp = null;
+function cargarJsQR() { if (window.jsQR) return Promise.resolve(window.jsQR); if (jsQRp) return jsQRp; jsQRp = new Promise((res) => { const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'; sc.onload = () => res(window.jsQR || null); sc.onerror = () => { jsQRp = null; res(null); }; document.head.append(sc); }); return jsQRp; }
+function abrirEscaner() {
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { toast('Este navegador no permite usar la cámara aquí. Usa un lector USB o busca al propietario a mano.', 'err'); return; }
+  modal((b, close) => {
+    const video = h('video', { playsinline: true, muted: true, autoplay: true, style: 'width:100%;border-radius:12px;background:#000;max-height:46vh;object-fit:cover' });
+    const estado = h('div', { class: 'muted', role: 'status', text: 'Iniciando la cámara…' }); const log = h('div', { class: 'qrlog' });
+    let stream = null, timer = null, vivo = true, detector = null, ultimo = '', tUlt = 0, ocupado = false; const canvas = document.createElement('canvas');
+    const parar = () => { vivo = false; clearInterval(timer); if (stream) stream.getTracks().forEach((t) => t.stop()); };
+    const anotar = (r) => { log.prepend(h('div', { class: r.ok ? '' : 'bad', text: `${hm(Date.now())} · ${r.msg}` })); toast(r.msg, r.ok ? 'ok' : 'err'); };
+    const leer = async () => {
+      if (!video.videoWidth) return '';
+      if ('BarcodeDetector' in window && detector !== false) { try { detector = detector || new BarcodeDetector({ formats: ['qr_code'] }); const r = await detector.detect(video); return r.length ? r[0].rawValue : ''; } catch (e) { detector = false; } }
+      const jsq = await cargarJsQR(); if (!jsq) { estado.textContent = 'No se pudo cargar el lector de códigos (¿sin internet?). Usa un lector USB o busca al propietario a mano.'; return ''; }
+      const w = Math.min(640, video.videoWidth), k = w / video.videoWidth; canvas.width = w; canvas.height = Math.round(video.videoHeight * k);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.drawImage(video, 0, 0, canvas.width, canvas.height); const im = ctx.getImageData(0, 0, canvas.width, canvas.height); const r = jsq(im.data, im.width, im.height, { inversionAttempts: 'dontInvert' }); return r ? r.data : '';
+    };
+    const tick = async () => { if (!vivo) return; if (!document.body.contains(video)) { parar(); return; } if (ocupado) return; ocupado = true; try { const txt = await leer(); if (txt && (txt !== ultimo || Date.now() - tUlt > 5000)) { ultimo = txt; tUlt = Date.now(); anotar(await procesarQR(txt)); } } catch (e) { /* sigue intentando */ } ocupado = false; };
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }).then((st) => { if (!vivo) { st.getTracks().forEach((t) => t.stop()); return; } stream = st; video.srcObject = st; video.play().catch(() => {}); estado.textContent = 'Apunta la cámara al código del propietario: se registra solo.'; timer = setInterval(tick, 350); }).catch(() => { estado.textContent = 'No se pudo abrir la cámara. Revisa el permiso del navegador o usa un lector USB.'; });
+    b.append(h('h3', { text: 'Escanear código QR' }), video, estado, log, h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'btn primary', text: 'Terminar', onclick: () => { parar(); close(null); } })));
+  });
 }
 async function registrarIngreso(u) { if (!(await ensureOp())) return; append('INGRESO', { u: u.id }); renderAll(); toast(`Presente: ${u.inm} · ${u.prop || 'sin nombre'}`, 'ok', { t: 'Deshacer', fn: () => { const dd = derive(cur()); const uu = dd.byId[u.id]; if (uu) deshacerUnidad(dd, uu); } }); }
 async function registrarSalida(u) { if (!(await ensureOp())) return; append('SALIDA', { u: u.id }); renderAll(); toast(`Salida registrada: ${u.inm}`, 'ok'); }
@@ -647,7 +735,7 @@ function viewAsistencia() {
     const q = norm(buscar); list.replaceChildren();
     const vis = visibles(); const unica = !!q && vis.length === 1;
     vis.forEach(u => {
-      const chip = u.est === 'A' ? h('span', { class: 'chip', text: 'Ausente' }) : u.est === 'P' ? h('span', { class: 'chip ok', text: 'Presente ' + hm(u.ingreso) + (u.via === 'correo' ? ' · enlace' + (u.ubic === 'S' ? ' · declara: en la sala' : u.ubic === 'D' ? ' · declara: a distancia' : '') : ' · mesa') }) : h('span', { class: 'chip rep', text: 'Representado ' + hm(u.ingreso) + (u.via === 'correo' ? ' · enlace' : ' · mesa') });
+      const chip = u.est === 'A' ? h('span', { class: 'chip', text: 'Ausente' }) : u.est === 'P' ? h('span', { class: 'chip ok', text: 'Presente ' + hm(u.ingreso) + (u.via === 'correo' ? ' · enlace' + (u.ubic === 'S' ? ' · declara: en la sala' : u.ubic === 'D' ? ' · declara: a distancia' : '') : ' · mesa' + (u.qr ? ' · QR' : '')) }) : h('span', { class: 'chip rep', text: 'Representado ' + hm(u.ingreso) + (u.via === 'correo' ? ' · enlace' : ' · mesa') });
       list.append(h('div', { class: 'unit fila' + (unica && u.est === 'A' ? ' unica' : '') }, h('div', { class: 'top' }, h('span', { class: 'id', text: u.inm }), h('span', { class: 'nm', text: u.prop || '(sin nombre)', title: u.prop || '' }), h('span', { class: 'al', text: fmtA(u.ali) + ' %' })),
         h('div', { class: 'st' }, chip, u.rep ? h('span', { class: 'muted', text: `por ${u.rep.nombre} · C.I. ${u.rep.cedula} · poder ${u.rep.ref}` }) : null, u.hist.length ? h('span', { class: 'muted', text: `salió ${hm(u.hist[u.hist.length - 1].salida)}` }) : null),
         h('div', { class: 'acts' }, u.est === 'A' ? [h('button', { class: 'P', text: 'Presente', disabled: lock, onclick: () => registrarIngreso(u) }), h('button', { class: 'R', text: 'Representado', disabled: lock, onclick: () => registrarPoder(d, u) })] : [h('button', { text: 'Salió', disabled: lock, onclick: () => registrarSalida(u) })], u.evs.some(s => !d.ann.has(s)) ? h('button', { text: 'Deshacer', disabled: lock, onclick: () => deshacerUnidad(d, u) }) : null)));
@@ -655,9 +743,10 @@ function viewAsistencia() {
     if (!list.children.length) list.append(h('p', { class: 'muted', text: 'Ningún inmueble coincide con el filtro.' }));
   };
   pinta();
-  const onEnter = (e) => { if (e.key !== 'Enter' || lock) return; const v = visibles(); if (!norm(buscar) || v.length !== 1) return; e.preventDefault(); const u = v[0]; if (u.est !== 'A') { toast(`${u.inm} ya está registrado`); return; } buscar = ''; enfocarBuscar = true; registrarIngreso(u); };
+  const onEnter = (e) => { if (e.key !== 'Enter' || lock) return; if (/^WCON1\|/.test(buscar.trim())) { e.preventDefault(); const txt = buscar.trim(); buscar = ''; e.target.value = ''; pinta(); procesarQR(txt).then((r) => { if (!r.ok) toast(r.msg, 'err'); else toast(r.msg, 'ok'); }); return; } const v = visibles(); if (!norm(buscar) || v.length !== 1) return; e.preventDefault(); const u = v[0]; if (u.est !== 'A') { toast(`${u.inm} ya está registrado`); return; } buscar = ''; enfocarBuscar = true; registrarIngreso(u); };
   const lista = h('div', { class: 'card' }, h('input', { id: 'aBuscar', type: 'search', placeholder: 'Buscar por inmueble, propietario o representante', value: buscar, autocomplete: 'off', oninput: e => { buscar = e.target.value; pinta(); }, onkeydown: onEnter }),
     punteroFino() && !lock ? h('div', { class: 'muted', style: 'margin-top:6px;font-size:12.5px' }, 'Escribe el inmueble o el apellido y pulsa ', h('span', { class: 'kbd', text: 'Enter' }), ': si queda un solo inmueble, se marca presente y el cursor vuelve aquí.') : null,
+    (!lock && navigator.mediaDevices) ? h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn small', text: 'Escanear código QR', onclick: abrirEscaner }), h('span', { class: 'muted', style: 'font-size:12.5px', text: 'Cada propietario ve su código en la página de su enlace. También sirve un lector USB con el cursor en el buscador.' })) : null,
     h('div', { class: 'chips' }, [['T', `Todos (${d.units.length})`], ['A', `Ausentes (${c.nA})`], ['P', `Presentes (${c.nP})`], ['R', `Representados (${c.nR})`]].map(([k, l]) => h('button', { class: filtro === k ? 'on' : '', text: l, onclick: () => { filtro = k; renderAll(); } }))), list);
   const avisos = d.warns.length ? h('div', { class: 'note', text: 'Avisos del registro: ' + d.warns.join(' · ') }) : null;
   if (esAncho()) {
@@ -671,28 +760,65 @@ function viewAsistencia() {
 }
 function cierreBanner(a, d) { return h('div', { class: 'card' }, h('h2', { text: '🔒 Asamblea cerrada y sellada' }), h('p', { class: 'muted', text: `Huella de cierre: ${huella(d.closeHash)}. Para corregir algo hay que reabrir con un motivo, y eso también queda registrado.` }), h('button', { class: 'btn small danger', text: 'Reabrir con motivo', onclick: async () => { const m = await askReason('Reabrir la asamblea', 'Se anula el cierre. La huella de cierre anterior dejará de ser la final.', 'Reabrir'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: d.closeSeq, motivo: m }); renderAll(); } })); }
 
+// ---------- orden del día cargado de antemano ----------
+function abrirPunto(pr, planId, cambio) {
+  const d = derive(cur()); const id = 'p' + (d.puntos.length + 1) + gid().slice(0, 3);
+  append('PUNTO_ABIERTO', { id, titulo: pr.titulo, umbral: 50, base: 'asistentes', cambio: cambio !== false, tipo: pr.tipo, opciones: pr.opciones, plan: planId || '' });
+  puntoSel = id; selV.clear(); renderAll(); toast(`Punto abierto: ${pr.titulo}`, 'ok'); if (derive(cur()).remotoAbierto) publicarAhora({ forzar: true });
+}
+async function planGuardar(items) { if (!(await ensureOp())) return false; append('ORDEN_PLAN', { items }); renderAll(); return true; }
+function cardOrdenDia(a, d, enVotacion) {
+  const lock = d.closed; const plan = d.plan || [];
+  const estado = (it) => { const pt = d.puntos.find((x) => x.plan === it.id); return !pt ? 'pend' : pt.cerrado ? 'cerr' : 'abier'; };
+  const ta = h('textarea', { placeholder: 'Un punto por línea.\nOpción múltiple: Título :: Opción A | Opción B | Opción C', style: 'min-height:96px;font-family:inherit;font-size:14px' });
+  const err = h('div', { class: 'err', role: 'alert' });
+  const agregar = h('button', { class: 'btn small primary', text: 'Agregar al orden del día', disabled: lock, onclick: async () => {
+    err.textContent = ''; const lineas = ta.value.split('\n').map((x) => x.trim()).filter(Boolean); if (!lineas.length) { err.textContent = 'Escribe al menos un punto.'; return; }
+    const nuevos = []; for (let i = 0; i < lineas.length; i++) { const pr = parsePunto(lineas[i]); if (pr.error) { err.textContent = `Línea ${i + 1}: ${pr.error}`; return; } nuevos.push({ id: 'q' + gid(), titulo: pr.titulo, tipo: pr.tipo, opciones: pr.opciones }); }
+    if (plan.length + nuevos.length > 40) { err.textContent = 'Máximo 40 puntos en el orden del día.'; return; }
+    if (await planGuardar(plan.concat(nuevos))) toast(`${pl(nuevos.length, 'punto agregado', 'puntos agregados')} al orden del día`, 'ok'); } });
+  const mover = (i, dir) => { const j = i + dir; if (j < 0 || j >= plan.length) return; const c = plan.slice(); [c[i], c[j]] = [c[j], c[i]]; planGuardar(c); };
+  const quitar = async (i) => { if (!(await askConfirm('Quitar del orden del día', `“${plan[i].titulo}”. No se borra del registro: queda anotado que se cambió el orden del día.`, 'Quitar', true))) return; planGuardar(plan.filter((_, k) => k !== i)); };
+  const filas = plan.map((it, i) => {
+    const e = estado(it); const abrir = e === 'pend' && enVotacion && d.abierta && !lock;
+    return h('div', { class: 'plan-row' }, h('span', { class: 'pi', text: String(i + 1) }),
+      h('div', {}, h('div', { style: 'font-weight:650', text: it.titulo }), h('div', { class: 'muted', style: 'font-size:12.5px', text: it.tipo === 'multiple' ? 'Opción múltiple: ' + it.opciones.map((o) => o.t).join(' | ') : 'A favor / En contra / Abstención' })),
+      h('div', { class: 'ac' }, e === 'cerr' ? h('span', { class: 'chip ok', text: 'Cerrado ✓' }) : e === 'abier' ? h('span', { class: 'chip warn', text: 'En votación' }) : null,
+        abrir ? h('button', { class: 'btn small primary', text: 'Abrir a votación', onclick: async () => { if (!(await ensureOp())) return; const cb = $('#cbCambio'); abrirPunto(it, it.id, cb ? cb.checked : true); } }) : null,
+        e === 'pend' && !lock ? [h('button', { class: 'btn small', text: '↑', 'aria-label': 'Subir', disabled: i === 0, onclick: () => mover(i, -1) }), h('button', { class: 'btn small', text: '↓', 'aria-label': 'Bajar', disabled: i === plan.length - 1, onclick: () => mover(i, 1) }), h('button', { class: 'btn small danger', text: 'Quitar', onclick: () => quitar(i) })] : null));
+  });
+  const nPend = (d.planPend || []).length;
+  return h('div', { class: 'card' }, h('h2', { text: enVotacion ? 'Orden del día' : 'Orden del día (opcional)' }),
+    h('p', { class: 'muted', text: plan.length ? (enVotacion ? (nPend ? `${pl(nPend, 'punto pendiente', 'puntos pendientes')}: ábrelos con un toque cuando toque votarlos.` : 'Todos los puntos del orden del día ya se abrieron.') : 'Los puntos se abren a votación con un toque durante la asamblea.') : 'Carga de antemano los puntos a votar y, en la asamblea, los abres con un toque en lugar de escribirlos.' }),
+    plan.length ? h('div', {}, filas) : null,
+    lock ? null : h('details', { open: !plan.length }, h('summary', { text: plan.length ? 'Agregar más puntos' : 'Cargar puntos' }),
+      h('p', { class: 'muted', text: 'Escribe un punto por línea. Para una votación de opción múltiple (de 2 a 6 opciones) separa con :: y |, por ejemplo: Elección de la empresa de vigilancia :: Segurimax | Guardia Norte | Vigilancia 24' }), ta, err, h('div', { class: 'row', style: 'margin-top:8px' }, agregar)));
+}
+
 // ---------- votación ----------
-async function votar(d, pt, inms, opcion, por, nota) { if (!(await ensureOp())) return; append('VOTO_GRUPO', { punto: pt.id, opcion, inms: inms.map(u => u.id), por, nota: nota || '' }); renderAll(); toast(`${OPC[opcion]}: ${por || 'registrado'}`, 'ok'); }
+async function votar(d, pt, inms, opcion, por, nota) { if (!(await ensureOp())) return; append('VOTO_GRUPO', { punto: pt.id, opcion, inms: inms.map(u => u.id), por, nota: nota || '' }); renderAll(); toast(`${etq(pt, opcion)}: ${por || 'registrado'}`, 'ok'); }
 // posición del umbral sobre una barra que mide la alícuota presente (null si no cabe en la barra)
-function posUmbral(t, p) { const den = t.aA || 0; if (!den) return null; const x = (Number(p.umbral) || 0) / 100 * (t.base || 0) / den * 100; return x > 100.0001 ? null : Math.max(0, Math.min(100, x)); }
+function posUmbral(t, p) { if (t.multi || (p && p.tipo === 'multiple')) return null; const den = t.aA || 0; if (!den) return null; const x = (Number(p.umbral) || 0) / 100 * (t.base || 0) / den * 100; return x > 100.0001 ? null : Math.max(0, Math.min(100, x)); }
 function cardResultado(d, p, grande) {
-  const t = tallyOf(d, p); const T = t.T; const pc = x => T ? x / T * 100 : 0; const pb = x => t.base ? x / t.base * 100 : 0;
-  const fila = (lab, k, col) => { const r = t.r[k]; const tot = r.P + r.R; return h('tr', {}, h('td', {}, h('span', { class: 'dot', style: 'background:' + col }), lab), h('td', { text: fmt(pc(r.P)) }), h('td', { text: fmt(pc(r.R)) }), h('td', {}, h('b', { text: fmt(pc(tot)) })), h('td', { text: k === 'N' ? '—' : fmt(pb(tot)) }), h('td', { text: String(r.n) })); };
-  const f = t.r.F.P + t.r.F.R, c = t.r.C.P + t.r.C.R, x = t.r.X.P + t.r.X.R; const den = Math.max(t.aA, 1e-9);
-  let cls = 'wait', txt = `Faltan ${t.pend} inmuebles por votar. Lleva ${fmt(t.pct)} % a favor.`;
-  if (!t.pend || p.cerrado) { cls = t.ok ? 'ok' : 'no'; txt = t.ok ? `APROBADO: ${fmt(t.pct)} % a favor (se necesita más de ${fmt(p.umbral)} %)` : `NO APROBADO: ${fmt(t.pct)} % a favor (se necesita más de ${fmt(p.umbral)} %)`; }
+  const t = tallyOf(d, p); const T = t.T; const ks = t.ks || clavesDe(p); const pc = x => T ? x / T * 100 : 0; const pb = x => t.base ? x / t.base * 100 : 0;
+  const nom = (k) => k === 'N' ? 'Sin votar' : etq(p, k);
+  const fila = (k) => { const r = t.r[k]; const tot = r.P + r.R; return h('tr', {}, h('td', {}, h('span', { class: 'dot', style: 'background:' + (COLOR_OPC[k] || 'var(--aus)') }), nom(k)), h('td', { text: fmt(pc(r.P)) }), h('td', { text: fmt(pc(r.R)) }), h('td', {}, h('b', { text: fmt(pc(tot)) })), h('td', { text: k === 'N' ? '—' : fmt(pb(tot)) }), h('td', { text: String(r.n) })); };
+  const den = Math.max(t.aA, 1e-9); const um = posUmbral(t, p);
+  let cls = 'wait', txt = `Faltan ${t.pend} inmuebles por votar. ` + (t.multi ? (t.gan ? `Va adelante: ${etq(p, t.gan)} (${fmt(t.pct)} %).` : 'Todavía no hay una opción adelante.') : `Lleva ${fmt(t.pct)} % a favor.`);
+  if (!t.pend || p.cerrado) { const vv = veredicto(p, t); cls = vv.ok ? 'ok' : 'no'; txt = vv.txt; }
   return h('div', { class: 'card' }, h('h2', { text: p.titulo + (p.cerrado ? ' · cerrado ' + hm(p.cierre.ts) : '') }),
-    h('div', { class: 'rwrap' }, h('div', { class: 'rbar' }, h('i', { class: 'f', style: `width:${f / den * 100}%` }), h('i', { class: 'c', style: `width:${c / den * 100}%` }), h('i', { class: 'a', style: `width:${x / den * 100}%` })), posUmbral(t, p) !== null ? h('span', { class: 'rmark', style: `left:${posUmbral(t, p)}%`, title: 'Umbral de aprobación' }) : null),
-    h('div', { class: 'rleg' }, h('i'), posUmbral(t, p) !== null ? `La línea marca lo que se necesita a favor para aprobar: más de ${fmt(p.umbral)} % ${p.base === 'total' ? 'del edificio' : 'de los asistentes'}.` : `Con la asistencia actual no se alcanza el ${fmt(p.umbral)} % del edificio que exige este punto.`),
-    h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Voto' }), h('th', { text: 'Presentes %' }), h('th', { text: 'En representación %' }), h('th', { text: 'Total %' }), h('th', { text: p.base === 'total' ? '% del edificio' : '% de asistentes' }), h('th', { text: 'Inmuebles' }))), h('tbody', {}, fila('A favor', 'F', 'var(--vf)'), fila('En contra', 'C', 'var(--vc)'), fila('Abstención', 'X', 'var(--vx)'), fila('Sin votar', 'N', 'var(--aus)')))),
+    h('div', { class: 'rwrap' }, h('div', { class: 'rbar' }, ks.map(k => h('i', { style: `width:${(t.r[k].P + t.r[k].R) / den * 100}%;background:${COLOR_OPC[k]}` }))), um !== null ? h('span', { class: 'rmark', style: `left:${um}%`, title: 'Umbral de aprobación' }) : null),
+    t.multi ? h('div', { class: 'rleg' }, 'Opción múltiple: gana la opción con más alícuota; no hay umbral de aprobación.') : h('div', { class: 'rleg' }, h('i'), um !== null ? `La línea marca lo que se necesita a favor para aprobar: más de ${fmt(p.umbral)} % ${p.base === 'total' ? 'del edificio' : 'de los asistentes'}.` : `Con la asistencia actual no se alcanza el ${fmt(p.umbral)} % del edificio que exige este punto.`),
+    h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Voto' }), h('th', { text: 'Present. %', title: 'Presentes, en % de la alícuota total' }), h('th', { text: 'Repres. %', title: 'En representación, en % de la alícuota total' }), h('th', { text: 'Total %' }), h('th', { text: p.base === 'total' ? '% edificio' : '% asist.', title: p.base === 'total' ? 'Porcentaje del total del edificio' : 'Porcentaje de la alícuota de los asistentes' }), h('th', { text: 'Inm.', title: 'Inmuebles' }))), h('tbody', {}, ks.concat('N').map(fila)))),
     h('div', { class: 'verdict ' + cls, text: txt }), grande ? h('p', { class: 'muted', text: 'Las tres primeras columnas son porcentajes de la alícuota total del edificio.' }) : null, p.cerrado ? h('p', { class: 'muted', text: `Resultado sellado en la anotación #${p.cierre.seq} · huella ${huella(p.cierre.hash)}` }) : null);
 }
 function viewVotacion() {
   const a = cur(); const d = derive(a); if (!d.abierta) return viewAsistencia(); const c = calcQ(d); const box = []; const lock = d.closed;
   if (lock) box.push(cierreBanner(a, d));
-  const tit = h('input', { type: 'text', placeholder: 'Punto a votar, por ejemplo: Aprobación del presupuesto 2027', disabled: lock });
+  const planCard = cardOrdenDia(a, d, true); box.push(planCard);
+  const tit = h('input', { type: 'text', placeholder: 'Punto a votar (opción múltiple: Título :: Opción A | Opción B)', disabled: lock });
   const cbCambio = h('input', { type: 'checkbox', checked: true, id: 'cbCambio', class: 'cbx' });
-  const add = async () => { const t = tit.value.trim(); if (!t || lock || !(await ensureOp())) return; const id = 'p' + (d.puntos.length + 1) + gid().slice(0, 3); append('PUNTO_ABIERTO', { id, titulo: t, umbral: 50, base: 'asistentes', cambio: cbCambio.checked }); puntoSel = id; renderAll(); toast(`Punto agregado: ${t}`, 'ok'); if (derive(cur()).remotoAbierto) publicarAhora({ forzar: true }); };
+  const add = async () => { const t = tit.value.trim(); if (!t || lock) return; const pr = parsePunto(t); if (pr.error) { toast(pr.error, 'err'); return; } if (!(await ensureOp())) return; abrirPunto(pr, '', cbCambio.checked); };
   tit.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   box.push(h('div', { class: 'card' }, h('h2', { text: 'Puntos de votación' }), h('div', { class: 'row' }, h('div', { class: 'field' }, tit), h('button', { class: 'btn primary', text: 'Agregar', disabled: lock, onclick: add })), d.remotoAbierto || (cur().remoto && cur().remoto.activo) ? h('label', { class: 'muted', style: 'display:flex;gap:8px;align-items:center;margin:8px 0', for: 'cbCambio' }, cbCambio, 'Permitir que los propietarios cambien su voto por su enlace mientras el punto esté abierto') : null,
     h('label', { class: 'muted', style: 'display:flex;gap:8px;align-items:center;margin:8px 0', for: 'cbSala' }, h('input', { type: 'checkbox', id: 'cbSala', class: 'cbx', checked: !!a.salaOculta, onchange: (e) => { a.salaOculta = e.target.checked; saveLocal(); actualizarPantalla(); } }), 'En la pantalla de sala, mostrar solo cuántos han votado y revelar el resultado al cerrar cada punto'),
@@ -700,44 +826,44 @@ function viewVotacion() {
   const p = d.pById[puntoSel] || d.puntos[d.puntos.length - 1]; if (!p) return box; puntoSel = p.id;
   if (!c.nP && !c.nR) { box.push(h('div', { class: 'card' }, h('p', { class: 'muted', text: 'Aún no hay inmuebles presentes ni representados. Regístralos en la pestaña Asistencia.' }))); return box; }
   const cardRes = cardResultado(d, p, !esAncho());
-  const vs = votantes(d); const dis = lock || p.cerrado; const lista = h('div', {});
+  const vs = votantes(d); const dis = lock || p.cerrado; const lista = h('div', {}); const esMulti = p.tipo === 'multiple'; const OPTS = clavesDe(p).map((k) => [k, etq(p, k)]);
   const keys = new Set(vs.map(x => x.k)); [...selV].forEach(k => { if (!keys.has(k)) selV.delete(k); });
   const estadoV = vt => { const us = vt.own.concat(vt.rep); const vals = [...new Set(us.map(u => p.votos[u.id] || ''))]; return vals.length === 1 ? (vals[0] || 'N') : 'mixto'; };
-  const cont = { T: vs.length, N: 0, F: 0, C: 0, X: 0, mixto: 0 }; vs.forEach(vt => { cont[estadoV(vt)]++; });
+  const cont = Object.fromEntries(['T', 'N', 'mixto'].concat(clavesDe(p)).map((k) => [k, 0])); cont.T = vs.length; vs.forEach(vt => { cont[estadoV(vt)]++; });
   const visibles = () => { const q = norm(vBuscar); return vs.filter(vt => (vFiltro === 'T' || estadoV(vt) === vFiltro) && (!q || norm(vt.name + ' ' + vt.own.concat(vt.rep).map(u => u.inm).join(' ')).includes(q))); };
-  const selInfo = h('div', { style: 'font-weight:650' }); const bar = h('div', { class: 'selbar hide' }, h('div', { class: 'wrap' }, selInfo, h('div', { class: 'seg' }, [['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => h('button', { class: 'on ' + k, text: l, onclick: () => aplicarSel(k) }))), h('div', { class: 'row', style: 'margin-top:6px' }, h('button', { class: 'btn small', text: 'Quitar selección', onclick: () => { selV.clear(); pinta(); } }))));
+  const selInfo = h('div', { style: 'font-weight:650' }); const bar = h('div', { class: 'selbar hide' }, h('div', { class: 'wrap' }, selInfo, h('div', { class: 'seg' + (esMulti ? ' m' : '') }, OPTS.map(([k, l]) => h('button', { class: 'on ' + k, text: l, title: l, onclick: () => aplicarSel(k) }))), h('div', { class: 'row', style: 'margin-top:6px' }, h('button', { class: 'btn small', text: 'Quitar selección', onclick: () => { selV.clear(); pinta(); } }))));
   const seleccion = () => vs.filter(x => selV.has(x.k));
   const actualizaBarra = () => { const sel = seleccion(); bar.classList.toggle('hide', !sel.length || dis); if (!sel.length) return; const inms = sel.flatMap(x => x.own.concat(x.rep)); selInfo.textContent = `${pl(sel.length, 'persona seleccionada', 'personas seleccionadas')} · ${pl(inms.length, 'inmueble', 'inmuebles')} · ${fmt(inms.reduce((z, u) => z + u.ali, 0))} % del edificio`; };
   async function aplicarSel(opcion) {
     const sel = seleccion(); if (!sel.length || dis) return; const inms = sel.flatMap(x => x.own.concat(x.rep)); const cambian = inms.filter(u => p.votos[u.id] && p.votos[u.id] !== opcion).length;
-    if (sel.length > 5 || cambian) { const ok = await askConfirm(`Registrar “${OPC[opcion]}”`, `${pl(sel.length, 'persona', 'personas')}, ${pl(inms.length, 'inmueble', 'inmuebles')}, ${fmt(inms.reduce((z, u) => z + u.ali, 0))} % del edificio.${cambian ? ` ${pl(cambian, 'inmueble ya tenía', 'inmuebles ya tenían')} otro voto: se reemplaza y el anterior queda en el historial.` : ''} Se anota en la auditoría como un solo registro.`, 'Registrar'); if (!ok) return; }
-    if (!(await ensureOp())) return; append('VOTO_GRUPO', { punto: p.id, opcion, inms: inms.map(u => u.id), por: `selección múltiple (${pl(sel.length, 'persona', 'personas')})`, nota: 'selección múltiple', personas: sel.map(x => x.name) }); selV.clear(); renderAll(); toast(`${OPC[opcion]}: ${pl(sel.length, 'persona', 'personas')} registradas`);
+    if (sel.length > 5 || cambian) { const ok = await askConfirm(`Registrar “${etq(p, opcion)}”`, `${pl(sel.length, 'persona', 'personas')}, ${pl(inms.length, 'inmueble', 'inmuebles')}, ${fmt(inms.reduce((z, u) => z + u.ali, 0))} % del edificio.${cambian ? ` ${pl(cambian, 'inmueble ya tenía', 'inmuebles ya tenían')} otro voto: se reemplaza y el anterior queda en el historial.` : ''} Se anota en la auditoría como un solo registro.`, 'Registrar'); if (!ok) return; }
+    if (!(await ensureOp())) return; append('VOTO_GRUPO', { punto: p.id, opcion, inms: inms.map(u => u.id), por: `selección múltiple (${pl(sel.length, 'persona', 'personas')})`, nota: 'selección múltiple', personas: sel.map(x => x.name) }); selV.clear(); renderAll(); toast(`${etq(p, opcion)}: ${pl(sel.length, 'persona', 'personas')} registradas`);
   }
   const pinta = () => {
     lista.replaceChildren(); const vis = visibles();
     vis.forEach(vt => {
       const us = vt.own.concat(vt.rep); const v = estadoV(vt); const carga = us.reduce((z, u) => z + u.ali, 0); const sel = selV.has(vt.k);
       const cb = h('input', { type: 'checkbox', class: 'cbx', checked: sel, disabled: dis, 'aria-label': 'Seleccionar a ' + vt.name, onchange: e => { if (e.target.checked) selV.add(vt.k); else selV.delete(vt.k); pinta(); } });
-      const det = h('details', {}, h('summary', { class: 'muted', text: `Ver sus ${us.length} inmuebles${v === 'mixto' ? ' (votos distintos)' : ''}` }), us.map(u => h('div', { class: 'row', style: 'margin:6px 0' }, h('span', { style: 'flex:1;min-width:120px', text: `${u.inm} · ${fmtA(u.ali)} % · ${u.est === 'P' ? 'propio' : 'en representación de ' + (u.prop || 'propietario')}` }), h('select', { style: 'width:150px', disabled: dis, onchange: e => { if (e.target.value) votar(d, p, [u], e.target.value, vt.name, 'voto individual'); } }, [['', 'Sin votar'], ['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => { const o = h('option', { value: k, text: l }); if ((p.votos[u.id] || '') === k) o.selected = true; return o; })))));
-      lista.append(h('div', { class: 'unit vfila' + (sel ? ' sel' : '') }, h('div', {}, h('div', { class: 'top' }, dis ? null : cb, h('span', { class: 'nm', style: 'font-weight:650', text: vt.name }), us.some(u => p.via && p.via[u.id]) ? h('span', { class: 'via', text: 'enlace' }) : (us.some(u => p.votos[u.id]) ? h('span', { class: 'via sala', text: 'mesa' }) : null), h('span', { class: 'al', text: fmt(carga) + ' %' })), h('div', { class: 'muted', style: 'margin-left:' + (dis ? '0' : '36px'), text: [vt.own.length ? `Propios: ${vt.own.map(u => u.inm).join(', ')}` : '', vt.rep.length ? `Representa: ${vt.rep.map(u => u.inm).join(', ')}` : ''].filter(Boolean).join(' · ') })),
-        h('div', { class: 'seg' }, [['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => h('button', { class: (v === k ? 'on ' : '') + k, text: l, disabled: dis, onclick: () => { if (v !== k) votar(d, p, us, k, vt.name, ''); } }))), us.length > 1 ? det : null));
+      const det = h('details', {}, h('summary', { class: 'muted', text: `Ver sus ${us.length} inmuebles${v === 'mixto' ? ' (votos distintos)' : ''}` }), us.map(u => h('div', { class: 'row', style: 'margin:6px 0' }, h('span', { style: 'flex:1;min-width:120px', text: `${u.inm} · ${fmtA(u.ali)} % · ${u.est === 'P' ? 'propio' : 'en representación de ' + (u.prop || 'propietario')}` }), h('select', { style: 'width:150px', disabled: dis, onchange: e => { if (e.target.value) votar(d, p, [u], e.target.value, vt.name, 'voto individual'); } }, [['', 'Sin votar']].concat(OPTS).map(([k, l]) => { const o = h('option', { value: k, text: l }); if ((p.votos[u.id] || '') === k) o.selected = true; return o; })))));
+      lista.append(h('div', { class: 'unit vfila' + (esMulti ? ' m' : '') + (sel ? ' sel' : '') }, h('div', {}, h('div', { class: 'top' }, dis ? null : cb, h('span', { class: 'nm', style: 'font-weight:650', text: vt.name }), us.some(u => p.via && p.via[u.id]) ? h('span', { class: 'via', text: 'enlace' }) : (us.some(u => p.votos[u.id]) ? h('span', { class: 'via sala', text: 'mesa' }) : null), h('span', { class: 'al', text: fmt(carga) + ' %' })), h('div', { class: 'muted', style: 'margin-left:' + (dis ? '0' : '36px'), text: [vt.own.length ? `Propios: ${vt.own.map(u => u.inm).join(', ')}` : '', vt.rep.length ? `Representa: ${vt.rep.map(u => u.inm).join(', ')}` : ''].filter(Boolean).join(' · ') })),
+        h('div', { class: 'seg' + (esMulti ? ' m' : '') }, OPTS.map(([k, l]) => h('button', { class: (v === k ? 'on ' : '') + k, text: l, title: l, disabled: dis, onclick: () => { if (v !== k) votar(d, p, us, k, vt.name, ''); } }))), us.length > 1 ? det : null));
     });
     if (!vis.length) lista.append(h('p', { class: 'muted', text: 'Nadie coincide con el filtro o la búsqueda.' }));
     actualizaBarra(); btnVis.textContent = `Seleccionar los ${vis.length} que se ven`;
   };
   const btnVis = h('button', { class: 'btn small', text: 'Seleccionar los que se ven', onclick: () => { visibles().forEach(vt => selV.add(vt.k)); pinta(); } });
-  const chipsF = h('div', { class: 'chips' }, [['T', 'Todos'], ['N', 'Sin votar'], ['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => h('button', { class: vFiltro === k ? 'on' : '', text: `${l} (${cont[k]})`, onclick: () => { vFiltro = k; renderAll(); } })));
+  const chipsF = h('div', { class: 'chips' }, [['T', 'Todos'], ['N', 'Sin votar']].concat(OPTS).map(([k, l]) => h('button', { class: vFiltro === k ? 'on' : '', text: `${l} (${cont[k]})`, onclick: () => { vFiltro = k; renderAll(); } })));
   const cardVotos = (h('div', { class: 'card' }, h('h2', { text: `Registrar votos (${pl(vs.length, 'persona presente', 'personas presentes')})` }), h('p', { class: 'muted', text: 'Para uno solo, toca su voto. Para varios a la vez, marca las casillas y usa la barra de abajo. Cada registro queda en la auditoría con hora y operador.' }),
     h('input', { type: 'search', placeholder: 'Buscar persona o inmueble', value: vBuscar, oninput: e => { vBuscar = e.target.value; pinta(); } }), chipsF,
     dis ? null : h('div', { class: 'row', style: 'margin-bottom:6px' }, btnVis, h('button', { class: 'btn small', text: 'Quitar selección', onclick: () => { selV.clear(); pinta(); } })),
     lista));
   pinta();
-  const cardRegla = (h('div', { class: 'card' }, h('h2', { text: 'Regla de aprobación de este punto' }), h('div', { class: 'row' },
+  const cardRegla = (h('div', { class: 'card' }, h('h2', { text: esMulti ? 'Cierre de este punto' : 'Regla de aprobación de este punto' }), esMulti ? h('p', { class: 'muted', text: 'Opción múltiple: gana la opción con más alícuota; no hay umbral de aprobación. Si hay empate, el resultado lo indica.' }) : h('div', { class: 'row' },
     h('div', { class: 'field' }, h('label', { text: 'Se aprueba con más de (% a favor)' }), h('input', { id: 'rU', type: 'number', min: '0', max: '100', step: '0.01', value: p.umbral, disabled: dis, onchange: async () => { if (!(await ensureOp())) { renderAll(); return; } append('PUNTO_REGLA', { id: p.id, umbral: Math.min(100, Math.max(0, Number($('#rU').value) || 0)), base: p.base }); renderAll(); } })),
     h('div', { class: 'field' }, h('label', { text: 'Calculado sobre' }), h('select', { id: 'rB', disabled: dis, onchange: async () => { if (!(await ensureOp())) { renderAll(); return; } append('PUNTO_REGLA', { id: p.id, umbral: p.umbral, base: $('#rB').value }); renderAll(); } }, [['asistentes', 'La alícuota presente y representada'], ['total', 'El 100 % de la alícuota del edificio']].map(([k, l]) => { const o = h('option', { value: k, text: l }); if (p.base === k) o.selected = true; return o; })))),
     h('div', { class: 'row', style: 'margin-top:10px' },
-      !p.cerrado ? h('button', { class: 'btn primary', text: 'Cerrar votación y sellar resultado', disabled: lock, onclick: async () => { const t0 = tallyLive(d, p); if (t0.pend && !(await askConfirm('Hay inmuebles sin votar', `${t0.pend} inmuebles presentes no han votado. Se contarán como “sin votar”.`, 'Cerrar igual'))) return; if (!(await ensureOp())) return; if (remotoActivo(d)) { toast('Cerrando la votación por correo y trayendo los últimos votos…'); await cerrarPuntoRemoto(); } const dd = derive(cur()); const pp = dd.pById[p.id]; const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: p.id, res: { r: t.r, T: t.T, aA: t.aA, nA: t.nA, base: t.base, fav: t.fav, pct: t.pct, ok: t.ok, pend: t.pend, pP: t.pP, pR: t.pR, pA: t.pA, canal: t.canal } }); toast(`Punto cerrado y sellado: ${t.ok ? 'APROBADO' : 'NO APROBADO'} (${fmt(t.pct)} % a favor)`, 'ok'); renderAll(); if (dd.remotoAbierto) publicarAhora({ forzar: true }); } }) : h('button', { class: 'btn small danger', text: 'Anular el cierre con motivo', disabled: lock, onclick: async () => { const m = await askReason('Anular el cierre de este punto', 'Se reabre la votación. El cierre anterior queda marcado como anulado.', 'Anular cierre'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: p.cierre.seq, motivo: m }); renderAll(); } }))));
-  if (esAncho()) { const puntosCard = box.pop(); box.push(h('div', { class: 'dos' }, h('div', {}, puntosCard, cardVotos, bar, h('div', { style: 'height:96px' })), h('aside', {}, cardRes, h('div', { class: 'card' }, cardRegla.lastElementChild), cardRegla))); cardRegla.lastElementChild.style.marginTop = '0'; }
+      !p.cerrado ? h('button', { class: 'btn primary', text: 'Cerrar votación y sellar resultado', disabled: lock, onclick: async () => { const t0 = tallyLive(d, p); if (t0.pend && !(await askConfirm('Hay inmuebles sin votar', `${t0.pend} inmuebles presentes no han votado. Se contarán como “sin votar”.`, 'Cerrar igual'))) return; if (!(await ensureOp())) return; if (remotoActivo(d)) { toast('Cerrando la votación por correo y trayendo los últimos votos…'); await cerrarPuntoRemoto(); } const dd = derive(cur()); const pp = dd.pById[p.id]; const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: p.id, res: resCierre(t) }); toast(`Punto cerrado y sellado: ${veredicto(pp, t).corto} (${fmt(t.pct)} %${t.multi ? '' : ' a favor'})`, 'ok'); renderAll(); if (dd.remotoAbierto) publicarAhora({ forzar: true }); } }) : h('button', { class: 'btn small danger', text: 'Anular el cierre con motivo', disabled: lock, onclick: async () => { const m = await askReason('Anular el cierre de este punto', 'Se reabre la votación. El cierre anterior queda marcado como anulado.', 'Anular cierre'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: p.cierre.seq, motivo: m }); renderAll(); } }))));
+  if (esAncho()) { const puntosCard = box.pop(); const ix = box.indexOf(planCard); if (ix >= 0) box.splice(ix, 1); box.push(h('div', { class: 'dos' }, h('div', {}, planCard, puntosCard, cardVotos, bar, h('div', { style: 'height:96px' })), h('aside', {}, cardRes, h('div', { class: 'card' }, cardRegla.lastElementChild), cardRegla))); cardRegla.lastElementChild.style.marginTop = '0'; }
   else box.push(cardRes, cardVotos, bar, h('div', { style: 'height:96px' }), cardRegla);
   return box;
 }
@@ -773,16 +899,16 @@ const REL = new Set(['INGRESO', 'REPRESENTACION', 'SALIDA']);
 function relUnit(e, id) { const p = e.p; if (REL.has(e.type)) return p.u === id; if (e.type === 'VOTO_GRUPO' || e.type === 'VOTO_REMOTO') return (p.inms || []).includes(id); if (e.type === 'INGRESO_REMOTO') return (p.units || []).includes(id); return false; }
 function eventosDeUnidad(a, id) { return a.events.filter(e => relUnit(e, id) || (e.type === 'ANULACION' && a.events[e.p.ref - 1] && relUnit(a.events[e.p.ref - 1], id))); }
 function descPrivada(e, d, uid) {
-  if (e.type === 'VOTO_REMOTO') { const pt = d.pById[e.p.punto]; return `Voto por enlace ${OPC[e.p.detalle[uid]] || ''}${pt ? ' en “' + pt.titulo + '”' : ''} para este inmueble · comprobante ${e.p.recibo}`; }
+  if (e.type === 'VOTO_REMOTO') { const pt = d.pById[e.p.punto]; return `Voto por enlace ${etq(pt, e.p.detalle[uid])}${pt ? ' en “' + pt.titulo + '”' : ''} para este inmueble · comprobante ${e.p.recibo}`; }
   if (e.type === 'INGRESO_REMOTO') return `Ingreso por enlace${e.p.ubic ? ' (declaró: ' + (e.p.ubic === 'S' ? 'en la sala' : 'a distancia') + ')' : ''} · hora del servidor ${hms(Date.parse(e.p.srv))}`;
-  if (e.type === 'VOTO_GRUPO') { const pt = d.pById[e.p.punto]; const otros = (e.p.inms || []).length - 1; return `Voto ${OPC[e.p.opcion]}${pt ? ' en “' + pt.titulo + '”' : ''} para este inmueble${otros > 0 ? ` (registrado junto con otros ${pl(otros, 'inmueble', 'inmuebles')})` : ''}`; }
+  if (e.type === 'VOTO_GRUPO') { const pt = d.pById[e.p.punto]; const otros = (e.p.inms || []).length - 1; return `Voto ${etq(pt, e.p.opcion)}${pt ? ' en “' + pt.titulo + '”' : ''} para este inmueble${otros > 0 ? ` (registrado junto con otros ${pl(otros, 'inmueble', 'inmuebles')})` : ''}`; }
   return desc(e, d);
 }
 function buildConstanciaHTML(a, uid) {
   const d = derive(a); const u = d.byId[uid]; if (!u) return ''; const v = verify(a.events, a.id); const evs = eventosDeUnidad(a, uid); const q = calcQ(d);
   const est = u.hist.concat(u.est !== 'A' ? [{ est: u.est, ingreso: u.ingreso, salida: 0, rep: u.rep }] : []);
   const estRows = est.map(x => `<tr><td>${x.est === 'P' ? 'Presente (propietario)' : 'Representado'}</td><td>${x.rep ? esc(x.rep.nombre) + ' · C.I. ' + esc(x.rep.cedula) + '<br>Poder: ' + esc(x.rep.ref) + (x.rep.verificado ? ' (verificado)' : '') + (x.rep.fotoSha ? '<br>Foto adjunta · huella ' + huella(x.rep.fotoSha) : '') : ''}</td><td>${hm(x.ingreso)}</td><td>${x.salida ? hm(x.salida) : (d.closed ? 'hasta el cierre' : 'sigue en sala')}</td></tr>`).join('');
-  const votos = d.puntos.map((p, i) => { let ev = null; for (let k = a.events.length - 1; k >= 0; k--) { const e = a.events[k]; if ((e.type === 'VOTO_GRUPO' || e.type === 'VOTO_REMOTO') && e.p.punto === p.id && (e.p.inms || []).includes(uid) && !d.ann.has(e.seq)) { ev = e; break; } } const opt = p.votos[uid]; const t = tallyOf(d, p); return `<tr><td>${i + 1}. ${esc(p.titulo)}</td><td>${opt ? OPC[opt] : (est.length ? 'Sin votar' : 'No estaba presente')}</td><td>${ev ? '#' + ev.seq + ' · ' + hms(ev.ts) + '<br><span class="hash">' + huella(ev.h) + '</span>' : '—'}</td><td>${p.cerrado ? (t.ok ? 'APROBADO' : 'NO APROBADO') : 'Sin cerrar'} (${fmt(t.pct)} % a favor)</td></tr>`; }).join('');
+  const votos = d.puntos.map((p, i) => { let ev = null; for (let k = a.events.length - 1; k >= 0; k--) { const e = a.events[k]; if ((e.type === 'VOTO_GRUPO' || e.type === 'VOTO_REMOTO') && e.p.punto === p.id && (e.p.inms || []).includes(uid) && !d.ann.has(e.seq)) { ev = e; break; } } const opt = p.votos[uid]; const t = tallyOf(d, p); return `<tr><td>${i + 1}. ${esc(p.titulo)}</td><td>${opt ? esc(etq(p, opt)) : (est.length ? 'Sin votar' : 'No estaba presente')}</td><td>${ev ? '#' + ev.seq + ' · ' + hms(ev.ts) + '<br><span class="hash">' + huella(ev.h) + '</span>' : '—'}</td><td>${p.cerrado ? esc(veredicto(p, t).corto) : 'Sin cerrar'} (${fmt(t.pct)} %${t.multi ? '' : ' a favor'})</td></tr>`; }).join('');
   const evRows = evs.map(e => { const an = d.ann.get(e.seq); return `<tr class="${an ? 'an' : ''}"><td>#${e.seq}</td><td>${hms(e.ts)}</td><td>${esc(descPrivada(e, d, uid))}${an ? '<br><b>Anulado</b> por #' + an.by + ': ' + esc(an.motivo) : ''}</td><td>${esc(e.op || '')}</td><td class="hash">${huella(e.h)}</td></tr>`; }).join('');
   const hu = huella(d.closed ? d.closeHash : v.last);
   return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Constancia · ${esc(u.inm)} · ${esc(d.meta.nombre)}</title><style>
@@ -873,10 +999,13 @@ function sparkSVG(d, w, hgt) {
 function buildReportHTML(a) {
   const d = derive(a); const q = calcQ(d); const v = verify(a.events, a.id); const ops = [...new Set(a.events.map(e => e.op).filter(Boolean))];
   const fotos = []; const rows = d.units.map(u => { const hh = u.hist.map(x => `${hm(x.ingreso)}–${hm(x.salida)}`).join(' / '); const rp = u.rep; return `<tr><td>${esc(u.inm)}</td><td>${esc(u.prop)}</td><td class="r">${fmtA(u.ali)}</td><td>${esc(condFinal(u))}</td><td>${medioU(u)}${ubicU(u) ? '<br><small>' + ubicU(u) + '</small>' : ''}</td><td>${rp ? esc(rp.nombre) + ' (C.I. ' + esc(rp.cedula) + ')' : ''}</td><td>${rp ? esc(rp.ref) + (rp.fotoSha ? ' · foto' : '') : ''}</td><td>${u.est !== 'A' ? hm(u.ingreso) : ''}${hh ? ' (' + hh + ')' : ''}</td></tr>`; }).join('');
-  const puntos = d.puntos.map((p, i) => { const t = tallyOf(d, p); const T = t.T || 1; const pc = x => fmt(x / T * 100); const fl = (lab, k) => `<tr><td>${lab}</td><td class="r">${pc(t.r[k].P)}</td><td class="r">${pc(t.r[k].R)}</td><td class="r"><b>${pc(t.r[k].P + t.r[k].R)}</b></td><td class="r">${t.r[k].n}</td></tr>`;
-    return `<section><h3>Punto ${i + 1}: ${esc(p.titulo)}</h3><p>Se aprueba con más de <b>${fmt(p.umbral)} %</b> sobre ${p.base === 'total' ? 'el total de la alícuota del edificio' : 'la alícuota presente y representada'}. ${p.cerrado ? 'Cerrado a las ' + hm(p.cierre.ts) + ' (anotación #' + p.cierre.seq + ', huella ' + huella(p.cierre.hash) + ').' : '<b>Votación sin cerrar.</b>'}</p>
-    <table><thead><tr><th>Voto</th><th class="r">Presentes (% alícuota total)</th><th class="r">En representación (% alícuota total)</th><th class="r">Total (%)</th><th class="r">Inmuebles</th></tr></thead><tbody>${fl('A favor', 'F')}${fl('En contra', 'C')}${fl('Abstención', 'X')}${fl('Sin votar', 'N')}</tbody></table>
-    ${detalleVotos(a, d, p)}<p class="res ${t.ok ? 'ok' : 'no'}">${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)} % a favor sobre ${p.base === 'total' ? 'el total del edificio' : 'la alícuota asistente'} (${fmt(t.base)} %). ${t.pend ? 'Inmuebles sin votar: ' + t.pend + '.' : ''}</p>${t.canal ? `<p>Votos emitidos (porcentaje de la alícuota total del edificio): mesa <b>${fmt(t.canal.sala.a)} %</b> (${pl(t.canal.sala.n, 'inmueble', 'inmuebles')}) · enlace <b>${fmt(t.canal.correo.a)} %</b> (${pl(t.canal.correo.n, 'inmueble', 'inmuebles')}).</p>` : ''}</section>`; }).join('') || '<p>No se registraron votaciones.</p>';
+  const puntos = d.puntos.map((p, i) => { const t = tallyOf(d, p); const T = t.T || 1; const ks = t.ks || clavesDe(p); const pc = x => fmt(x / T * 100); const vv = veredicto(p, t);
+    const fl = (k) => `<tr><td>${k === 'N' ? 'Sin votar' : esc(etq(p, k))}</td><td class="r">${pc(t.r[k].P)}</td><td class="r">${pc(t.r[k].R)}</td><td class="r"><b>${pc(t.r[k].P + t.r[k].R)}</b></td><td class="r">${t.r[k].n}</td></tr>`;
+    const regla = p.tipo === 'multiple' ? 'Votación de <b>opción múltiple</b>: gana la opción con más alícuota (' + esc(p.opciones.map((o) => o.t).join(' | ')) + ').' : `Se aprueba con más de <b>${fmt(p.umbral)} %</b> sobre ${p.base === 'total' ? 'el total de la alícuota del edificio' : 'la alícuota presente y representada'}.`;
+    const res = t.multi ? vv.txt + '.' : `${vv.corto}: ${fmt(t.pct)} % a favor sobre ${p.base === 'total' ? 'el total del edificio' : 'la alícuota asistente'} (${fmt(t.base)} %).`;
+    return `<section><h3>Punto ${i + 1}: ${esc(p.titulo)}</h3><p>${regla} ${p.cerrado ? 'Cerrado a las ' + hm(p.cierre.ts) + ' (anotación #' + p.cierre.seq + ', huella ' + huella(p.cierre.hash) + ').' : '<b>Votación sin cerrar.</b>'}</p>
+    <table><thead><tr><th>Voto</th><th class="r">Presentes (% alícuota total)</th><th class="r">En representación (% alícuota total)</th><th class="r">Total (%)</th><th class="r">Inmuebles</th></tr></thead><tbody>${ks.concat('N').map(fl).join('')}</tbody></table>
+    ${detalleVotos(a, d, p)}<p class="res ${vv.ok ? 'ok' : 'no'}">${esc(res)} ${t.pend ? 'Inmuebles sin votar: ' + t.pend + '.' : ''}</p>${t.canal ? `<p>Votos emitidos (porcentaje de la alícuota total del edificio): mesa <b>${fmt(t.canal.sala.a)} %</b> (${pl(t.canal.sala.n, 'inmueble', 'inmuebles')}) · enlace <b>${fmt(t.canal.correo.a)} %</b> (${pl(t.canal.correo.n, 'inmueble', 'inmuebles')}).</p>` : ''}</section>`; }).join('') || '<p>No se registraron votaciones.</p>';
   const anul = [...d.ann.entries()].map(([ref, x]) => { const e = a.events[ref - 1]; return `<tr><td>#${ref}</td><td>${esc(e ? desc(e, d) : '')}</td><td>#${x.by} · ${hms(x.ts)}</td><td>${esc(x.motivo)}</td><td>${esc(x.op || '')}</td></tr>`; }).join('');
   const poderes = d.units.filter(u => u.rep).map(u => `<tr><td>${esc(u.inm)}</td><td>${esc(u.rep.nombre)}</td><td>${esc(u.rep.cedula)}</td><td>${esc(u.rep.ref)}</td><td>${u.rep.verificado ? 'Sí' : 'No'}</td><td>${u.rep.fotoSha ? 'Sí' : 'No'}${u.rep.excepcion ? ' · excede máximo' : ''}</td></tr>`).join('');
   return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Reporte de asamblea · ${esc(d.meta.nombre)}</title><style>
@@ -897,7 +1026,7 @@ ${anul ? `<h3>Anotaciones anuladas y su motivo</h3><table><thead><tr><th>Anotaci
 <p>Una anotación es cada acción registrada (un ingreso, una representación, una salida, un voto, una anulación o un cierre), con su hora y su operador; su cantidad no es el número de asistentes ni de votos. Cada anotación incluye la huella de la anterior (SHA-256). Para verificar, se recalcula la cadena con el archivo JSON de auditoría adjunto; cualquier cambio posterior hace que las huellas no coincidan.</p>
 <section class="firma"><h2>6. Constancia y firmas</h2>
 <p>Asamblea: <b>${esc(d.meta.nombre)}</b>${d.meta.fecha ? ' · ' + esc(d.meta.fecha) : ''}. Quórum ${d.closed ? 'al cierre' : 'actual'}: <b>${fmt(q.pA)} %</b> (mínimo ${fmt(d.meta.quorumReq)} %) → <b>${q.pA >= d.meta.quorumReq ? 'HAY QUÓRUM' : 'NO HAY QUÓRUM'}</b>. Presentes: ${pl(q.nP, 'inmueble', 'inmuebles')} (${fmt(q.pP)} %). Representados: ${pl(q.nR, 'inmueble', 'inmuebles')} (${fmt(q.pR)} %).</p>
-${d.puntos.length ? `<table><thead><tr><th>Punto</th><th>Resultado</th><th class="r">% a favor</th></tr></thead><tbody>${d.puntos.map((p, i) => { const t = tallyOf(d, p); return `<tr><td>${i + 1}. ${esc(p.titulo)}</td><td>${p.cerrado ? (t.ok ? 'APROBADO' : 'NO APROBADO') : 'Sin cerrar'}</td><td class="r">${fmt(t.pct)}</td></tr>`; }).join('')}</tbody></table>` : ''}
+${d.puntos.length ? `<table><thead><tr><th>Punto</th><th>Resultado</th><th class="r">% a favor</th></tr></thead><tbody>${d.puntos.map((p, i) => { const t = tallyOf(d, p); return `<tr><td>${i + 1}. ${esc(p.titulo)}</td><td>${p.cerrado ? esc(veredicto(p, t).corto) : 'Sin cerrar'}</td><td class="r">${fmt(t.pct)}</td></tr>`; }).join('')}</tbody></table>` : ''}
 <p>Huella de ${d.closed ? 'cierre' : 'este borrador'}: <span class="hash"><b>${huella(d.closed ? d.closeHash : v.last)}</b></span>. Quienes firman reconocen que este reporte corresponde a esa huella, que figura al pie de cada página. Una página con otra huella no pertenece a este reporte.</p>
 <div class="sig"><div>Presidente de la asamblea<br>C.I.</div><div>Secretario<br>C.I.</div><div>Administrador<br>C.I.</div></div>
 <div class="sig"><div>Junta de condominio<br>C.I.</div><div>Testigo<br>C.I.</div><div>Testigo<br>C.I.</div></div>
@@ -906,8 +1035,34 @@ ${d.puntos.length ? `<table><thead><tr><th>Punto</th><th>Resultado</th><th class
 </body></html>`;
 }
 const csvCell = x => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"';
-function buildCSV(a) { const d = derive(a); const head = ['Inmueble', 'Propietario', 'Alicuota %', 'Condicion', 'Representante', 'Cedula representante', 'Poder', 'Hora ingreso', 'Hora salida', 'Medio de ingreso', 'Ubicacion declarada'].concat(d.puntos.map((p, i) => `Punto ${i + 1}: ${p.titulo}`)); const rows = [head]; const V = { F: 'A favor', C: 'En contra', X: 'Abstencion' };
-  d.units.forEach(u => rows.push([u.inm, u.prop, String(u.ali).replace('.', ','), condFinal(u), u.rep ? u.rep.nombre : '', u.rep ? u.rep.cedula : '', u.rep ? u.rep.ref : '', u.ingreso ? hm(u.ingreso) : '', u.hist.length ? hm(u.hist[u.hist.length - 1].salida) : '', medioU(u), ubicU(u).replace('declara: ', '')].concat(d.puntos.map(p => u.est === 'A' ? '' : (V[p.votos[u.id]] || 'Sin votar')))));
+function buildActaHTML(a) {
+  const d = derive(a); const q = calcQ(d); const v = verify(a.events, a.id); const ph = (t) => `<mark>[${esc(t)}]</mark>`; const hayQ = q.pA >= d.meta.quorumReq;
+  const pt = (t) => String(t).replace(/\.$/, '') + '.'; const poderes = d.units.filter((u) => u.rep); const orden = (d.plan && d.plan.length) ? d.plan.map((it) => it.titulo) : d.puntos.map((p) => p.titulo);
+  const puntos = d.puntos.map((p, i) => {
+    const t = tallyOf(d, p); const ks = t.ks || clavesDe(p); const T = t.T || 1; const vv = veredicto(p, t);
+    const lin = ks.concat('N').map((k) => `<li>${k === 'N' ? 'Sin votar' : esc(etq(p, k))}: ${fmt((t.r[k].P + t.r[k].R) / T * 100)} % de las alícuotas del edificio (${pl(t.r[k].n, 'inmueble', 'inmuebles')}).</li>`).join('');
+    const regla = p.tipo === 'multiple' ? 'Fue una votación de opción múltiple: resulta ganadora la opción con mayor alícuota.' : `Para su aprobación se requería más de ${fmt(p.umbral)} % sobre ${p.base === 'total' ? 'el total de las alícuotas del edificio' : 'las alícuotas presentes y representadas'}.`;
+    return `<h3>${i + 1}. ${esc(p.titulo)}</h3><p>Sometido el punto a votación${p.cerrado ? ` (cerrada la votación a las ${hm(p.cierre.ts)})` : ' (votación sin cerrar al generar este borrador)'}, se obtuvo el siguiente resultado:</p><ul>${lin}</ul><p>${regla} <b>${t.multi ? esc(vv.txt) : esc(vv.corto) + ', con ' + fmt(t.pct) + ' % a favor'}.</b></p><p>${ph('Observaciones, intervenciones o salvedades, si las hubo')}</p>`;
+  }).join('') || `<p>${ph('No se registraron votaciones: describa aquí lo tratado')}</p>`;
+  const filasPod = poderes.map((u) => `<tr><td>${esc(u.inm)}</td><td>${esc(u.prop || '')}</td><td>${esc(u.rep.nombre)}</td><td>${esc(u.rep.cedula)}</td><td>${esc(u.rep.ref)}</td></tr>`).join('');
+  return `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" lang="es"><head><meta charset="utf-8"><title>Acta (borrador) · ${esc(d.meta.nombre)}</title><style>
+body{font:12pt/1.5 "Times New Roman",serif;color:#111;margin:24px auto;max-width:800px;padding:0 16px}h1{font-size:17pt;text-align:center;margin:0 0 4px}h2{font-size:13pt;margin:20px 0 4px}h3{font-size:12pt;margin:14px 0 2px}p{margin:6px 0;text-align:justify}table{border-collapse:collapse;width:100%;margin:6px 0}th,td{border:1px solid #888;padding:3px 6px;text-align:left;font-size:10.5pt}th{background:#eee}mark{background:#fff3a3}.borrador{border:2px solid #c22727;color:#c22727;padding:6px;margin:10px 0;font:bold 11pt Arial,sans-serif;text-align:center}.sig{width:100%;margin-top:46px}.sig td{border:0;border-top:1px solid #000;text-align:center;width:33%;padding-top:4px}.nota{font:9.5pt Arial,sans-serif;color:#555;margin-top:24px}
+</style></head><body>
+<h1>ACTA DE ASAMBLEA DE PROPIETARIOS</h1><p style="text-align:center"><b>${esc(d.meta.nombre)}</b></p>${d.closed ? '' : '<div class="borrador">BORRADOR · La asamblea aún no está cerrada ni sellada: los datos pueden cambiar.</div>'}
+<p>En ${ph('ciudad y lugar de la reunión')}, el día ${d.meta.fecha ? esc(d.meta.fecha) : ph('fecha')}, se reunieron los propietarios del inmueble <b>${esc(d.meta.nombre)}</b> en asamblea ${ph('ordinaria / extraordinaria')}, convocada por ${ph('quien convoca')}. Presidió la asamblea ${ph('nombre del presidente')} y actuó como secretario(a) ${ph('nombre del secretario')}. El registro de asistencia comenzó a las ${d.openedAt ? pt(hm(d.openedAt)) : ph('hora') + '.'}</p>
+<h2>Verificación del quórum</h2>
+<p>Revisado el registro de asistencia, se encontraron presentes <b>${pl(q.nP, 'inmueble', 'inmuebles')}</b>, que representan ${fmt(q.pP)} % de las alícuotas, y representados por poder <b>${pl(q.nR, 'inmueble', 'inmuebles')}</b> (${fmt(q.pR)} %), para un total de <b>${fmt(q.pA)} %</b> de las alícuotas del edificio${q.nC ? `; de ellos, ${pl(q.nC, 'inmueble ingresó', 'inmuebles ingresaron')} mediante su enlace personal` : ''}. Siendo el mínimo requerido ${fmt(d.meta.quorumReq)} %, ${hayQ ? 'se declaró válidamente constituida la asamblea' : '<b>no se alcanzó el quórum requerido</b>'}.${d.quorumHit ? ` El quórum se alcanzó por primera vez a las ${pt(hm(d.quorumHit))}` : ''}</p>
+${filasPod ? `<h2>Poderes recibidos</h2><table><thead><tr><th>Inmueble</th><th>Propietario</th><th>Representante</th><th>Cédula</th><th>Poder</th></tr></thead><tbody>${filasPod}</tbody></table>` : ''}
+<h2>Orden del día</h2>${orden.length ? `<ol>${orden.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>` : `<p>${ph('Orden del día')}</p>`}
+<h2>Desarrollo y votaciones</h2>${puntos}
+<h2>Cierre</h2><p>No habiendo más asuntos que tratar, se dio por terminada la asamblea ${d.closed ? `a las ${hm(d.closedAt)}` : `a las ${ph('hora de cierre')}`}, con un quórum final de ${fmt(q.pA)} %.</p>
+<p>El conteo de asistencia y votos consta en el reporte de la asamblea (registro encadenado de ${a.events.length} anotaciones, ${v.ok ? 'íntegro' : '<b>ALTERADO</b>'}). Huella de apertura ${huella(d.openHash)}; ${d.closed ? 'huella de cierre' : 'huella actual'} <b>${huella(d.closed ? d.closeHash : v.last)}</b>.</p>
+<table class="sig"><tr><td>Presidente<br>C.I.</td><td>Secretario(a)<br>C.I.</td><td>Administrador(a)<br>C.I.</td></tr></table>
+<p class="nota">Borrador generado por la consola a partir del registro de la asamblea. Los textos resaltados deben completarse. Debe ser revisado y ajustado por quien redacta el acta; no sustituye al acta oficial firmada.</p>
+</body></html>`;
+}
+function buildCSV(a) { const d = derive(a); const head = ['Inmueble', 'Propietario', 'Alicuota %', 'Condicion', 'Representante', 'Cedula representante', 'Poder', 'Hora ingreso', 'Hora salida', 'Medio de ingreso', 'Ubicacion declarada'].concat(d.puntos.map((p, i) => `Punto ${i + 1}: ${p.titulo}`)); const rows = [head]; 
+  d.units.forEach(u => rows.push([u.inm, u.prop, String(u.ali).replace('.', ','), condFinal(u), u.rep ? u.rep.nombre : '', u.rep ? u.rep.cedula : '', u.rep ? u.rep.ref : '', u.ingreso ? hm(u.ingreso) : '', u.hist.length ? hm(u.hist[u.hist.length - 1].salida) : '', medioU(u), ubicU(u).replace('declara: ', '')].concat(d.puntos.map(p => u.est === 'A' ? '' : (p.votos[u.id] ? etq(p, p.votos[u.id]) : 'Sin votar')))));
   return '\ufeff' + rows.map(r => r.map(csvCell).join(';')).join('\r\n'); }
 function buildJSON(a, privado) { const v = verify(a.events, a.id); const o = { formato: 'wcon-asamblea-auditoria-v2', asamblea: a.id, generado: new Date().toISOString(), verificacion: v, genesis: genesis(a.id), eventos: a.events, fotos: a.fotos }; if (privado === true) o.privado = { contactos: a.contactos || {}, tokens: a.tokens || {}, remoto: a.remoto || {}, envios: a.envios || {} }; return JSON.stringify(o, null, 1); }
 const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'asamblea';
@@ -917,7 +1072,7 @@ function viewReporte() {
   const msg = h('span', { class: 'muted' }); const q = calcQ(d); const v = verify(a.events, a.id);
   const guardar = async (name, data) => {
     try { if (window.claude && window.claude.use) { const dl = await window.claude.use('downloads'); if (dl) { await dl.save({ filename: name, data }); return 'ok'; } } } catch (e) { if (e && e.code === 'declined') return 'declined'; }
-    try { const mime = name.endsWith('.html') ? 'text/html' : name.endsWith('.csv') ? 'text/csv' : 'application/json'; const url = URL.createObjectURL(new Blob([data], { type: mime + ';charset=utf-8' })); const l = h('a', { href: url, download: name }); document.body.append(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); return 'ok'; } catch (e) { return 'fail'; }
+    try { const mime = name.endsWith('.doc') ? 'application/msword' : name.endsWith('.html') ? 'text/html' : name.endsWith('.csv') ? 'text/csv' : 'application/json'; const url = URL.createObjectURL(new Blob([data], { type: mime + ';charset=utf-8' })); const l = h('a', { href: url, download: name }); document.body.append(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); return 'ok'; } catch (e) { return 'fail'; }
   };
   const dlBtn = (label, name, fn, primary) => h('button', { class: 'btn ' + (primary ? 'primary' : ''), text: label, onclick: async () => { const r = await guardar(name, fn(a)); msg.textContent = r === 'ok' ? 'Archivo entregado. Búscalo en tu carpeta de Descargas.' : r === 'declined' ? '' : 'No se pudo descargar aquí. Prueba abriendo esta herramienta en otro navegador.'; } });
   const imprimir = async () => {
@@ -927,10 +1082,10 @@ function viewReporte() {
     w.document.open(); w.document.write(html); w.document.close(); msg.textContent = 'Se abrió el reporte en otra pestaña. En la ventana de impresión elige tu impresora o “Guardar como PDF”.';
   };
   const resumen = []; resumen.push(`ASAMBLEA: ${d.meta.nombre}${d.meta.fecha ? ' · ' + d.meta.fecha : ''}`, `Quórum: ${fmt(q.pA)} % (mínimo ${fmt(d.meta.quorumReq)} %) → ${q.pA >= d.meta.quorumReq ? 'HAY QUÓRUM' : 'NO HAY QUÓRUM'}`, `  Presentes: ${q.nP} inmuebles, ${fmt(q.pP)} %`, `  En representación: ${q.nR} inmuebles, ${fmt(q.pR)} %`);
-  d.puntos.forEach((p, i) => { const t = tallyOf(d, p); resumen.push('', `PUNTO ${i + 1}: ${p.titulo}`, `  A favor ${fmt((t.r.F.P + t.r.F.R) / (t.T || 1) * 100)} % · En contra ${fmt((t.r.C.P + t.r.C.R) / (t.T || 1) * 100)} % · Abstención ${fmt((t.r.X.P + t.r.X.R) / (t.T || 1) * 100)} %`, `  ${t.ok ? 'APROBADO' : 'NO APROBADO'} (${fmt(t.pct)} % a favor; se requiere más de ${fmt(p.umbral)} %)${p.cerrado ? '' : ' · sin cerrar'}`); });
+  d.puntos.forEach((p, i) => { const t = tallyOf(d, p); const ks = t.ks || clavesDe(p); const vv = veredicto(p, t); resumen.push('', `PUNTO ${i + 1}: ${p.titulo}`, '  ' + ks.map((k) => `${etq(p, k)} ${fmt((t.r[k].P + t.r[k].R) / (t.T || 1) * 100)} %`).join(' · '), `  ${t.multi ? vv.txt : `${vv.corto} (${fmt(t.pct)} % a favor; se requiere más de ${fmt(p.umbral)} %)`}${p.cerrado ? '' : ' · sin cerrar'}`); });
   resumen.push('', `Huella de apertura: ${huella(d.openHash)}`, `${d.closed ? 'Huella de cierre' : 'Huella actual'}: ${huella(d.closed ? d.closeHash : v.last)}`, `Registro ${v.ok ? 'íntegro' : 'ALTERADO'} (${a.events.length} anotaciones)`);
   const txt = resumen.join('\n'); const ta = h('textarea', { readonly: true, style: 'min-height:200px' }); ta.value = txt;
-  box.push(h('div', { class: 'card' }, h('h2', { text: 'Descargar' }), h('div', { class: 'row' }, h('button', { class: 'btn primary', text: '🖨️ Imprimir reporte para firmar', onclick: imprimir }), dlBtn('Descargar reporte (HTML)', `reporte-${slug(d.meta.nombre)}.html`, buildReportHTML), dlBtn('Asistencia y votos (CSV)', `asistencia-${slug(d.meta.nombre)}.csv`, buildCSV), dlBtn('Registro de auditoría (JSON)', `auditoria-${slug(d.meta.nombre)}.json`, buildJSON)), h('div', { style: 'margin-top:6px' }, msg),
+  box.push(h('div', { class: 'card' }, h('h2', { text: 'Descargar' }), h('div', { class: 'row' }, h('button', { class: 'btn primary', text: '🖨️ Imprimir reporte para firmar', onclick: imprimir }), dlBtn('Descargar reporte (HTML)', `reporte-${slug(d.meta.nombre)}.html`, buildReportHTML), h('button', { class: 'btn', text: 'Ver borrador de acta', onclick: () => { let w = null; try { w = window.open('', '_blank'); } catch (e) { w = null; } if (!w) { msg.textContent = 'El navegador bloqueó la ventana. Descarga el borrador en Word.'; return; } w.document.open(); w.document.write(buildActaHTML(a)); w.document.close(); } }), dlBtn('Borrador de acta (Word)', `acta-${slug(d.meta.nombre)}.doc`, buildActaHTML), dlBtn('Asistencia y votos (CSV)', `asistencia-${slug(d.meta.nombre)}.csv`, buildCSV), dlBtn('Registro de auditoría (JSON)', `auditoria-${slug(d.meta.nombre)}.json`, buildJSON)), h('div', { style: 'margin-top:6px' }, msg),
     h('p', { class: 'muted', text: 'Para firmar: 1) cierra y sella la asamblea más abajo, 2) imprime, 3) firmen todos la última hoja, 4) envía la huella de cierre a la junta. Guarda también el archivo JSON: es la prueba para verificar la cadena de huellas.' })));
   box.push(h('div', { class: 'card' }, h('h2', { text: 'Resumen para el acta' }), ta, h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { class: 'btn', text: 'Copiar resumen', onclick: () => { copiar(txt); ta.focus(); ta.select(); } }))));
   box.push(cardConstancia(a));
@@ -1004,10 +1159,10 @@ function armarSnapshot(a, d, o) {
     const rep = []; g.units.forEach((id) => { const u = por[id]; if (u && u.est === 'R' && !(u.rep && u.rep.enlace === enlaceId(g.k))) rep.push({ m: u.inm, p: (u.rep && u.rep.nombre) || '' }); });
     if (!us.length && !rep.length) return;
     const v = {}; if (pt) us.forEach((x) => { if (pt.votos[x.i]) v[x.i] = pt.votos[x.i]; });
-    const h = (estado === 'cerrada' ? d.puntos : d.puntos.filter((p) => p.cerrado)).map((p) => ({ t: p.titulo, v: Object.fromEntries(us.filter((x) => p.votos[x.i]).map((x) => [x.i, p.votos[x.i]])) })).filter((x) => Object.keys(x.v).length);
+    const h = (estado === 'cerrada' ? d.puntos : d.puntos.filter((p) => p.cerrado)).map((p) => ({ t: p.titulo, o: p.tipo === 'multiple' ? p.optMap : undefined, v: Object.fromEntries(us.filter((x) => p.votos[x.i]).map((x) => [x.i, p.votos[x.i]])) })).filter((x) => Object.keys(x.v).length);
     mapa[th] = { n: g.nombre, e: g.correos[0], g: (us.some((x) => x.t === 'p' && por[x.i].est !== 'A') || d.remotoH.has(th)) ? 1 : 0, u: us, v, h, r: rep };
   });
-  return { estado, asamblea: { id: a.id, nombre: d.meta.nombre, fecha: d.meta.fecha, ayuda: ((x) => (x.includes('@') ? x.toLowerCase() : x))(String(remotoCfg(a).ayuda || '').trim()) }, punto: pt ? { id: pt.id, titulo: pt.titulo, umbral: pt.umbral, cambio: pt.permiteCambio } : null, mapa };
+  return { estado, asamblea: { id: a.id, nombre: d.meta.nombre, fecha: d.meta.fecha, ayuda: ((x) => (x.includes('@') ? x.toLowerCase() : x))(String(remotoCfg(a).ayuda || '').trim()) }, punto: pt ? { id: pt.id, titulo: pt.titulo, umbral: pt.umbral, cambio: pt.permiteCambio, tipo: pt.tipo, opciones: pt.opciones } : null, mapa };
 }
 async function publicarAhora(o) {
   const a = cur(); if (!a) return false;
@@ -1033,7 +1188,7 @@ function ingerirFila(a, f) {
   if (f.tipo === 'INGRESO') { append('INGRESO_REMOTO', { rid: f.rid, k: f.k, units, srv: f.ts, h: f.h, ubic: (f.detalle && f.detalle.ubic) || '' }); return 1; }
   if (f.tipo === 'VOTO') {
     const pt = d.pById[f.punto]; if (!pt) return descartar('punto desconocido'); if (pt.cerrado) return descartar('el punto ya estaba cerrado');
-    const detalle = {}; units.forEach((id) => { if (['F', 'C', 'X'].includes(f.detalle[id])) detalle[id] = f.detalle[id]; });
+    const detalle = {}; units.forEach((id) => { if (clavesDe(pt).includes(f.detalle[id])) detalle[id] = f.detalle[id]; });
     if (!Object.keys(detalle).length) return descartar('voto sin opciones válidas');
     append('VOTO_REMOTO', { rid: f.rid, k: f.k, punto: f.punto, inms: Object.keys(detalle), detalle, recibo: f.recibo, srv: f.ts, h: f.h }); return 1;
   }
@@ -1521,8 +1676,10 @@ function pasoSiguiente(a, d) {
     return { pestana: 'correo', n: 2, titulo: 'Abre la asamblea a los propietarios', texto: 'Hazlo cuando empiece la asamblea: antes, sus enlaces dicen que todavía no ha iniciado.', cta: 'Ir a Correo' };
   }
   if (!quorumOk) return { pestana: 'asistencia', n: 3, titulo: 'Registra la asistencia', texto: `Falta ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} % para llegar al quórum (${fmt(d.meta.quorumReq)} %).`, cta: 'Ir a Asistencia' };
-  if (!d.puntos.length) return { pestana: 'votacion', n: 4, titulo: 'Agrega el primer punto a votar', texto: 'Hay quórum. Escribe el punto del orden del día y ábrelo a votación.', cta: 'Ir a Votación' };
+  const pend = d.planPend || [];
+  if (!d.puntos.length) return pend.length ? { pestana: 'votacion', n: 4, titulo: 'Abre el primer punto del orden del día', texto: `Hay quórum. Sigue: “${pend[0].titulo}”.`, cta: 'Ir a Votación' } : { pestana: 'votacion', n: 4, titulo: 'Agrega el primer punto a votar', texto: 'Hay quórum. Escribe el punto del orden del día y ábrelo a votación.', cta: 'Ir a Votación' };
   if (abiertos.length) return { pestana: 'votacion', n: 4, titulo: 'Hay una votación en curso', texto: 'Cuando terminen de votar, cierra el punto para sellar el resultado.', cta: 'Ir a Votación' };
+  if (pend.length) return { pestana: 'votacion', n: 4, titulo: 'Abre el siguiente punto del orden del día', texto: `Sigue: “${pend[0].titulo}”. Quedan ${pend.length} por votar.`, cta: 'Ir a Votación' };
   return { pestana: 'votacion', n: 4, titulo: 'Agrega otro punto o cierra la asamblea', texto: 'Todos los puntos están cerrados. Si no hay más, ve al reporte y cierra la asamblea.', cta: 'Ir a Votación', alt: { pestana: 'reporte', cta: 'Cerrar y firmar' } };
 }
 const NOMBRE_PESTANA = { padron: 'Padrón', correo: 'Correo', asistencia: 'Asistencia', votacion: 'Votación', auditoria: 'Auditoría', reporte: 'Reporte' };
@@ -1586,8 +1743,9 @@ function actualizarPantalla() {
   const rs = doc.getElementById('rs');
   if (!p) { set('pn', 'Esperando'); set('pt', 'Aún no hay un punto en votación'); rs.replaceChildren(); rs.dataset.f = ''; set('pp', ''); return; }
   const t = tallyOf(d, p); const base = t.aA || 0; const pc = (x) => (base ? x / base * 100 : 0);
-  const filas = [['✔', 'A favor', t.r.F.P + t.r.F.R, '#7FA2FF'], ['✖', 'En contra', t.r.C.P + t.r.C.R, '#FFA877'], ['–', 'Abstención', t.r.X.P + t.r.X.R, '#C3CEE0']];
-  set('pn', `Punto ${d.puntos.indexOf(p) + 1} de ${d.puntos.length}${p.cerrado ? ' · cerrado' : ''}`); set('pt', p.titulo || '');
+  const COL_SALA = { F: '#7FA2FF', C: '#FFA877', X: '#C3CEE0', O1: '#7FA2FF', O2: '#FFA877', O3: '#5EEAD4', O4: '#C4A8FF', O5: '#FBBF24', O6: '#F9A8D4' };
+  const filas = (t.ks || clavesDe(p)).map((k, i) => [k === 'F' ? '✔' : k === 'C' ? '✖' : k === 'X' ? '–' : String.fromCharCode(65 + i) + '.', etq(p, k), t.r[k].P + t.r[k].R, COL_SALA[k]]);
+  const ipl = p.plan ? (d.plan || []).findIndex((x) => x.id === p.plan) : -1; set('pn', ipl >= 0 ? `Punto ${ipl + 1} de ${d.plan.length}${p.cerrado ? ' · cerrado' : ''}` : `Punto ${d.puntos.indexOf(p) + 1} de ${d.puntos.length}${p.cerrado ? ' · cerrado' : ''}`); set('pt', p.titulo || '');
   const sin = t.r.N.P + t.r.N.R; const um = posUmbral(t, p);
   const firma = [a.salaOculta ? 1 : 0, p.id, p.cerrado ? 1 : 0, um, p.umbral, p.base, ...filas.map((x) => x[2].toFixed(4)), sin.toFixed(4), t.nA, t.pend].join('|');
   if (rs.dataset.f === firma) return; rs.dataset.f = firma;
@@ -1599,9 +1757,9 @@ function actualizarPantalla() {
     doc.getElementById('pp').className = 'cap'; set('pp', 'El resultado se mostrará al cerrar la votación.'); return;
   }
   rs.replaceChildren(...filas.map(([ic, et, v, col], idx) => { const f = el('div', 'r'); const rt = el('div', 'rt'); rt.append(el('span', '', `${ic} ${et}`), el('span', '', `${fmt(pc(v))}\u00a0%`)); const w = el('div', 'rbw'); const rb = el('div', 'rb'); const i = el('i'); i.style.width = Math.min(100, pc(v)) + '%'; i.style.background = col; rb.append(i); w.append(rb); if (idx === 0 && um !== null) { const m = el('b'); m.style.left = `calc(${um}% - 2px)`; w.append(m); } f.append(rt, w); return f; }),
-    el('div', 'um', um !== null ? `La línea blanca marca lo necesario para aprobar: más de ${fmt(p.umbral)}\u00a0% ${p.base === 'total' ? 'del edificio' : 'de los asistentes'}.` : `Este punto exige más de ${fmt(p.umbral)}\u00a0% del edificio.`));
-  doc.getElementById('pp').className = p.cerrado ? 'ver ' + (t.ok ? 'ok' : 'no') : 'cap';
-  set('pp', p.cerrado ? `${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)}\u00a0% a favor` : `Porcentaje de la alícuota presente${sin ? ' · ' + fmt(pc(sin)) + '\u00a0% aún sin votar' : ''}`);
+    el('div', 'um', t.multi ? 'Gana la opción con más votos.' : um !== null ? `La línea blanca marca lo necesario para aprobar: más de ${fmt(p.umbral)}\u00a0% ${p.base === 'total' ? 'del edificio' : 'de los asistentes'}.` : `Este punto exige más de ${fmt(p.umbral)}\u00a0% del edificio.`));
+  const vv = veredicto(p, t); doc.getElementById('pp').className = p.cerrado ? 'ver ' + (vv.ok ? 'ok' : 'no') : 'cap';
+  set('pp', p.cerrado ? (t.multi ? vv.txt.replace(/ %/g, '\u00a0%') : `${vv.corto}: ${fmt(t.pct)}\u00a0% a favor`) : `Porcentaje de la alícuota presente${sin ? ' · ' + fmt(pc(sin)) + '\u00a0% aún sin votar' : ''}`);
 }
 setInterval(actualizarPantalla, 1500);
 
@@ -1609,7 +1767,7 @@ setInterval(actualizarPantalla, 1500);
 const usoEnlaces = (a) => a.events.some((e) => String(e.type).startsWith('REMOTO_'));
 function sellarPunto(idPunto) {   // sella con los votos que hay, igual que «Cerrar votación y sellar resultado»
   const dd = derive(cur()); const pp = dd.pById[idPunto]; if (!pp || pp.cerrado) return;
-  const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: pp.id, res: { r: t.r, T: t.T, aA: t.aA, nA: t.nA, base: t.base, fav: t.fav, pct: t.pct, ok: t.ok, pend: t.pend, pP: t.pP, pR: t.pR, pA: t.pA, canal: t.canal } });
+  const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: pp.id, res: resCierre(t) });
 }
 async function cerrarAsamblea() {
   const a = cur(); const d = derive(a); if (d.closed) return; const q = calcQ(d); const abiertos = d.puntos.filter((p) => !p.cerrado);
@@ -1675,7 +1833,7 @@ function detalleVotos(a, d, p) {
   const filas = d.units.filter((u) => u.est !== 'A' || p.votos[u.id]).map((u) => {
     const op = p.votos[u.id]; const remoto = !!(p.via && p.via[u.id]); let resp = '';
     if (op) { const e = ultimo(remoto ? 'VOTO_REMOTO' : 'VOTO_GRUPO', u.id); resp = e ? (remoto ? `Comprobante ${e.p.recibo}` : `Registrado por ${e.op || 'sin operador'} (#${e.seq})`) : ''; }
-    return `<tr><td>${esc(u.inm)}</td><td>${esc(u.prop || 'sin nombre')}${u.rep ? ' (representado por ' + esc(u.rep.nombre) + ')' : ''}</td><td class="r">${fmtA(u.ali)}</td><td>${op ? OPC[op] : 'Sin votar'}</td><td>${op ? (remoto ? 'Enlace' : 'Mesa') : ''}</td><td>${esc(resp)}</td></tr>`;
+    return `<tr><td>${esc(u.inm)}</td><td>${esc(u.prop || 'sin nombre')}${u.rep ? ' (representado por ' + esc(u.rep.nombre) + ')' : ''}</td><td class="r">${fmtA(u.ali)}</td><td>${op ? esc(etq(p, op)) : 'Sin votar'}</td><td>${op ? (remoto ? 'Enlace' : 'Mesa') : ''}</td><td>${esc(resp)}</td></tr>`;
   });
   return filas.length ? `<h4>Votación nominal</h4><table><thead><tr><th>Inmueble</th><th>Propietario</th><th class="r">Alícuota %</th><th>Voto</th><th>Medio</th><th>Respaldo</th></tr></thead><tbody>${filas.join('')}</tbody></table>` : '';
 }
@@ -1705,7 +1863,7 @@ function adivinarColumnas(lines) {
 
 $('#asmPantalla').addEventListener('click', abrirPantalla); $('#asmCerrar').addEventListener('click', cerrarAsamblea);
 iniciarBloqueo(arrancar);
-window.__asm = { fechaBonita, isoDeFecha, R, gruposDe, armarSnapshot, publicarAhora, sincronizar, tokenDe, buildConstanciaHTML, eventosDeUnidad, store: () => store, derive, calcQ, tallyLive, verify, sha256, canon, append, buildReportHTML, buildCSV, buildJSON, parsePegado, huella, desc, votantes };
+window.__asm = { parsePunto, procesarQR, buildActaHTML, veredicto, etq, clavesDe, ingerirFila, tokenDe, abrirPunto, fechaBonita, isoDeFecha, R, gruposDe, armarSnapshot, publicarAhora, sincronizar, tokenDe, buildConstanciaHTML, eventosDeUnidad, store: () => store, derive, calcQ, tallyLive, verify, sha256, canon, append, buildReportHTML, buildCSV, buildJSON, parsePegado, huella, desc, votantes };
 })();
 </script>
 </body>
