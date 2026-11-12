@@ -57,7 +57,7 @@ main{padding:14px 0 96px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:150px}
 .field label{font-size:12px;color:var(--muted)}
-input[type=text],input[type=number],input[type=search],textarea,select{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 10px;min-height:42px;width:100%}
+input[type=text],input[type=number],input[type=search],input[type=datetime-local],textarea,select{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 10px;min-height:42px;width:100%}
 input:disabled,select:disabled,textarea:disabled{opacity:.6}
 textarea{min-height:110px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
 .unit{border-top:1px solid var(--line);padding:10px 0}
@@ -278,7 +278,7 @@ function derive(a) {
   for (const e of ev) {
     if (ann.has(e.seq)) continue; const p = e.p;
     switch (e.type) {
-      case 'ASAMBLEA_CREADA': case 'ASAMBLEA_ACTUALIZADA': if (!d.frozen) for (const k of ['nombre', 'fecha', 'quorumReq', 'maxRep', 'baseTotal']) if (k in p) d.meta[k] = p[k]; break;
+      case 'ASAMBLEA_CREADA': case 'ASAMBLEA_ACTUALIZADA': if (!d.frozen) for (const k of ['nombre', 'fecha', 'fechaISO', 'quorumReq', 'maxRep', 'baseTotal']) if (k in p) d.meta[k] = p[k]; break;
       case 'PADRON_CARGADO': if (!d.frozen) { d.rows = (p.rows || []).map(r => ({ ...r })); trk(d, d.rows); } break;
       case 'PADRON_AGREGADO': if (!d.frozen) { const nr = (p.rows || []).map(r => ({ ...r })); d.rows = d.rows.concat(nr); trk(d, nr); } break;
       case 'PADRON_EDITADO': if (!d.frozen) d.rows = d.rows.map(r => r.id === p.id ? { ...r, inm: p.inm, prop: p.prop, ali: p.ali } : r); break;
@@ -514,9 +514,9 @@ function tarjetaPegar(d) {
 }
 function viewPadron() {
   const a = cur(); const d = derive(a); const box = []; const lock = d.frozen; const base = lock ? d.T : (Number(d.meta.baseTotal) || 100); const sum = d.rows.reduce((s, r) => s + (Number(r.ali) || 0), 0); const falta = base - sum; const completo = Math.abs(falta) < 0.005;
-  const onCh = async () => { if (!(await ensureOp())) { renderAll(); return; } append('ASAMBLEA_ACTUALIZADA', { ...d.meta, nombre: $('#fNom').value.trim() || 'Sin nombre', fecha: $('#fFec').value.trim(), quorumReq: Math.min(100, Math.max(0, Number($('#fQ').value) || 0)), maxRep: Math.max(0, Math.floor(Number($('#fMr').value) || 0)), baseTotal: (toNum($('#fBt').value) > 0 ? toNum($('#fBt').value) : 100) }); renderAll(); };
+  const onCh = async () => { if (!(await ensureOp())) { renderAll(); return; } append('ASAMBLEA_ACTUALIZADA', { ...d.meta, nombre: $('#fNom').value.trim() || 'Sin nombre', fecha: $('#fFec').value ? fechaBonita($('#fFec').value) : (d.meta.fechaISO ? '' : d.meta.fecha), fechaISO: $('#fFec').value || '', quorumReq: Math.min(100, Math.max(0, Number($('#fQ').value) || 0)), maxRep: Math.max(0, Math.floor(Number($('#fMr').value) || 0)), baseTotal: (toNum($('#fBt').value) > 0 ? toNum($('#fBt').value) : 100) }); renderAll(); };
   box.push(h('div', { class: 'card' }, h('h2', { text: '1. Datos de la asamblea' }),
-    h('div', { class: 'row' }, h('div', { class: 'field' }, h('label', { text: 'Edificio o nombre de la asamblea' }), h('input', { id: 'fNom', type: 'text', value: d.meta.nombre, disabled: lock, onchange: onCh })), h('div', { class: 'field' }, h('label', { text: 'Fecha y hora' }), h('input', { id: 'fFec', type: 'text', value: d.meta.fecha, placeholder: '15/12/2026 6:00 pm', disabled: lock, onchange: onCh }))),
+    h('div', { class: 'row', style: 'align-items:flex-start' }, h('div', { class: 'field' }, h('label', { text: 'Edificio o nombre de la asamblea' }), h('input', { id: 'fNom', type: 'text', value: d.meta.nombre, disabled: lock, onchange: onCh })), h('div', { class: 'field' }, h('label', { text: 'Fecha y hora' }), h('input', { id: 'fFec', type: 'datetime-local', value: d.meta.fechaISO || isoDeFecha(d.meta.fecha), disabled: lock, onchange: onCh }), (d.meta.fecha ? h('div', { class: 'muted', style: 'font-size:12.5px;margin-top:4px', text: (d.meta.fechaISO || isoDeFecha(d.meta.fecha)) ? 'Se mostrará así: ' + d.meta.fecha : 'Fecha guardada: ' + d.meta.fecha + ' (elige una del calendario para reemplazarla)' }) : null))),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('div', { class: 'field' }, h('label', { text: 'Quórum mínimo (% del edificio)' }), h('input', { id: 'fQ', type: 'number', min: '0', max: '100', step: '0.01', value: d.meta.quorumReq, disabled: lock, onchange: onCh })), h('div', { class: 'field' }, h('label', { text: 'Máximo de poderes por persona (0 = sin límite)' }), h('input', { id: 'fMr', type: 'number', min: '0', step: '1', value: d.meta.maxRep, disabled: lock, onchange: onCh }))),
     h('div', { class: 'row', style: 'margin-top:8px' }, h('div', { class: 'field' }, h('label', { text: 'Alícuota total del edificio (%)' }), h('input', { id: 'fBt', type: 'text', inputmode: 'decimal', value: String(base).replace('.', ','), disabled: lock, onchange: onCh }))),
     h('p', { class: 'muted', text: lock ? 'Estos datos quedaron fijos al congelar el padrón.' : 'Deja 100 si las alícuotas de todos los inmuebles suman 100 %. Todos los porcentajes de la asamblea se calculan sobre este total, no sobre lo que lleves cargado.' })));
@@ -1574,9 +1574,19 @@ function detalleVotos(a, d, p) {
   return filas.length ? `<h4>Votación nominal</h4><table><thead><tr><th>Inmueble</th><th>Propietario</th><th class="r">Alícuota %</th><th>Voto</th><th>Medio</th><th>Respaldo</th></tr></thead><tbody>${filas.join('')}</tbody></table>` : '';
 }
 
+// ---------- fecha y hora elegidas en un calendario ----------
+function fechaBonita(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso || '')); if (!m) return ''; const H = Number(m[4]); return `${m[3]}/${m[2]}/${m[1]} ${H % 12 || 12}:${m[5]} ${H >= 12 ? 'pm' : 'am'}`; }
+function isoDeFecha(txt) {   // entiende «15/12/2026 6:00 pm», «5/1/2027 9:30 a. m.», «20/01/2027 18:30»; si no puede, devuelve ''
+  const m = /^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2})(?::(\d{2}))?\s*(?:([ap])\.?\s?m\.?)?)?\s*$/i.exec(String(txt || '')); if (!m) return '';
+  const dd = Number(m[1]), mo = Number(m[2]), yy = Number(m[3]); let H = m[4] === undefined ? 0 : Number(m[4]); const mi = m[5] || '00'; const ap = (m[6] || '').toLowerCase();
+  if (ap && (H < 1 || H > 12)) return ''; if (ap === 'p' && H < 12) H += 12; if (ap === 'a' && H === 12) H = 0;
+  const f = new Date(yy, mo - 1, dd); if (f.getFullYear() !== yy || f.getMonth() !== mo - 1 || f.getDate() !== dd || H > 23 || Number(mi) > 59) return '';
+  return `${yy}-${String(mo).padStart(2, '0')}-${String(dd).padStart(2, '0')}T${String(H).padStart(2, '0')}:${mi}`;
+}
+
 $('#asmPantalla').addEventListener('click', abrirPantalla); $('#asmCerrar').addEventListener('click', cerrarAsamblea);
 iniciarBloqueo(arrancar);
-window.__asm = { R, gruposDe, armarSnapshot, publicarAhora, sincronizar, tokenDe, buildConstanciaHTML, eventosDeUnidad, store: () => store, derive, calcQ, tallyLive, verify, sha256, canon, append, buildReportHTML, buildCSV, buildJSON, parsePegado, huella, desc, votantes };
+window.__asm = { fechaBonita, isoDeFecha, R, gruposDe, armarSnapshot, publicarAhora, sincronizar, tokenDe, buildConstanciaHTML, eventosDeUnidad, store: () => store, derive, calcQ, tallyLive, verify, sha256, canon, append, buildReportHTML, buildCSV, buildJSON, parsePegado, huella, desc, votantes };
 })();
 </script>
 </body>
