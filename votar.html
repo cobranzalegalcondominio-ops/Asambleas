@@ -64,6 +64,12 @@ details{margin-top:14px}summary{cursor:pointer;color:var(--pri);font-weight:700;
 .hoja h3{margin:0 0 4px;font-size:21px}.hoja .gap{display:grid;gap:10px;margin-top:14px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (min-width:600px){.hoja-bg{align-items:center}.hoja{border-radius:24px}}
+
+:root{--o1:#2152e0;--o2:#b4400d;--o3:#0f766e;--o4:#7c3aed;--o5:#a16207;--o6:#be185d;--o1b:#e8eeff;--o2b:#fdebdd;--o3b:#dff5f1;--o4b:#efe7fe;--o5b:#fbf1d6;--o6b:#fce7f0}
+@media (prefers-color-scheme:dark){:root{--o1:#7fa2ff;--o2:#ffa877;--o3:#5eead4;--o4:#c4a8ff;--o5:#fbbf24;--o6:#f9a8d4;--o1b:#16234a;--o2b:#3d2312;--o3b:#0f3a36;--o4b:#2a2147;--o5b:#3a2d0c;--o6b:#3d1630}}
+.v.O1{border-color:var(--o1);background:var(--o1b)}.v.O1 .i{background:var(--o1);color:var(--card)}.estado-voto.O1{background:var(--o1b);color:var(--o1)}.lista b.O1{color:var(--o1)}.ra.on.O1{border-color:var(--o1);background:var(--o1b);color:var(--o1)}.v.O2{border-color:var(--o2);background:var(--o2b)}.v.O2 .i{background:var(--o2);color:var(--card)}.estado-voto.O2{background:var(--o2b);color:var(--o2)}.lista b.O2{color:var(--o2)}.ra.on.O2{border-color:var(--o2);background:var(--o2b);color:var(--o2)}.v.O3{border-color:var(--o3);background:var(--o3b)}.v.O3 .i{background:var(--o3);color:var(--card)}.estado-voto.O3{background:var(--o3b);color:var(--o3)}.lista b.O3{color:var(--o3)}.ra.on.O3{border-color:var(--o3);background:var(--o3b);color:var(--o3)}.v.O4{border-color:var(--o4);background:var(--o4b)}.v.O4 .i{background:var(--o4);color:var(--card)}.estado-voto.O4{background:var(--o4b);color:var(--o4)}.lista b.O4{color:var(--o4)}.ra.on.O4{border-color:var(--o4);background:var(--o4b);color:var(--o4)}.v.O5{border-color:var(--o5);background:var(--o5b)}.v.O5 .i{background:var(--o5);color:var(--card)}.estado-voto.O5{background:var(--o5b);color:var(--o5)}.lista b.O5{color:var(--o5)}.ra.on.O5{border-color:var(--o5);background:var(--o5b);color:var(--o5)}.v.O6{border-color:var(--o6);background:var(--o6b)}.v.O6 .i{background:var(--o6);color:var(--card)}.estado-voto.O6{background:var(--o6b);color:var(--o6)}.lista b.O6{color:var(--o6)}.ra.on.O6{border-color:var(--o6);background:var(--o6b);color:var(--o6)}
+.rad.m{grid-template-columns:1fr}.rad.m .ra{text-align:left;padding:10px 14px;line-height:1.25}
+.qr{width:min(70vw,240px);margin:12px auto 4px}.qr svg{width:100%;height:auto;display:block;border-radius:10px;box-shadow:0 0 0 1px var(--line)}
 </style>
 </head>
 <body>
@@ -75,6 +81,60 @@ details{margin-top:14px}summary{cursor:pointer;color:var(--pri);font-weight:700;
 const API = window.VOTAR_API || 'https://n8n.legaltech.com.ve/webhook/asamblea';
 // ─────────────────────────────────────────────────────────────────────────────
 const OPC = { F: { t: 'A favor', e: '✔' }, C: { t: 'En contra', e: '✖' }, X: { t: 'Abstención', e: '–' } };
+const clavesDe = (p) => (p && p.tipo === 'multiple') ? p.opciones.map((o) => o.k).concat('X') : ['F', 'C', 'X'];
+function info(p, k) { if (p && p.tipo === 'multiple') { const i = p.opciones.findIndex((o) => o.k === k); if (i >= 0) return { t: p.opciones[i].t, e: String.fromCharCode(65 + i) }; } return OPC[k] || { t: String(k || ''), e: '•' }; }
+const ctxHist = (x) => (x && x.o) ? { tipo: 'multiple', opciones: Object.keys(x.o).map((k) => ({ k, t: x.o[k] })) } : null;
+// ---------- código QR (byte, corrección M, versiones 1–10) ----------
+function qrMatriz(texto, maskForzada) {
+  const bytes = Array.from(unescape(encodeURIComponent(String(texto)))).map((c) => c.charCodeAt(0));
+  const ECC = [0, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26], BLQ = [0, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5];
+  const rawMods = (v) => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+  let ver = 0, dataCw = 0;
+  for (let v = 1; v <= 10; v++) { const cw = Math.floor(rawMods(v) / 8) - ECC[v] * BLQ[v]; if (4 + (v < 10 ? 8 : 16) + 8 * bytes.length <= cw * 8) { ver = v; dataCw = cw; break; } }
+  if (!ver) return null;
+  const size = ver * 4 + 17, bits = [], put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+  put(4, 4); put(bytes.length, ver < 10 ? 8 : 16); bytes.forEach((b) => put(b, 8)); put(0, Math.min(4, dataCw * 8 - bits.length));
+  while (bits.length % 8) bits.push(0);
+  for (let pad = 0xEC; bits.length < dataCw * 8; pad ^= 0xEC ^ 0x11) put(pad, 8);
+  const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+  const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+  const eccLen = ECC[ver], nb = BLQ[ver], div = new Array(eccLen).fill(0); div[eccLen - 1] = 1; let root = 1;
+  for (let i = 0; i < eccLen; i++) { for (let j = 0; j < eccLen; j++) { div[j] = mul(div[j], root); if (j + 1 < eccLen) div[j] ^= div[j + 1]; } root = mul(root, 2); }
+  const rem = (blk) => { const res = new Array(eccLen).fill(0); blk.forEach((b) => { const f = b ^ res.shift(); res.push(0); div.forEach((c, i) => { res[i] ^= mul(c, f); }); }); return res; };
+  const raw = Math.floor(rawMods(ver) / 8), nShort = nb - (raw % nb), shortLen = Math.floor(raw / nb), blocks = [];
+  for (let i = 0, k = 0; i < nb; i++) { const len = shortLen - eccLen + (i < nShort ? 0 : 1), dat = data.slice(k, k + len); k += len; const ecc = rem(dat); if (i < nShort) dat.push(0); blocks.push(dat.concat(ecc)); }
+  const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((blk, j) => { if (i !== shortLen - eccLen || j >= nShort) all.push(blk[i]); });
+  const mod = Array.from({ length: size }, () => new Array(size).fill(false)), fn = Array.from({ length: size }, () => new Array(size).fill(false));
+  const setF = (x, y, d) => { mod[y][x] = d; fn[y][x] = true; };
+  for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+  const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+  finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+  const pos = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, step = Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; pos.push(6); for (let p = size - 7; pos.length < n; p -= step) pos.splice(1, 0, p); }
+  pos.forEach((px, i) => pos.forEach((py, j) => { if ((i === 0 && j === 0) || (i === 0 && j === pos.length - 1) || (i === pos.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(px + dx, py + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+  const bit = (x, i) => ((x >>> i) & 1) !== 0;
+  const formato = (mask) => {
+    const d = (0 << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const f = ((d << 10) | r) ^ 0x5412;
+    for (let i = 0; i <= 5; i++) setF(8, i, bit(f, i)); setF(8, 7, bit(f, 6)); setF(8, 8, bit(f, 7)); setF(7, 8, bit(f, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(f, i));
+    for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(f, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(f, i)); setF(8, size - 8, true);
+  };
+  formato(0);
+  if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const f = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(f, i), a = size - 11 + (i % 3), b = Math.floor(i / 3); setF(a, b, c); setF(b, a, c); } }
+  let k = 0; for (let right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!fn[y][x] && k < all.length * 8) { mod[y][x] = bit(all[k >>> 3], 7 - (k & 7)); k++; } } }
+  const aplicar = (m) => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) { const inv = [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, ((x * y) % 2) + ((x * y) % 3) === 0, (((x * y) % 2) + ((x * y) % 3)) % 2 === 0, (((x + y) % 2) + ((x * y) % 3)) % 2 === 0][m]; if (inv && !fn[y][x]) mod[y][x] = !mod[y][x]; } };
+  const penal = () => {
+    let p = 0; for (let t = 0; t < 2; t++) for (let a = 0; a < size; a++) { let run = 1; for (let b = 1; b < size; b++) { const c = t ? mod[b][a] : mod[a][b], pr = t ? mod[b - 1][a] : mod[a][b - 1]; if (c === pr) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+    for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = mod[y][x]; if (c === mod[y][x + 1] && c === mod[y + 1][x] && c === mod[y + 1][x + 1]) p += 3; }
+    let dark = 0; mod.forEach((r) => r.forEach((c) => { if (c) dark++; })); p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+  };
+  let mejor = 0, pm = Infinity; if (maskForzada === undefined) { for (let m = 0; m < 8; m++) { aplicar(m); formato(m); const p = penal(); if (p < pm) { pm = p; mejor = m; } aplicar(m); } } else mejor = maskForzada;
+  aplicar(mejor); formato(mejor); return mod;
+}
+function qrSvg(texto) {
+  const m = qrMatriz(texto); if (!m) return ''; const n = m.length, q = 4; let d = '';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (m[y][x]) d += `M${x + q} ${y + q}h1v1h-1z`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n + 2 * q} ${n + 2 * q}" shape-rendering="crispEdges" role="img" aria-label="Código QR de entrada"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+}
+
 const token = (new URLSearchParams(location.search).get('t') || '').trim();
 const $ = (s) => document.querySelector(s);
 function h(tag, attrs, ...kids) {
@@ -154,7 +214,7 @@ function saludo() {
     rp.length ? h('p', { class: 'mut' }, 'En esta asamblea ' + (rp.length === 1 ? 'su inmueble ' : 'sus inmuebles ') + rp.map((x) => x.m + (x.p ? ' lo representa ' + x.p : ' tiene representante')).join('; ') + '.') : null,
     h('div', { class: 'chips', 'aria-label': 'Sus inmuebles' }, d.unidades.map((u) => h('div', { class: 'chip' }, h('b', {}, 'Inmueble ' + u.m), h('em', {}, `${fmtA(u.a)} %${u.t === 'r' ? ' · en representación de ' + (u.d || 'otro propietario') : ''}`))))];
 }
-function resumenVotos(votos) { return h('ul', { class: 'lista' }, S.d.unidades.filter((u) => votos[u.i]).map((u) => h('li', {}, h('span', {}, 'Inmueble ' + u.m), h('b', { class: votos[u.i] }, OPC[votos[u.i]].t)))); }
+function resumenVotos(votos, ctx) { return h('ul', { class: 'lista' }, S.d.unidades.filter((u) => votos[u.i]).map((u) => h('li', {}, h('span', {}, 'Inmueble ' + u.m), h('b', { class: votos[u.i] }, info(ctx, votos[u.i]).t)))); }
 
 function pantallaRepresentado() {
   const d = S.d; return [cabecera(), h('div', { class: 'card' }, h('p', { class: 'hola' }, d.nombre ? `Hola, ${d.nombre}` : 'Hola'), h('h2', {}, 'Su voto está a cargo de su representante'), h('p', {}, 'En esta asamblea ' + (d.representados.length === 1 ? 'su inmueble está representado:' : 'sus inmuebles están representados:')), h('ul', { class: 'lista' }, d.representados.map((x) => h('li', {}, h('span', {}, 'Inmueble ' + x.m), h('b', {}, x.p || 'con representante')))), h('p', { class: 'mut' }, 'No necesita hacer nada. Si esto no es correcto, comuníquese con la administración.'))];
@@ -168,11 +228,22 @@ function pantallaInvalida() {
 }
 function pantallaCargando() { return [h('div', { class: 'top' }, h('small', {}, 'Asamblea de propietarios'), h('h1', {}, 'Cargando…')), h('div', { class: 'card' }, h('p', { class: 'mut' }, 'Un momento, estamos abriendo su asamblea.'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')))]; }
 
+// código para que la mesa registre la asistencia: NO contiene el enlace secreto, solo la huella (SHA-256) que la mesa ya conoce
+async function calcTh() {
+  if (S.th || !(window.crypto && crypto.subtle)) return;
+  try { const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)); S.th = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 16); render(); } catch (e) { /* sin código QR: el propietario puede ingresar con los botones */ }
+}
+function cardQR() {
+  const d = S.d; if (!d || !d.asamblea || !d.asamblea.id || !S.th || !(d.unidades || []).length || d.ingreso || S.ingresoLocal) return null;
+  const svg = qrSvg(`WCON1|${d.asamblea.id}|${S.th}`); if (!svg) return null;
+  const caja = h('div', { class: 'qr' }); caja.innerHTML = svg;
+  return h('div', { class: 'card' }, h('h2', {}, 'Su código de entrada'), h('p', { class: 'mut' }, 'Si está en la sala, muestre este código en la entrada: la mesa lo escanea y registra su asistencia.'), caja);
+}
 function pantallaEspera() {
   return [cabecera(), h('div', { class: 'card' }, saludo(), h('h2', { style: 'margin-top:14px' }, 'La asamblea todavía no ha iniciado'),
     h('p', {}, 'Puede dejar esta pantalla abierta: se actualiza sola. Cuando la abogada abra la asamblea, aparecerá aquí el botón para ingresar.'),
     h('div', { class: 'espera' }, h('i'), h('i'), h('i')),
-    h('button', { class: 'btn ghost sm', type: 'button', onclick: () => refrescar(true) }, 'Actualizar ahora'))];
+    h('button', { class: 'btn ghost sm', type: 'button', onclick: () => refrescar(true) }, 'Actualizar ahora')), cardQR()].filter(Boolean);
 }
 function pantallaIngreso() {
   const bS = h('button', { class: 'btn', type: 'button', id: 'ingresarSala' }, 'Ingresar: estoy en la sala');
@@ -180,7 +251,7 @@ function pantallaIngreso() {
   bS.onclick = () => ingresar('S'); bD.onclick = () => ingresar('D');
   return [cabecera(), h('div', { class: 'card' }, saludo(), h('h2', { style: 'margin-top:14px' }, 'La asamblea está abierta'),
     h('p', {}, 'Para registrar su asistencia, indique dónde está. Elija “en la sala” solo si está en el lugar donde se realiza la asamblea; podrá votar desde su celular en ambos casos.'), bS, bD,
-    S.error ? h('div', { class: 'err', role: 'alert' }, S.error) : null)];
+    S.error ? h('div', { class: 'err', role: 'alert' }, S.error) : null), cardQR()].filter(Boolean);
 }
 function pantallaDentro() {
   const d = S.d;
@@ -192,12 +263,12 @@ function pantallaDentro() {
 function historialCard() {
   const d = S.d; const hs = (d.historial || []).filter((x) => d.unidades.some((u) => x.v && x.v[u.i]));
   if (!hs.length) return null;
-  return h('div', { class: 'card' }, h('h2', {}, 'Sus votos anteriores'), hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v))));
+  return h('div', { class: 'card' }, h('h2', {}, 'Sus votos anteriores'), hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v, ctxHist(x)))));
 }
 function pantallaCerrada() {
   const d = S.d; const hs = (d.historial || []).filter((x) => d.unidades.some((u) => x.v && x.v[u.i]));
   return [cabecera(), h('div', { class: 'card' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h2', { style: 'text-align:center' }, 'La asamblea ha finalizado'), h('p', { style: 'text-align:center' }, 'Gracias por participar.')),
-    d.archivada ? h('div', { class: 'card' }, h('p', { class: 'mut' }, 'Si necesita el detalle de sus votos, pídalo a la administración indicando el código de su comprobante.')) : h('div', { class: 'card' }, h('h2', {}, 'Sus votos registrados'), hs.length ? hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v))) : h('p', { class: 'mut' }, 'No registró votos en esta asamblea.'),
+    d.archivada ? h('div', { class: 'card' }, h('p', { class: 'mut' }, 'Si necesita el detalle de sus votos, pídalo a la administración indicando el código de su comprobante.')) : h('div', { class: 'card' }, h('h2', {}, 'Sus votos registrados'), hs.length ? hs.map((x) => h('div', {}, h('div', { style: 'font-weight:700;margin-top:8px' }, x.t), resumenVotos(x.v, ctxHist(x)))) : h('p', { class: 'mut' }, 'No registró votos en esta asamblea.'),
       h('p', { class: 'mut' }, 'Guarde sus comprobantes: sirven para pedir que se compruebe cualquier voto.'))];
 }
 
@@ -208,8 +279,8 @@ function pantallaVotar() {
   if (voto) {
     const vals = [...new Set(d.unidades.map((u) => votos[u.i]))];
     const uno = vals.length === 1 ? vals[0] : 'M';
-    bloque.push(h('div', { class: 'estado-voto ' + uno }, h('span', { 'aria-hidden': 'true' }, uno === 'M' ? '✓' : OPC[uno].e), uno === 'M' ? 'Su voto está registrado' : 'Su voto: ' + OPC[uno].t));
-    bloque.push(resumenVotos(votos));
+    bloque.push(h('div', { class: 'estado-voto ' + uno }, h('span', { 'aria-hidden': 'true' }, uno === 'M' ? '✓' : info(p, uno).e), uno === 'M' ? 'Su voto está registrado' : 'Su voto: ' + info(p, uno).t));
+    bloque.push(resumenVotos(votos, p));
     if (S.ok) bloque.push(h('div', { class: 'mut' }, `Comprobante ${S.ok.recibo} · ${hora(S.ok.hora)}`));
     bloque.push(p.cambio ? h('button', { class: 'btn ghost', type: 'button', style: 'margin-top:10px', onclick: () => { S.cambiando = true; S.sel = {}; S.detalle = false; render(); } }, 'Cambiar mi voto') : h('p', { class: 'mut' }, 'En esta votación el voto es definitivo.'));
     bloque.push(h('p', { class: 'mut', style: 'margin-top:12px' }, 'Espere: cuando se abra el siguiente punto aparecerá aquí.'), h('div', { class: 'espera' }, h('i'), h('i'), h('i')));
@@ -218,11 +289,11 @@ function pantallaVotar() {
     bloque.push(h('p', { class: 'mut' }, uno ? `Su voto vale ${fmtA(d.unidades[0].a)} % de la alícuota.` : `Sus ${d.unidades.length} inmuebles suman ${fmtA(d.unidades.reduce((s, u) => s + u.a, 0))} % de la alícuota.`));
     if (S.cambiando) bloque.push(h('div', { class: 'aviso' }, 'Está cambiando su voto: el anterior queda en el historial y vale el nuevo.'));
     if (!S.detalle) {
-      bloque.push(h('div', { class: 'votos', role: 'group', 'aria-label': 'Elija su voto' }, ['F', 'C', 'X'].map((k) => h('button', { class: 'v ' + k, type: 'button', onclick: () => { d.unidades.forEach((u) => { S.sel[u.i] = k; }); confirmar(); } }, h('span', { class: 'i', 'aria-hidden': 'true' }, OPC[k].e), OPC[k].t))));
+      bloque.push(h('div', { class: 'votos', role: 'group', 'aria-label': 'Elija su voto' }, clavesDe(p).map((k) => h('button', { class: 'v ' + k, type: 'button', onclick: () => { d.unidades.forEach((u) => { S.sel[u.i] = k; }); confirmar(); } }, h('span', { class: 'i', 'aria-hidden': 'true' }, info(p, k).e), info(p, k).t))));
       if (!uno) bloque.push(h('details', {}, h('summary', {}, 'Votar distinto por cada inmueble'), h('div', { style: 'margin-top:6px' }, h('button', { class: 'btn ghost sm', type: 'button', onclick: () => { S.detalle = true; render(); } }, 'Elegir por inmueble'))));
     } else {
       bloque.push(h('div', { style: 'margin-top:8px' }, d.unidades.map((u) => h('div', { class: 'unid' }, h('div', { class: 'n' }, 'Inmueble ' + u.m, h('small', {}, ` · ${fmtA(u.a)} %${u.t === 'r' ? ' · en representación de ' + (u.d || 'otro propietario') : ''}`)),
-        h('div', { class: 'rad', role: 'radiogroup', 'aria-label': 'Voto del inmueble ' + u.m }, ['F', 'C', 'X'].map((k) => h('button', { class: 'ra ' + k + (S.sel[u.i] === k ? ' on' : ''), type: 'button', role: 'radio', 'aria-checked': String(S.sel[u.i] === k), onclick: () => { S.sel[u.i] = k; render(); } }, OPC[k].t)))))));
+        h('div', { class: 'rad' + (p.tipo === 'multiple' ? ' m' : ''), role: 'radiogroup', 'aria-label': 'Voto del inmueble ' + u.m }, clavesDe(p).map((k) => h('button', { class: 'ra ' + k + (S.sel[u.i] === k ? ' on' : ''), type: 'button', role: 'radio', 'aria-checked': String(S.sel[u.i] === k), onclick: () => { S.sel[u.i] = k; render(); } }, info(p, k).t)))))));
       const listo = d.unidades.every((u) => S.sel[u.i]);
       bloque.push(h('button', { class: 'btn', type: 'button', disabled: !listo, style: 'margin-top:12px', onclick: confirmar }, listo ? 'Revisar mi voto' : 'Elija un voto para cada inmueble'), h('button', { class: 'btn ghost sm', type: 'button', style: 'margin-top:10px', onclick: () => { S.detalle = false; S.sel = {}; render(); } }, 'Votar igual por todos'));
     }
@@ -241,8 +312,8 @@ function confirmar() {
   bCamb.onclick = () => cerrarHoja();
   bConf.onclick = async () => { bConf.disabled = true; bCamb.disabled = true; bConf.textContent = 'Registrando su voto…'; const r = await enviarVoto(v); if (r === true) return; else { err.textContent = r; bConf.disabled = false; bCamb.disabled = false; bConf.textContent = 'Reintentar'; } };
   const contenido = h('div', { class: 'hoja', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ht' }, h('h3', { id: 'ht' }, 'Confirme su voto'), h('div', { class: 'mut' }, S.d.punto.titulo),
-    vals.length === 1 ? h('div', { class: 'estado-voto ' + vals[0], style: 'margin-top:14px' }, h('span', { 'aria-hidden': 'true' }, OPC[vals[0]].e), OPC[vals[0]].t.toUpperCase()) : null,
-    resumenVotos(v), h('div', { class: 'mut' }, `Alícuota que vota: ${fmtA(total)} %`), err, h('div', { class: 'gap' }, bConf, bCamb));
+    vals.length === 1 ? h('div', { class: 'estado-voto ' + vals[0], style: 'margin-top:14px' }, h('span', { 'aria-hidden': 'true' }, info(S.d.punto, vals[0]).e), info(S.d.punto, vals[0]).t.toUpperCase()) : null,
+    resumenVotos(v, S.d.punto), h('div', { class: 'mut' }, `Alícuota que vota: ${fmtA(total)} %`), err, h('div', { class: 'gap' }, bConf, bCamb));
   hoja = h('div', { class: 'hoja-bg', onclick: (e) => { if (e.target === e.currentTarget && !bConf.disabled) cerrarHoja(); } }, contenido);
   $('#capa').replaceChildren(hoja); bConf.focus();
 }
@@ -272,7 +343,7 @@ async function enviarVoto(v) {
   if (r.d && r.d.ok) {
     S.ok = { recibo: r.d.recibo, hora: r.d.hora, correo: r.d.correo }; S.error = ''; S.cambiando = false; S.kVoto = '';
     Object.keys(v).forEach((id) => { S.mis[id] = { o: v[id], p: S.d.punto.id, ts: Date.now() }; }); S.ingresoLocal = true;
-    const resumen = Object.entries(v); S.recibo = { v, ...S.ok }; pantallaRecibo();
+    S.recibo = { v, p: S.d.punto, ...S.ok }; pantallaRecibo();
     refrescar(true); return true;
   }
   const m = r.d && r.d.motivo;
@@ -288,7 +359,7 @@ function pantallaRecibo() {
   const cerrar = h('button', { class: 'btn', type: 'button' }, 'Listo');
   cerrar.onclick = () => { S.recibo = null; hoja = null; $('#capa').replaceChildren(); render(); };
   const c = h('div', { class: 'hoja', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'rt' }, h('div', { class: 'ok-big', 'aria-hidden': 'true' }, '✓'), h('h3', { id: 'rt', style: 'text-align:center' }, 'Su voto quedó registrado'),
-    h('div', { class: 'mut', style: 'text-align:center' }, S.d.punto ? S.d.punto.titulo : ''), resumenVotos(r.v), h('div', { class: 'mut', style: 'text-align:center' }, 'Comprobante'), h('div', { class: 'recibo' }, r.recibo),
+    h('div', { class: 'mut', style: 'text-align:center' }, S.d.punto ? S.d.punto.titulo : ''), resumenVotos(r.v, r.p), h('div', { class: 'mut', style: 'text-align:center' }, 'Comprobante'), h('div', { class: 'recibo' }, r.recibo),
     h('div', { class: 'mut', style: 'text-align:center' }, hora(r.hora) + (r.correo ? ` · Lo enviamos a ${r.correo}` : '')), h('div', { class: 'gap' }, cerrar, copiar));
   hoja = h('div', { class: 'hoja-bg' }, c); $('#capa').replaceChildren(hoja); cerrar.focus();
 }
@@ -310,7 +381,7 @@ function render() {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !S.invalido) refrescar(false); });
 window.addEventListener('online', () => refrescar(true));
-if (!token || token.length < 20) { S.invalido = true; render(); } else { render(); refrescar(true); }
+if (!token || token.length < 20) { S.invalido = true; render(); } else { render(); refrescar(true); calcTh(); }
 window.__votar = { S, refrescar };
 </script>
 </body>
