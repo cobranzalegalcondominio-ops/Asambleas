@@ -444,7 +444,7 @@ function parsePegado(txt) {
   const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean); const rows = [], bad = [];
   if (!lines.length) return { rows, bad, edificios: [] };
   const head = /inmueble|apto|apart|unidad|propietario|alicuota|coeficiente|edificio|titular/.test(norm(lines[0])) && !splitLine(lines[0]).some(numLike);
-  let ci = 0, cp = 1, ca = 2, ce = -1, cc = [-1, -1];
+  let ci = 0, cp = 1, ca = 2, ce = -1, cc = [-1, -1]; let guess = null; if (!head) { guess = adivinarColumnas(lines); if (guess) { ci = guess.ci; cp = guess.cp; ca = guess.ca; ce = guess.ce; cc = guess.cc; } }
   if (head) { const c0 = splitLine(lines[0]); if (c0.length > 1) { const H = c0.map(norm); const fi = re => H.findIndex(x => re.test(x)); const i1 = fi(/inmueble|apto|apart|unidad|local|casa/), p1 = fi(/propietario|nombre|titular/), a1 = fi(/alicuota|coeficiente|porcentaje|%/); ce = fi(/edificio|condominio|conjunto/); cc = H.map((x, i) => /correo|email|e-mail|mail/.test(x) ? i : -1).filter(i => i >= 0).concat([-1, -1]).slice(0, 2); if (i1 >= 0) ci = i1; if (p1 >= 0) cp = p1; if (a1 >= 0) ca = a1; } }
   const seen = new Set();
   lines.slice(head ? 1 : 0).forEach((l, i) => {
@@ -460,7 +460,7 @@ function parsePegado(txt) {
     const k = norm(ce >= 0 ? c[ce] : '') + '|' + norm(inm); if (seen.has(k)) { bad.push({ n, l, why: 'Inmueble repetido en lo pegado' + (ce >= 0 ? ' (en el mismo edificio)' : '') }); return; } seen.add(k);
     rows.push({ ed: ce >= 0 ? (c[ce] || '') : '', inm: String(inm), prop: String(prop || ''), ali, c1: cc[0] >= 0 ? String(c[cc[0]] || '') : '', c2: cc[1] >= 0 ? String(c[cc[1]] || '') : '' });
   });
-  return { rows, bad, edificios: [...new Set(rows.map(r => r.ed).filter(Boolean))] };
+  return { rows, bad, edificios: [...new Set(rows.map(r => r.ed).filter(Boolean))], mapa: guess ? guess.txt : '' };
 }
 function escalaFracciones(rows) { const s = rows.reduce((x, r) => x + r.ali, 0); return s > 0.98 && s < 1.02 ? { rows: rows.map(r => ({ ...r, ali: Math.round(r.ali * 1e6) / 1e4 })), escalado: true } : { rows, escalado: false }; }
 const conIds = (d, rows) => rows.map((r, i) => ({ id: 'u' + (d.maxId + 1 + i), inm: r.inm, prop: r.prop, ali: r.ali }));
@@ -501,12 +501,13 @@ function tarjetaPegar(d) {
     if (!edSel && r.edificios.length > 1) { out.append(h('div', { class: 'note', text: 'Tu hoja trae varios edificios. Elige el de esta asamblea:' }), h('div', { class: 'chips' }, r.edificios.map(x => h('button', { text: `${x} (${r.rows.filter(y => y.ed === x).length})`, onclick: () => mostrar(r, x) })))); return; }
     const esc0 = noEscalar ? { rows: rows0, escalado: false } : escalaFracciones(rows0); const rows = esc0.rows; const exist = new Set(d.rows.map(x => norm(x.inm))); const nuevos = rows.filter(x => !exist.has(norm(x.inm))); const dups = rows.length - nuevos.length; const sum = rows.reduce((x, y) => x + y.ali, 0);
     out.append(h('div', { class: 'note', style: 'background:var(--pres-bg);color:var(--pres)', text: `Detecté ${pl(rows.length, 'inmueble', 'inmuebles')} que suman ${fmt(sum)} %.${esc0.escalado ? 'Los valores sumaban 1 y parecían fracciones, así que los convertí a porcentaje (por ejemplo 0,30 pasa a 30 %). Si ya estaban en porcentaje, pulsa «Usar tal cual».' : ''}` }));
+    if (r.mapa) out.append(h('div', { class: 'muted', style: 'font-size:12.5px;margin:4px 0', text: 'No vi fila de encabezados; leí las columnas así: ' + r.mapa + '. Si no es correcto, copia también la fila de encabezados.' }));
     if (esc0.escalado) out.append(h('div', { class: 'row', style: 'margin:6px 0' }, h('button', { class: 'btn small', text: 'Usar tal cual: ya están en porcentaje', onclick: () => mostrar(r, edSel, true) })));
     if (r.bad.length) out.append(h('div', { class: 'note bad' }, h('b', { text: `${pl(r.bad.length, 'línea con problema', 'líneas con problemas')} (no se cargará${r.bad.length === 1 ? '' : 'n'}):` }), r.bad.slice(0, 6).map(x => h('div', { text: `Línea ${x.n}: “${x.l.slice(0, 50)}” → ${x.why}` })), r.bad.length > 6 ? h('div', { text: `y ${r.bad.length - 6} más` }) : null));
-    out.append(h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Inmueble' }), h('th', { text: 'Propietario' }), h('th', { text: 'Alícuota %' }))), h('tbody', {}, rows.slice(0, 8).map(x => h('tr', {}, h('td', { text: x.inm }), h('td', { style: 'text-align:left', text: x.prop }), h('td', { text: fmtA(x.ali) }))), rows.length > 8 ? h('tr', {}, h('td', { colspan: '3', style: 'text-align:left', class: 'muted', text: `… y ${rows.length - 8} más` })) : null))));
+    out.append(h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Inmueble', style: 'text-align:left' }), h('th', { text: 'Propietario', style: 'text-align:left' }), h('th', { text: 'Alícuota %' }))), h('tbody', {}, rows.slice(0, 8).map(x => h('tr', {}, h('td', { text: x.inm }), h('td', { style: 'text-align:left', text: x.prop }), h('td', { text: fmtA(x.ali) }))), rows.length > 8 ? h('tr', {}, h('td', { colspan: '3', style: 'text-align:left', class: 'muted', text: `… y ${rows.length - 8} más` })) : null))));
     const bAdd = h('button', { class: 'btn primary', text: `Agregar ${nuevos.length} al padrón`, disabled: !nuevos.length, onclick: async () => { if (!(await ensureOp())) return; const dd = derive(cur()); const ex2 = new Set(dd.rows.map(x => norm(x.inm))); const nv = rows.filter(x => !ex2.has(norm(x.inm))); const nf = conIds(dd, nv); append('PADRON_AGREGADO', { rows: nf }); setContactos(cur(), nf, nv); renderAll(); toast(`${nv.length} inmuebles agregados`); } });
     const bRep = d.rows.length ? h('button', { class: 'btn danger', text: 'Reemplazar todo el padrón', disabled: !rows.length, onclick: async () => { if (!(await askConfirm('Reemplazar el padrón', `Se cambiarán los ${d.rows.length} inmuebles actuales por estos ${rows.length}.`, 'Reemplazar', true)) || !(await ensureOp())) return; const nf = conIds({ maxId: 0 }, rows); cur().contactos = {}; append('PADRON_CARGADO', { rows: nf }); setContactos(cur(), nf, rows); renderAll(); } }) : null;
-    out.append(h('div', { class: 'row', style: 'margin-top:8px' }, bAdd, bRep), dups ? h('p', { class: 'muted', text: `${dups === 1 ? '1 ya estaba' : dups + ' ya estaban'} en el padrón y no se duplicará${dups === 1 ? '' : 'n'} al agregar.` }) : null);
+    out.append(h('div', { class: 'row', style: 'margin-top:8px' }, bAdd, bRep), dups ? h('p', { class: 'muted', text: `${dups === 1 ? '1 ya estaba' : dups + ' ya estaban'} en el padrón y no se duplicará${dups === 1 ? '' : 'n'} al agregar.` }) : document.createComment(''));
   };
   return h('details', { class: 'card', open: d.rows.length === 0 }, h('summary', { text: '¿Tienes el padrón en Excel o Google Sheets? Pégalo aquí' }),
     h('p', { class: 'muted', text: 'Copia las celdas desde Excel o Google Sheets: Inmueble, Propietario y Alícuota (en %). Si incluyes la fila de encabezados, también entiendo las columnas Edificio, Correo 1 y Correo 2. Primero te muestro lo que entendí y tú confirmas.' }), h('div', { class: 'row', style: 'margin:4px 0 8px' }, h('a', { class: 'btn small', href: 'Plantilla_Padron.xlsx', download: 'Plantilla_Padron.xlsx', text: 'Descargar plantilla de Excel' })), ta,
@@ -1582,6 +1583,19 @@ function isoDeFecha(txt) {   // entiende «15/12/2026 6:00 pm», «5/1/2027 9:30
   if (ap && (H < 1 || H > 12)) return ''; if (ap === 'p' && H < 12) H += 12; if (ap === 'a' && H === 12) H = 0;
   const f = new Date(yy, mo - 1, dd); if (f.getFullYear() !== yy || f.getMonth() !== mo - 1 || f.getDate() !== dd || H > 23 || Number(mi) > 59) return '';
   return `${yy}-${String(mo).padStart(2, '0')}-${String(dd).padStart(2, '0')}T${String(H).padStart(2, '0')}:${mi}`;
+}
+
+// ---------- pegar un padrón sin fila de encabezados: deducir las columnas por su contenido ----------
+function adivinarColumnas(lines) {
+  const filas = lines.slice(0, 25).map(splitLine); const n = Math.max(...filas.map((f) => f.length)); if (n < 2) return null;
+  const conCorreo = []; for (let j = 0; j < n; j++) if (filas.some((f) => /@/.test(f[j] || ''))) conCorreo.push(j);
+  const limite = conCorreo.length ? conCorreo[0] : n; let ca = -1;
+  for (let j = limite - 1; j >= 0; j--) { const vals = filas.map((f) => String(f[j] || '').trim()).filter(Boolean); if (vals.length && vals.every((v) => numLike(v))) { ca = j; break; } }
+  if (ca < 1) return null;
+  const cp = ca >= 2 ? ca - 1 : -1, ci = ca >= 2 ? ca - 2 : 0, ce = ca >= 3 ? ca - 3 : -1; const cc = [conCorreo[0] !== undefined ? conCorreo[0] : -1, conCorreo[1] !== undefined ? conCorreo[1] : -1];
+  const basico = ce < 0 && ci === 0 && cp === 1 && ca === 2 && cc[0] < 0;
+  const nom = []; if (ce >= 0) nom.push('Edificio'); nom.push('Inmueble'); if (cp >= 0) nom.push('Propietario'); nom.push('Alícuota'); if (cc[0] >= 0) nom.push('Correo 1'); if (cc[1] >= 0) nom.push('Correo 2');
+  return { ci, cp, ca, ce, cc, txt: basico ? '' : nom.join(' · ') };
 }
 
 $('#asmPantalla').addEventListener('click', abrirPantalla); $('#asmCerrar').addEventListener('click', cerrarAsamblea);
