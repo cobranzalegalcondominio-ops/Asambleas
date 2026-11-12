@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Consola de la asamblea · Quórum, votos y votación por correo</title>
+<!-- interfaz v11 -->
 <style>
 :root{
   --bg:#f2f4f8;--panel:#ffffff;--ink:#14213a;--muted:#5b6678;--line:#dde2ea;--accent:#1b5fd1;--accent-ink:#ffffff;
@@ -181,13 +182,65 @@ header{box-shadow:0 1px 0 var(--line)}
 #asmCerrar[hidden]{display:none}
 a.btn{text-decoration:none;display:inline-flex;align-items:center;color:var(--ink)}
 details.card>summary{cursor:pointer;font-weight:650;font-size:15px}
+
+/* ===== revisión de interfaz (v11): encabezado compacto, filas densas, dos paneles, avisos arriba ===== */
+header{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px)}
+main{padding-top:calc(var(--hh,150px) + 12px)}
+header .wrap{transition:padding .15s}
+header.mini .hrow{display:none}
+header.mini .wrap{padding-top:6px;padding-bottom:6px}
+header.mini .qbar{height:8px;margin:0 0 4px}
+header.mini .qtxt{font-size:12.5px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
+header.mini .qtxt b{font-size:15px}
+.hrow .btn.small{display:inline-flex;align-items:center;gap:6px}
+.ico{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button b{display:grid;place-items:center;height:22px}nav button b .ico{width:22px;height:22px}
+#toast .toast{left:12px;right:12px;transform:none;width:fit-content;max-width:calc(100vw - 24px);margin:0 auto;border-radius:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+.toast button{border:1px solid rgba(255,255,255,.55);background:transparent;color:inherit;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:700;cursor:pointer;min-height:28px}
+.next{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 14px;padding:10px 16px;border-radius:16px;border-width:1.5px}
+.next .tx{flex:1;min-width:220px;display:flex;flex-direction:column;gap:2px}
+.next h2{font-size:16px}.next p{font-size:13px;line-height:1.4}.next .et{font-size:11px}
+.next .row{margin-top:0}.next .btn.primary{min-height:40px;font-size:14px}
+.unit.fila{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:8px 0}
+.unit.fila .top{grid-column:1/-1}
+.unit.fila .st{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;min-width:0}
+.unit.fila .acts{margin-top:0;display:flex;gap:6px}
+.unit.fila .acts button{min-height:40px;padding:0 14px;font-size:13.5px;white-space:nowrap}
+.unit.fila.unica{background:var(--pres-bg);border-radius:10px;padding-left:8px;padding-right:8px}
+.kbd{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 6px;font:600 12px ui-monospace,Consolas,monospace;background:var(--bg)}
+.rwrap{position:relative;margin:8px 0}.rwrap .rbar{margin:0}
+.rmark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:1px}
+.rleg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:6px}.rleg i{display:inline-block;width:2px;height:12px;background:var(--ink)}
+#view.estrecho>*{max-width:756px;margin-left:auto;margin-right:auto}
+@media (min-width:700px){
+  .unit.fila{grid-template-columns:64px minmax(0,1.1fr) 72px minmax(0,1.5fr) auto;padding:6px 0}
+  .unit.fila .top{display:contents}
+  .unit.fila .al{text-align:right}
+  .unit.fila .acts button{min-height:36px}
+  .unit.vfila{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:4px 14px;align-items:center}
+  .unit.vfila .seg{margin-top:0}.unit.vfila .seg button{min-height:38px}
+  .unit.vfila details{grid-column:1/-1}
+}
+@media (max-width:600px){
+  .hrow .lbl{display:none}
+  header .hrow+.hrow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}header .hrow+.hrow>*{flex:none}
+  .qtxt{gap:4px 10px}
+}
+@media (min-width:1100px){
+  #toast .toast{left:auto;right:24px;margin:0;bottom:84px}
+  .dos>aside td:first-child{white-space:nowrap}.dos>aside th{font-size:11px;padding-left:3px;padding-right:3px}.dos>aside td{padding-left:3px;padding-right:3px}
+  .wrap{max-width:1180px}
+  .dos{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:14px;align-items:start}
+  .dos>aside{position:sticky;top:calc(var(--hcur,150px) + 12px + env(safe-area-inset-top,0px));max-height:calc(100vh - var(--hcur,150px) - 100px);overflow:auto}
+  .dos>aside .card:last-child{margin-bottom:0}
+}
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 </head>
 <body>
 <div id="lock" hidden></div>
 <header><div class="wrap">
-  <div class="hrow"><select id="asmSel" aria-label="Asamblea"></select><button class="btn small" id="asmNew">＋ Nueva</button><button class="btn small" id="asmLock" hidden aria-label="Seguridad y bloqueo">🔒</button><button class="btn small" id="asmPantalla" aria-label="Abrir la pantalla de sala para proyectar" title="Pantalla de sala">🖥</button></div>
+  <div class="hrow"><select id="asmSel" aria-label="Asamblea"></select><button class="btn small" id="asmNew">＋ Nueva</button><button class="btn small" id="asmLock" hidden aria-label="Seguridad y bloqueo"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="lbl">Bloquear</span></button><button class="btn small" id="asmPantalla" aria-label="Abrir la pantalla de sala para proyectar" title="Pantalla de sala"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span class="lbl">Pantalla de sala</span></button></div>
   <div class="hrow" style="margin-top:6px"><span class="chip" id="estChip">—</span><span class="chip" id="intChip">—</span><span class="chip" id="sync">—</span><span class="chip hide" id="remChip"></span><button class="btn small" id="asmCerrar" hidden>Cerrar asamblea</button></div>
   <div class="qbar" id="qbar"><i class="p"></i><i class="r"></i><span class="qmark" id="qmark"></span></div>
   <div class="qtxt" id="qtxt"></div>
@@ -376,7 +429,10 @@ const askReason = (title, msg, ok) => modal((b, close) => { const ta = h('textar
 const askName = () => modal((b, close) => { const i = h('input', { type: 'text', placeholder: 'Nombre y apellido' }); const bt = h('button', { class: 'btn primary', text: 'Continuar', disabled: true, onclick: () => close(i.value.trim()) }); i.addEventListener('input', () => { bt.disabled = i.value.trim().length < 3; }); i.addEventListener('keydown', ev => { if (ev.key === 'Enter' && !bt.disabled) close(i.value.trim()); }); b.append(h('h3', { text: '¿Quién opera la mesa?' }), h('p', { class: 'muted', text: 'Tu nombre queda anotado en cada registro de la auditoría.' }), i, h('div', { class: 'row', style: 'margin-top:10px' }, bt, h('button', { class: 'btn', text: 'Cancelar', onclick: () => close(null) }))); });
 async function ensureOp() { if (store.op) return true; const n = await askName(); if (!n) return false; store.op = n; saveLocal(); return true; }
 let toastT = null;
-function toast(msg, tipo) { const t = $('#toast'); const k = tipo || (/^(No se pudo|No pudimos|Error|Sin conexión)/i.test(msg) ? 'err' : /^(Copiado|Conectado|Agregado|Sincronizado:|Correo|Archivo|Ajustes guardados|Asamblea abierta|Asamblea importada)/i.test(msg) ? 'ok' : ''); t.replaceChildren(h('div', { class: 'toast ' + k, text: msg, role: 'status' })); clearTimeout(toastT); toastT = setTimeout(() => t.replaceChildren(), k === 'err' ? 6000 : 3500); }
+let enfocarBuscar = false;
+const esAncho = () => window.matchMedia('(min-width:1100px)').matches;
+const punteroFino = () => window.matchMedia('(pointer:fine)').matches;
+function toast(msg, tipo, accion) { const t = $('#toast'); const k = tipo || (/^(No se pudo|No pudimos|Error|Sin conexión)/i.test(msg) ? 'err' : /^(Copiado|Conectado|Agregado|Sincronizado:|Correo|Archivo|Ajustes guardados|Asamblea abierta|Asamblea importada)/i.test(msg) ? 'ok' : ''); t.replaceChildren(h('div', { class: 'toast ' + k, role: 'status' }, h('span', { text: msg }), accion ? h('button', { type: 'button', text: accion.t, onclick: () => { t.replaceChildren(); accion.fn(); } }) : null)); clearTimeout(toastT); toastT = setTimeout(() => t.replaceChildren(), k === 'err' ? 6000 : accion ? 5000 : 2600); }
 
 // ---------- sincronización con la cuenta (opcional) ----------
 let cloud = null, cloudState = 'local', flushing = false, flushT = null;
@@ -428,7 +484,9 @@ function renderHeader() {
   $('#qtxt').replaceChildren(h('span', {}, h('b', { text: fmt(c.pA) + ' %' }), ` de ${fmt(d.T)} % del edificio`), h('span', {}, h('span', { class: 'dot', style: 'background:var(--pres)' }), `Presentes ${fmt(c.pP)} % (${c.nP})`), h('span', {}, h('span', { class: 'dot', style: 'background:var(--rep)' }), `Representados ${fmt(c.pR)} % (${c.nR})`),
     h('span', { class: 'chip ' + (ok ? 'ok' : 'warn'), text: ok ? `Hay quórum (mínimo ${fmt(d.meta.quorumReq)} %)` : `Faltan ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} puntos para el quórum` }));
 }
-function renderTabs() { const T = [['padron', '📋', 'Padrón'], ['correo', '✉️', 'Correo'], ['asistencia', '🚪', 'Asistencia'], ['votacion', '🗳️', 'Votación'], ['auditoria', '🔍', 'Auditoría'], ['reporte', '📄', 'Reporte']]; $('#tabs').replaceChildren(...T.map(([k, ic, l], i) => h('button', { class: tab === k ? 'on' : '', 'aria-label': `Paso ${i + 1}: ${l}`, onclick: () => { tab = k; renderAll(); window.scrollTo(0, 0); } }, h('span', { class: 'nn', text: String(i + 1) }), h('b', { text: ic }), l))); }
+const ICONOS = { padron: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/>', correo: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>', asistencia: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.700 6 6M15.500 11.500l2 2 3.500-4"/>', votacion: '<path d="M4 12h16v8H4zM7 12l2-7h6l2 7"/><path d="m10 8.500 1.500 1.500 2.500-3"/>', auditoria: '<path d="M12 3 5 6v5c0 4.500 3 8 7 10 4-2 7-5.500 7-10V6z"/><path d="m9 12 2 2 4-4"/>', reporte: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>' };
+const icono = (k) => { const b = document.createElement('b'); b.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + ICONOS[k] + '</svg>'; return b; };
+function renderTabs() { const T = [['padron', '', 'Padrón'], ['correo', '', 'Correo'], ['asistencia', '', 'Asistencia'], ['votacion', '', 'Votación'], ['auditoria', '', 'Auditoría'], ['reporte', '', 'Reporte']]; $('#tabs').replaceChildren(...T.map(([k, ic, l], i) => h('button', { class: tab === k ? 'on' : '', 'aria-label': `Paso ${i + 1}: ${l}`, onclick: () => { tab = k; if (k === 'asistencia') enfocarBuscar = true; renderAll(); window.scrollTo(0, 0); } }, h('span', { class: 'nn', text: String(i + 1) }), icono(k), l))); }
 
 // ---------- padrón ----------
 const numLike = x => /^-?[\d.,]+\s*%?$/.test(String(x || '').trim());
@@ -466,7 +524,7 @@ function escalaFracciones(rows) { const s = rows.reduce((x, r) => x + r.ali, 0);
 const conIds = (d, rows) => rows.map((r, i) => ({ id: 'u' + (d.maxId + 1 + i), inm: r.inm, prop: r.prop, ali: r.ali }));
 const DEMO = [['1A', 'Ana Rivas', 9.5], ['1B', 'Luis Mendoza', 9.5], ['2A', 'Carmen Ortega', 8.25], ['2B', 'Pedro Salazar', 8.25], ['3A', 'Rosa Paredes', 8.25], ['3B', 'Rosa Paredes', 8.25], ['4A', 'Jorge Castro', 8], ['4B', 'Elena Molina', 8], ['5A', 'Miguel Romero', 8], ['5B', 'Sofía Díaz', 8], ['6A', 'Rafael Suárez', 8], ['6B', 'Diana López', 8]];
 const demoCorreo = (n) => norm(n).replace(/[^a-z]+/g, '.') + '@ejemplo.com';
-async function cargarEjemplo() { if (!(await ensureOp())) return; const d = derive(cur()); if (d.rows.length && !(await askConfirm('Reemplazar el padrón', 'Se cambiarán los inmuebles actuales por los de ejemplo.', 'Reemplazar', true))) return; const src = DEMO.map(([inm, prop, ali]) => ({ inm, prop, ali, c1: demoCorreo(prop) })); const nf = conIds({ maxId: 0 }, src); const a0 = cur(); a0.contactos = {}; append('PADRON_CARGADO', { rows: nf }); setContactos(a0, nf, src); renderAll(); }
+async function cargarEjemplo() { if (!(await ensureOp())) return; const d = derive(cur()); if (d.rows.length && !(await askConfirm('Reemplazar el padrón', 'Se cambiarán los inmuebles actuales por los de ejemplo.', 'Reemplazar', true))) return; const src = DEMO.map(([inm, prop, ali]) => ({ inm, prop, ali, c1: demoCorreo(prop) })); const nf = conIds({ maxId: 0 }, src); const a0 = cur(); a0.contactos = {}; if (['', 'nueva asamblea', 'sin nombre'].includes(norm(d.meta.nombre))) append('ASAMBLEA_ACTUALIZADA', { ...d.meta, nombre: 'Edificio de ejemplo' }); append('PADRON_CARGADO', { rows: nf }); setContactos(a0, nf, src); renderAll(); }
 async function editarFila(d, r) {
   const f = await modal((b, close) => {
     const i1 = h('input', { type: 'text', value: r.inm }), i2 = h('input', { type: 'text', value: r.prop }), i3 = h('input', { type: 'text', inputmode: 'decimal', value: String(r.ali).replace('.', ',') }); const er = h('div', { class: 'err' });
@@ -539,9 +597,10 @@ function viewPadron() {
     box.push(h('div', { class: 'card' }, h('h2', { text: '3. Abrir la asamblea' }), h('p', { class: 'muted', text: 'Al congelar el padrón queda fijo con sus alícuotas y se abre el registro de asistencia. Desde ese momento nada se borra: solo se anula con un motivo.' }),
       h('div', { style: 'margin:8px 0' }, items.map(([ok, t]) => h('div', { text: (ok ? '✔ ' : '⚠ ') + t, style: 'color:' + (ok ? 'var(--pres)' : 'var(--warn)') }))),
       h('button', { class: 'btn primary', text: 'Congelar padrón y abrir asamblea', disabled: !d.rows.length || sum > base + 0.005, onclick: async () => {
+        if (['', 'nueva asamblea', 'sin nombre'].includes(norm(d.meta.nombre))) { toast('Escribe el nombre del edificio antes de congelar: aparece en la pantalla de sala, los correos y el reporte.', 'err'); const f = $('#fNom'); if (f) { window.scrollTo(0, 0); f.focus(); f.select(); } return; }
         const warn = []; if (falta > 0.005) warn.push(`El padrón suma ${fmt(sum)} % de ${fmt(base)} %. Faltan ${fmt(falta)} % de alícuota: esos inmuebles no figuran y no podrán registrarse. Si es una asamblea real, completa el padrón antes.`); if (d.rows.some(r => !r.ali)) warn.push('Hay inmuebles con alícuota 0.');
         const ok = await askConfirm(falta > 0.005 ? '¿Congelar con el padrón incompleto?' : '¿Congelar el padrón?', `${d.rows.length} inmuebles, alícuota ${fmt(sum)} % de ${fmt(base)} %. ${warn.join(' ')} Después no podrás cambiarlo.`, falta > 0.005 ? 'Congelar así' : 'Congelar y abrir', falta > 0.005); if (!ok || !(await ensureOp())) return;
-        const rows = d.rows.map(r => ({ id: r.id, inm: r.inm, prop: r.prop, ali: r.ali })); append('PADRON_CONGELADO', { n: rows.length, total: Number(sum.toFixed(6)), base, hash: sha256(canon(rows)) }); tab = (cur().remoto && cur().remoto.activo) ? 'correo' : 'asistencia'; renderAll(); toast('Padrón congelado: ya puedes abrir la asamblea y registrar la asistencia', 'ok');
+        const rows = d.rows.map(r => ({ id: r.id, inm: r.inm, prop: r.prop, ali: r.ali })); append('PADRON_CONGELADO', { n: rows.length, total: Number(sum.toFixed(6)), base, hash: sha256(canon(rows)) }); tab = (cur().remoto && cur().remoto.activo) ? 'correo' : 'asistencia'; enfocarBuscar = true; renderAll(); window.scrollTo(0, 0); toast('Padrón congelado: ya puedes abrir la asamblea y registrar la asistencia', 'ok');
       } })));
   } else box.push(h('div', { class: 'card' }, h('h2', { text: 'Esta asamblea' }), h('div', { class: 'row' }, h('button', { class: 'btn small danger', text: 'Eliminar asamblea de este dispositivo', onclick: async () => { if (!(await askConfirm('¿Eliminar esta asamblea de este dispositivo?', 'Se borra la copia local. Si hay respaldo en tu cuenta, se conserva allí.', 'Eliminar', true))) return; const id = a.id; delete store.asms[id]; store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); saveLocal(); renderAll(); } }))));
   return box;
@@ -551,7 +610,7 @@ function viewPadron() {
 function readPhoto(file) {
   return new Promise((res, rej) => { const fr = new FileReader(); fr.onerror = rej; fr.onload = () => { const img = new Image(); img.onerror = rej; img.onload = () => { const m = 900, k = Math.min(1, m / Math.max(img.width, img.height)); const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); let q = 0.6, out = cv.toDataURL('image/jpeg', q); while (out.length > 150000 && q > 0.3) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); } res(out); }; img.src = fr.result; }; fr.readAsDataURL(file); });
 }
-async function registrarIngreso(u) { if (!(await ensureOp())) return; append('INGRESO', { u: u.id }); renderAll(); toast(`Presente: ${u.inm} · ${u.prop || 'sin nombre'}`, 'ok'); }
+async function registrarIngreso(u) { if (!(await ensureOp())) return; append('INGRESO', { u: u.id }); renderAll(); toast(`Presente: ${u.inm} · ${u.prop || 'sin nombre'}`, 'ok', { t: 'Deshacer', fn: () => { const dd = derive(cur()); const uu = dd.byId[u.id]; if (uu) deshacerUnidad(dd, uu); } }); }
 async function registrarSalida(u) { if (!(await ensureOp())) return; append('SALIDA', { u: u.id }); renderAll(); toast(`Salida registrada: ${u.inm}`, 'ok'); }
 async function registrarPoder(d, u) {
   if (!(await ensureOp())) return; const a = cur(); const cnt = {}; d.units.forEach(x => { if (x.est === 'R' && x.rep) cnt[norm(x.rep.nombre)] = (cnt[norm(x.rep.nombre)] || 0) + 1; });
@@ -583,26 +642,39 @@ function viewAsistencia() {
   const a = cur(); const d = derive(a); if (!d.abierta) return [h('div', { class: 'card' }, h('h2', { text: 'Primero abre la asamblea' }), h('p', { class: 'muted', text: 'Ve a Padrón, carga los inmuebles con sus alícuotas y congela el padrón.' }), h('button', { class: 'btn primary', text: 'Ir al padrón', onclick: () => { tab = 'padron'; renderAll(); } }))];
   const c = calcQ(d); const list = h('div', {}); const lock = d.closed; const box = [];
   if (lock) box.push(cierreBanner(a, d));
+  const visibles = () => { const q = norm(buscar); return d.units.filter(u => (filtro === 'T' || u.est === filtro) && (!q || norm(u.inm + ' ' + u.prop + ' ' + (u.rep ? u.rep.nombre : '')).includes(q))); };
   const pinta = () => {
     const q = norm(buscar); list.replaceChildren();
-    d.units.filter(u => (filtro === 'T' || u.est === filtro) && (!q || norm(u.inm + ' ' + u.prop + ' ' + (u.rep ? u.rep.nombre : '')).includes(q))).forEach(u => {
+    const vis = visibles(); const unica = !!q && vis.length === 1;
+    vis.forEach(u => {
       const chip = u.est === 'A' ? h('span', { class: 'chip', text: 'Ausente' }) : u.est === 'P' ? h('span', { class: 'chip ok', text: 'Presente ' + hm(u.ingreso) + (u.via === 'correo' ? ' · enlace' + (u.ubic === 'S' ? ' · declara: en la sala' : u.ubic === 'D' ? ' · declara: a distancia' : '') : ' · mesa') }) : h('span', { class: 'chip rep', text: 'Representado ' + hm(u.ingreso) + (u.via === 'correo' ? ' · enlace' : ' · mesa') });
-      list.append(h('div', { class: 'unit' }, h('div', { class: 'top' }, h('span', { class: 'id', text: u.inm }), h('span', { class: 'nm', text: u.prop || '(sin nombre)' }), h('span', { class: 'al', text: fmtA(u.ali) + ' %' })),
-        h('div', { class: 'row', style: 'margin-top:6px' }, chip, u.rep ? h('span', { class: 'muted', text: `por ${u.rep.nombre} · C.I. ${u.rep.cedula} · poder ${u.rep.ref}` }) : null, u.hist.length ? h('span', { class: 'muted', text: `salió ${hm(u.hist[u.hist.length - 1].salida)}` }) : null),
+      list.append(h('div', { class: 'unit fila' + (unica && u.est === 'A' ? ' unica' : '') }, h('div', { class: 'top' }, h('span', { class: 'id', text: u.inm }), h('span', { class: 'nm', text: u.prop || '(sin nombre)', title: u.prop || '' }), h('span', { class: 'al', text: fmtA(u.ali) + ' %' })),
+        h('div', { class: 'st' }, chip, u.rep ? h('span', { class: 'muted', text: `por ${u.rep.nombre} · C.I. ${u.rep.cedula} · poder ${u.rep.ref}` }) : null, u.hist.length ? h('span', { class: 'muted', text: `salió ${hm(u.hist[u.hist.length - 1].salida)}` }) : null),
         h('div', { class: 'acts' }, u.est === 'A' ? [h('button', { class: 'P', text: 'Presente', disabled: lock, onclick: () => registrarIngreso(u) }), h('button', { class: 'R', text: 'Representado', disabled: lock, onclick: () => registrarPoder(d, u) })] : [h('button', { text: 'Salió', disabled: lock, onclick: () => registrarSalida(u) })], u.evs.some(s => !d.ann.has(s)) ? h('button', { text: 'Deshacer', disabled: lock, onclick: () => deshacerUnidad(d, u) }) : null)));
     });
     if (!list.children.length) list.append(h('p', { class: 'muted', text: 'Ningún inmueble coincide con el filtro.' }));
   };
   pinta();
-  box.push(h('div', { class: 'card' }, h('input', { type: 'search', placeholder: 'Buscar por inmueble, propietario o representante', value: buscar, oninput: e => { buscar = e.target.value; pinta(); } }),
-    h('div', { class: 'chips' }, [['T', `Todos (${d.units.length})`], ['A', `Ausentes (${c.nA})`], ['P', `Presentes (${c.nP})`], ['R', `Representados (${c.nR})`]].map(([k, l]) => h('button', { class: filtro === k ? 'on' : '', text: l, onclick: () => { filtro = k; renderAll(); } }))), list));
-  if (d.warns.length) box.push(h('div', { class: 'note', text: 'Avisos del registro: ' + d.warns.join(' · ') }));
+  const onEnter = (e) => { if (e.key !== 'Enter' || lock) return; const v = visibles(); if (!norm(buscar) || v.length !== 1) return; e.preventDefault(); const u = v[0]; if (u.est !== 'A') { toast(`${u.inm} ya está registrado`); return; } buscar = ''; enfocarBuscar = true; registrarIngreso(u); };
+  const lista = h('div', { class: 'card' }, h('input', { id: 'aBuscar', type: 'search', placeholder: 'Buscar por inmueble, propietario o representante', value: buscar, autocomplete: 'off', oninput: e => { buscar = e.target.value; pinta(); }, onkeydown: onEnter }),
+    punteroFino() && !lock ? h('div', { class: 'muted', style: 'margin-top:6px;font-size:12.5px' }, 'Escribe el inmueble o el apellido y pulsa ', h('span', { class: 'kbd', text: 'Enter' }), ': si queda un solo inmueble, se marca presente y el cursor vuelve aquí.') : null,
+    h('div', { class: 'chips' }, [['T', `Todos (${d.units.length})`], ['A', `Ausentes (${c.nA})`], ['P', `Presentes (${c.nP})`], ['R', `Representados (${c.nR})`]].map(([k, l]) => h('button', { class: filtro === k ? 'on' : '', text: l, onclick: () => { filtro = k; renderAll(); } }))), list);
+  const avisos = d.warns.length ? h('div', { class: 'note', text: 'Avisos del registro: ' + d.warns.join(' · ') }) : null;
+  if (esAncho()) {
+    const okQ = d.T > 0 && c.pA >= d.meta.quorumReq;
+    const resumen = h('div', { class: 'card' }, h('h2', { text: 'Resumen de asistencia' }),
+      h('div', { class: 'kpis' }, h('div', { class: 'kpi' }, h('b', { text: fmt(c.pP) + ' %' }), h('span', { text: `Presentes · ${pl(c.nP, 'inmueble', 'inmuebles')}` })), h('div', { class: 'kpi' }, h('b', { text: fmt(c.pR) + ' %' }), h('span', { text: `Representados · ${pl(c.nR, 'inmueble', 'inmuebles')}` })), h('div', { class: 'kpi' }, h('b', { text: String(c.nA) }), h('span', { text: 'Inmuebles ausentes' })), c.nC ? h('div', { class: 'kpi' }, h('b', { text: String(c.nC) }), h('span', { text: 'Ingresaron por su enlace' })) : null),
+      h('div', { class: 'verdict ' + (okQ ? 'ok' : 'wait'), text: okQ ? `Hay quórum: ${fmt(c.pA)} % (mínimo ${fmt(d.meta.quorumReq)} %)` : `Quórum ${fmt(c.pA)} %: faltan ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} puntos (mínimo ${fmt(d.meta.quorumReq)} %)` }));
+    box.push(h('div', { class: 'dos' }, h('div', {}, lista), h('aside', {}, resumen, avisos)));
+  } else { box.push(lista); if (avisos) box.push(avisos); }
   return box;
 }
 function cierreBanner(a, d) { return h('div', { class: 'card' }, h('h2', { text: '🔒 Asamblea cerrada y sellada' }), h('p', { class: 'muted', text: `Huella de cierre: ${huella(d.closeHash)}. Para corregir algo hay que reabrir con un motivo, y eso también queda registrado.` }), h('button', { class: 'btn small danger', text: 'Reabrir con motivo', onclick: async () => { const m = await askReason('Reabrir la asamblea', 'Se anula el cierre. La huella de cierre anterior dejará de ser la final.', 'Reabrir'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: d.closeSeq, motivo: m }); renderAll(); } })); }
 
 // ---------- votación ----------
 async function votar(d, pt, inms, opcion, por, nota) { if (!(await ensureOp())) return; append('VOTO_GRUPO', { punto: pt.id, opcion, inms: inms.map(u => u.id), por, nota: nota || '' }); renderAll(); toast(`${OPC[opcion]}: ${por || 'registrado'}`, 'ok'); }
+// posición del umbral sobre una barra que mide la alícuota presente (null si no cabe en la barra)
+function posUmbral(t, p) { const den = t.aA || 0; if (!den) return null; const x = (Number(p.umbral) || 0) / 100 * (t.base || 0) / den * 100; return x > 100.0001 ? null : Math.max(0, Math.min(100, x)); }
 function cardResultado(d, p, grande) {
   const t = tallyOf(d, p); const T = t.T; const pc = x => T ? x / T * 100 : 0; const pb = x => t.base ? x / t.base * 100 : 0;
   const fila = (lab, k, col) => { const r = t.r[k]; const tot = r.P + r.R; return h('tr', {}, h('td', {}, h('span', { class: 'dot', style: 'background:' + col }), lab), h('td', { text: fmt(pc(r.P)) }), h('td', { text: fmt(pc(r.R)) }), h('td', {}, h('b', { text: fmt(pc(tot)) })), h('td', { text: k === 'N' ? '—' : fmt(pb(tot)) }), h('td', { text: String(r.n) })); };
@@ -610,7 +682,8 @@ function cardResultado(d, p, grande) {
   let cls = 'wait', txt = `Faltan ${t.pend} inmuebles por votar. Lleva ${fmt(t.pct)} % a favor.`;
   if (!t.pend || p.cerrado) { cls = t.ok ? 'ok' : 'no'; txt = t.ok ? `APROBADO: ${fmt(t.pct)} % a favor (se necesita más de ${fmt(p.umbral)} %)` : `NO APROBADO: ${fmt(t.pct)} % a favor (se necesita más de ${fmt(p.umbral)} %)`; }
   return h('div', { class: 'card' }, h('h2', { text: p.titulo + (p.cerrado ? ' · cerrado ' + hm(p.cierre.ts) : '') }),
-    h('div', { class: 'rbar' }, h('i', { class: 'f', style: `width:${f / den * 100}%` }), h('i', { class: 'c', style: `width:${c / den * 100}%` }), h('i', { class: 'a', style: `width:${x / den * 100}%` })),
+    h('div', { class: 'rwrap' }, h('div', { class: 'rbar' }, h('i', { class: 'f', style: `width:${f / den * 100}%` }), h('i', { class: 'c', style: `width:${c / den * 100}%` }), h('i', { class: 'a', style: `width:${x / den * 100}%` })), posUmbral(t, p) !== null ? h('span', { class: 'rmark', style: `left:${posUmbral(t, p)}%`, title: 'Umbral de aprobación' }) : null),
+    h('div', { class: 'rleg' }, h('i'), posUmbral(t, p) !== null ? `La línea marca lo que se necesita a favor para aprobar: más de ${fmt(p.umbral)} % ${p.base === 'total' ? 'del edificio' : 'de los asistentes'}.` : `Con la asistencia actual no se alcanza el ${fmt(p.umbral)} % del edificio que exige este punto.`),
     h('div', { class: 'tw' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'Voto' }), h('th', { text: 'Presentes %' }), h('th', { text: 'En representación %' }), h('th', { text: 'Total %' }), h('th', { text: p.base === 'total' ? '% del edificio' : '% de asistentes' }), h('th', { text: 'Inmuebles' }))), h('tbody', {}, fila('A favor', 'F', 'var(--vf)'), fila('En contra', 'C', 'var(--vc)'), fila('Abstención', 'X', 'var(--vx)'), fila('Sin votar', 'N', 'var(--aus)')))),
     h('div', { class: 'verdict ' + cls, text: txt }), grande ? h('p', { class: 'muted', text: 'Las tres primeras columnas son porcentajes de la alícuota total del edificio.' }) : null, p.cerrado ? h('p', { class: 'muted', text: `Resultado sellado en la anotación #${p.cierre.seq} · huella ${huella(p.cierre.hash)}` }) : null);
 }
@@ -622,10 +695,11 @@ function viewVotacion() {
   const add = async () => { const t = tit.value.trim(); if (!t || lock || !(await ensureOp())) return; const id = 'p' + (d.puntos.length + 1) + gid().slice(0, 3); append('PUNTO_ABIERTO', { id, titulo: t, umbral: 50, base: 'asistentes', cambio: cbCambio.checked }); puntoSel = id; renderAll(); toast(`Punto agregado: ${t}`, 'ok'); if (derive(cur()).remotoAbierto) publicarAhora({ forzar: true }); };
   tit.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   box.push(h('div', { class: 'card' }, h('h2', { text: 'Puntos de votación' }), h('div', { class: 'row' }, h('div', { class: 'field' }, tit), h('button', { class: 'btn primary', text: 'Agregar', disabled: lock, onclick: add })), d.remotoAbierto || (cur().remoto && cur().remoto.activo) ? h('label', { class: 'muted', style: 'display:flex;gap:8px;align-items:center;margin:8px 0', for: 'cbCambio' }, cbCambio, 'Permitir que los propietarios cambien su voto por su enlace mientras el punto esté abierto') : null,
+    h('label', { class: 'muted', style: 'display:flex;gap:8px;align-items:center;margin:8px 0', for: 'cbSala' }, h('input', { type: 'checkbox', id: 'cbSala', class: 'cbx', checked: !!a.salaOculta, onchange: (e) => { a.salaOculta = e.target.checked; saveLocal(); actualizarPantalla(); } }), 'En la pantalla de sala, mostrar solo cuántos han votado y revelar el resultado al cerrar cada punto'),
     d.puntos.length ? h('div', { class: 'chips' }, d.puntos.map((p, i) => h('button', { class: p.id === puntoSel ? 'on' : '', text: `${i + 1}. ${p.titulo.slice(0, 28)}${p.titulo.length > 28 ? '…' : ''}${p.cerrado ? ' 🔒' : ''}`, onclick: () => { puntoSel = p.id; selV.clear(); renderAll(); } }))) : h('p', { class: 'muted', text: 'Agrega el primer punto del orden del día que se vaya a votar.' })));
   const p = d.pById[puntoSel] || d.puntos[d.puntos.length - 1]; if (!p) return box; puntoSel = p.id;
   if (!c.nP && !c.nR) { box.push(h('div', { class: 'card' }, h('p', { class: 'muted', text: 'Aún no hay inmuebles presentes ni representados. Regístralos en la pestaña Asistencia.' }))); return box; }
-  box.push(cardResultado(d, p, true));
+  const cardRes = cardResultado(d, p, !esAncho());
   const vs = votantes(d); const dis = lock || p.cerrado; const lista = h('div', {});
   const keys = new Set(vs.map(x => x.k)); [...selV].forEach(k => { if (!keys.has(k)) selV.delete(k); });
   const estadoV = vt => { const us = vt.own.concat(vt.rep); const vals = [...new Set(us.map(u => p.votos[u.id] || ''))]; return vals.length === 1 ? (vals[0] || 'N') : 'mixto'; };
@@ -645,7 +719,7 @@ function viewVotacion() {
       const us = vt.own.concat(vt.rep); const v = estadoV(vt); const carga = us.reduce((z, u) => z + u.ali, 0); const sel = selV.has(vt.k);
       const cb = h('input', { type: 'checkbox', class: 'cbx', checked: sel, disabled: dis, 'aria-label': 'Seleccionar a ' + vt.name, onchange: e => { if (e.target.checked) selV.add(vt.k); else selV.delete(vt.k); pinta(); } });
       const det = h('details', {}, h('summary', { class: 'muted', text: `Ver sus ${us.length} inmuebles${v === 'mixto' ? ' (votos distintos)' : ''}` }), us.map(u => h('div', { class: 'row', style: 'margin:6px 0' }, h('span', { style: 'flex:1;min-width:120px', text: `${u.inm} · ${fmtA(u.ali)} % · ${u.est === 'P' ? 'propio' : 'en representación de ' + (u.prop || 'propietario')}` }), h('select', { style: 'width:150px', disabled: dis, onchange: e => { if (e.target.value) votar(d, p, [u], e.target.value, vt.name, 'voto individual'); } }, [['', 'Sin votar'], ['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => { const o = h('option', { value: k, text: l }); if ((p.votos[u.id] || '') === k) o.selected = true; return o; })))));
-      lista.append(h('div', { class: 'unit' + (sel ? ' sel' : '') }, h('div', { class: 'top' }, dis ? null : cb, h('span', { class: 'nm', style: 'font-weight:650', text: vt.name }), us.some(u => p.via && p.via[u.id]) ? h('span', { class: 'via', text: 'enlace' }) : (us.some(u => p.votos[u.id]) ? h('span', { class: 'via sala', text: 'mesa' }) : null), h('span', { class: 'al', text: fmt(carga) + ' %' })), h('div', { class: 'muted', style: 'margin-left:' + (dis ? '0' : '36px'), text: [vt.own.length ? `Propios: ${vt.own.map(u => u.inm).join(', ')}` : '', vt.rep.length ? `Representa: ${vt.rep.map(u => u.inm).join(', ')}` : ''].filter(Boolean).join(' · ') }),
+      lista.append(h('div', { class: 'unit vfila' + (sel ? ' sel' : '') }, h('div', {}, h('div', { class: 'top' }, dis ? null : cb, h('span', { class: 'nm', style: 'font-weight:650', text: vt.name }), us.some(u => p.via && p.via[u.id]) ? h('span', { class: 'via', text: 'enlace' }) : (us.some(u => p.votos[u.id]) ? h('span', { class: 'via sala', text: 'mesa' }) : null), h('span', { class: 'al', text: fmt(carga) + ' %' })), h('div', { class: 'muted', style: 'margin-left:' + (dis ? '0' : '36px'), text: [vt.own.length ? `Propios: ${vt.own.map(u => u.inm).join(', ')}` : '', vt.rep.length ? `Representa: ${vt.rep.map(u => u.inm).join(', ')}` : ''].filter(Boolean).join(' · ') })),
         h('div', { class: 'seg' }, [['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => h('button', { class: (v === k ? 'on ' : '') + k, text: l, disabled: dis, onclick: () => { if (v !== k) votar(d, p, us, k, vt.name, ''); } }))), us.length > 1 ? det : null));
     });
     if (!vis.length) lista.append(h('p', { class: 'muted', text: 'Nadie coincide con el filtro o la búsqueda.' }));
@@ -653,16 +727,18 @@ function viewVotacion() {
   };
   const btnVis = h('button', { class: 'btn small', text: 'Seleccionar los que se ven', onclick: () => { visibles().forEach(vt => selV.add(vt.k)); pinta(); } });
   const chipsF = h('div', { class: 'chips' }, [['T', 'Todos'], ['N', 'Sin votar'], ['F', 'A favor'], ['C', 'En contra'], ['X', 'Abstención']].map(([k, l]) => h('button', { class: vFiltro === k ? 'on' : '', text: `${l} (${cont[k]})`, onclick: () => { vFiltro = k; renderAll(); } })));
-  box.push(h('div', { class: 'card' }, h('h2', { text: `Registrar votos (${pl(vs.length, 'persona presente', 'personas presentes')})` }), h('p', { class: 'muted', text: 'Para uno solo, toca su voto. Para varios a la vez, marca las casillas y usa la barra de abajo. Cada registro queda en la auditoría con hora y operador.' }),
+  const cardVotos = (h('div', { class: 'card' }, h('h2', { text: `Registrar votos (${pl(vs.length, 'persona presente', 'personas presentes')})` }), h('p', { class: 'muted', text: 'Para uno solo, toca su voto. Para varios a la vez, marca las casillas y usa la barra de abajo. Cada registro queda en la auditoría con hora y operador.' }),
     h('input', { type: 'search', placeholder: 'Buscar persona o inmueble', value: vBuscar, oninput: e => { vBuscar = e.target.value; pinta(); } }), chipsF,
     dis ? null : h('div', { class: 'row', style: 'margin-bottom:6px' }, btnVis, h('button', { class: 'btn small', text: 'Quitar selección', onclick: () => { selV.clear(); pinta(); } })),
     lista));
-  pinta(); box.push(bar, h('div', { style: 'height:96px' }));
-  box.push(h('div', { class: 'card' }, h('h2', { text: 'Regla de aprobación de este punto' }), h('div', { class: 'row' },
+  pinta();
+  const cardRegla = (h('div', { class: 'card' }, h('h2', { text: 'Regla de aprobación de este punto' }), h('div', { class: 'row' },
     h('div', { class: 'field' }, h('label', { text: 'Se aprueba con más de (% a favor)' }), h('input', { id: 'rU', type: 'number', min: '0', max: '100', step: '0.01', value: p.umbral, disabled: dis, onchange: async () => { if (!(await ensureOp())) { renderAll(); return; } append('PUNTO_REGLA', { id: p.id, umbral: Math.min(100, Math.max(0, Number($('#rU').value) || 0)), base: p.base }); renderAll(); } })),
     h('div', { class: 'field' }, h('label', { text: 'Calculado sobre' }), h('select', { id: 'rB', disabled: dis, onchange: async () => { if (!(await ensureOp())) { renderAll(); return; } append('PUNTO_REGLA', { id: p.id, umbral: p.umbral, base: $('#rB').value }); renderAll(); } }, [['asistentes', 'La alícuota presente y representada'], ['total', 'El 100 % de la alícuota del edificio']].map(([k, l]) => { const o = h('option', { value: k, text: l }); if (p.base === k) o.selected = true; return o; })))),
     h('div', { class: 'row', style: 'margin-top:10px' },
-      !p.cerrado ? h('button', { class: 'btn small', text: '🔒 Cerrar votación y sellar resultado', disabled: lock, onclick: async () => { const t0 = tallyLive(d, p); if (t0.pend && !(await askConfirm('Hay inmuebles sin votar', `${t0.pend} inmuebles presentes no han votado. Se contarán como “sin votar”.`, 'Cerrar igual'))) return; if (!(await ensureOp())) return; if (remotoActivo(d)) { toast('Cerrando la votación por correo y trayendo los últimos votos…'); await cerrarPuntoRemoto(); } const dd = derive(cur()); const pp = dd.pById[p.id]; const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: p.id, res: { r: t.r, T: t.T, aA: t.aA, nA: t.nA, base: t.base, fav: t.fav, pct: t.pct, ok: t.ok, pend: t.pend, pP: t.pP, pR: t.pR, pA: t.pA, canal: t.canal } }); toast(`Punto cerrado y sellado: ${t.ok ? 'APROBADO' : 'NO APROBADO'} (${fmt(t.pct)} % a favor)`, 'ok'); renderAll(); if (dd.remotoAbierto) publicarAhora({ forzar: true }); } }) : h('button', { class: 'btn small danger', text: 'Anular el cierre con motivo', disabled: lock, onclick: async () => { const m = await askReason('Anular el cierre de este punto', 'Se reabre la votación. El cierre anterior queda marcado como anulado.', 'Anular cierre'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: p.cierre.seq, motivo: m }); renderAll(); } }))));
+      !p.cerrado ? h('button', { class: 'btn primary', text: 'Cerrar votación y sellar resultado', disabled: lock, onclick: async () => { const t0 = tallyLive(d, p); if (t0.pend && !(await askConfirm('Hay inmuebles sin votar', `${t0.pend} inmuebles presentes no han votado. Se contarán como “sin votar”.`, 'Cerrar igual'))) return; if (!(await ensureOp())) return; if (remotoActivo(d)) { toast('Cerrando la votación por correo y trayendo los últimos votos…'); await cerrarPuntoRemoto(); } const dd = derive(cur()); const pp = dd.pById[p.id]; const t = tallyLive(dd, pp); append('PUNTO_CERRADO', { id: p.id, res: { r: t.r, T: t.T, aA: t.aA, nA: t.nA, base: t.base, fav: t.fav, pct: t.pct, ok: t.ok, pend: t.pend, pP: t.pP, pR: t.pR, pA: t.pA, canal: t.canal } }); toast(`Punto cerrado y sellado: ${t.ok ? 'APROBADO' : 'NO APROBADO'} (${fmt(t.pct)} % a favor)`, 'ok'); renderAll(); if (dd.remotoAbierto) publicarAhora({ forzar: true }); } }) : h('button', { class: 'btn small danger', text: 'Anular el cierre con motivo', disabled: lock, onclick: async () => { const m = await askReason('Anular el cierre de este punto', 'Se reabre la votación. El cierre anterior queda marcado como anulado.', 'Anular cierre'); if (!m || !(await ensureOp())) return; append('ANULACION', { ref: p.cierre.seq, motivo: m }); renderAll(); } }))));
+  if (esAncho()) { const puntosCard = box.pop(); box.push(h('div', { class: 'dos' }, h('div', {}, puntosCard, cardVotos, bar, h('div', { style: 'height:96px' })), h('aside', {}, cardRes, h('div', { class: 'card' }, cardRegla.lastElementChild), cardRegla))); cardRegla.lastElementChild.style.marginTop = '0'; }
+  else box.push(cardRes, cardVotos, bar, h('div', { style: 'height:96px' }), cardRegla);
   return box;
 }
 
@@ -1275,8 +1351,19 @@ setTimeout(async () => { const a = cur(); if (a && a.remoto && a.remoto.activo &
 function renderAll() {
   if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); }
   renderHeader(); actualizarChipRemoto(); renderTabs(); const v = tab === 'asistencia' ? viewAsistencia() : tab === 'votacion' ? viewVotacion() : tab === 'correo' ? viewCorreo() : tab === 'auditoria' ? [cardValidaciones(), ...viewAuditoria()] : tab === 'reporte' ? viewReporte() : viewPadron();
-  $('#view').replaceChildren(...[cardSiguientePaso(), ...v].filter(Boolean)); actualizarPantalla(); actualizarBotonCerrar();
+  $('#view').className = 'wrap' + ((tab === 'asistencia' || tab === 'votacion') ? '' : ' estrecho');
+  $('#view').replaceChildren(...[cardSiguientePaso(), ...v].filter(Boolean)); actualizarPantalla(); actualizarBotonCerrar(); medirEncabezado();
+  if (enfocarBuscar) { enfocarBuscar = false; const b = $('#aBuscar'); if (b && tab === 'asistencia' && punteroFino() && !$('#modal').children.length) b.focus(); }
 }
+// encabezado fijo: mide su alto completo (--hh, reserva de espacio) y el actual (--hcur, para avisos y panel lateral); se compacta al bajar
+function medirEncabezado() {
+  const hd = document.querySelector('header'); if (!hd) return; const st = document.documentElement.style;
+  if (!hd.classList.contains('mini')) st.setProperty('--hh', hd.offsetHeight + 'px');
+  st.setProperty('--hcur', hd.offsetHeight + 'px');
+}
+let anchoPrevio = esAncho();
+window.addEventListener('scroll', () => { const hd = document.querySelector('header'); const y = window.scrollY; const mini = hd.classList.contains('mini'); if (!mini && y > 110) { hd.classList.add('mini'); medirEncabezado(); } else if (mini && y < 40) { hd.classList.remove('mini'); medirEncabezado(); } }, { passive: true });
+window.addEventListener('resize', () => { if (esAncho() !== anchoPrevio) { anchoPrevio = esAncho(); if (!document.body.classList.contains('bloqueado') && !$('#modal').children.length) renderAll(); } medirEncabezado(); });
 $('#asmSel').addEventListener('change', e => { store.current = e.target.value; puntoSel = ''; saveLocal(); renderAll(); });
 $('#asmNew').addEventListener('click', () => { nuevaAsm('Nueva asamblea'); renderAll(); });
 function arrancar() { if (!cur()) { store.current = Object.keys(store.asms)[0] || ''; if (!cur()) nuevaAsm('Nueva asamblea'); } renderAll(); initCloud(); }
@@ -1442,17 +1529,17 @@ const NOMBRE_PESTANA = { padron: 'Padrón', correo: 'Correo', asistencia: 'Asist
 function cardSiguientePaso() {
   const a = cur(); if (!a) return null; const d = derive(a); const p = pasoSiguiente(a, d); if (!p) return null;
   const aqui = tab === p.pestana;
+  if (aqui && !p.omitir && !p.alt && d.frozen) return null;
   return h('section', { class: 'next', 'aria-label': 'Siguiente paso' },
-    h('span', { class: 'et', text: `Siguiente paso · pestaña ${p.n} ${NOMBRE_PESTANA[p.pestana]}` }), h('h2', { text: p.titulo }), h('p', { text: p.texto }),
+    h('div', { class: 'tx' }, h('span', { class: 'et', text: `Siguiente paso · pestaña ${p.n} ${NOMBRE_PESTANA[p.pestana]}` }), h('h2', { text: p.titulo }), h('p', { text: p.texto })),
     (!aqui || p.omitir || p.alt) ? h('div', { class: 'row' },
-      !aqui ? h('button', { class: 'btn primary', text: p.cta, onclick: () => { tab = p.pestana; renderAll(); window.scrollTo(0, 0); } }) : null,
+      !aqui ? h('button', { class: 'btn primary', text: p.cta, onclick: () => { tab = p.pestana; if (tab === 'asistencia') enfocarBuscar = true; renderAll(); window.scrollTo(0, 0); } }) : null,
       p.alt ? h('button', { class: 'btn', text: p.alt.cta, onclick: () => { tab = p.alt.pestana; renderAll(); window.scrollTo(0, 0); } }) : null,
       p.omitir ? h('button', { class: 'btn small', text: 'No usaré voto por enlace', onclick: () => { a.sinEnlace = true; saveLocal(); renderAll(); } }) : null) : null);
 }
 // ---------- pantalla de sala (para proyectar) ----------
 let pantallaWin = null;
 const PANTALLA_HTML = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pantalla de sala</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0A1328;color:#F2F5FB;font:500 clamp(16px,1.7vw,24px)/1.35 Inter,system-ui,sans-serif;padding:3vh 4vw;display:flex;flex-direction:column;justify-content:space-between;gap:2.5vh}
 .cap{font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A9B6CE;font-size:clamp(13px,1.4vw,20px)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:2vw;flex-wrap:wrap}
@@ -1469,12 +1556,18 @@ h1{margin:0;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-si
 .rb{height:2vh;min-height:14px;border-radius:999px;background:#1B2A52;overflow:hidden}.rb i{display:block;height:100%}
 .pie{border-top:1px solid #22305C;padding-top:2vh;color:#E3E9F5;font-size:clamp(15px,1.6vw,24px)}
 .ver{font-weight:700;font-size:clamp(20px,2.4vw,36px)}
-</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+.bar{display:flex;overflow:visible}.bar i:first-child{border-radius:999px 0 0 999px}.bar i#qr{background:#B79BFF;border-radius:0 999px 999px 0}
+.ok,.no{text-wrap:balance}
+.des{display:flex;flex-direction:column;gap:.5vh;font-size:clamp(15px,1.5vw,22px);color:#E3E9F5;font-weight:600}.des span{display:flex;align-items:center;gap:.6em}.des i{width:.7em;height:.7em;border-radius:50%;display:inline-block}
+.rbw{position:relative}.rbw b{position:absolute;top:-.7vh;bottom:-.7vh;width:4px;background:#fff;border-radius:2px}
+.um{color:#A9B6CE;font-size:clamp(13px,1.3vw,19px);font-weight:600}
+.oc{font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:clamp(40px,5.2vw,96px);line-height:1;color:#fff}
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 </head><body>
 <div class="top"><span class="cap" id="asm"></span><span class="pill"><span class="dot"></span><span id="est"></span></span></div>
-<main><section class="q" aria-label="Quórum"><span class="cap">Quórum</span><span class="num" id="q" role="status"></span><div class="bar" id="qb"><i id="qf"></i><b id="qm"></b></div><span id="qs"></span><span class="cap" id="qi" style="text-transform:none;letter-spacing:0"></span></section>
+<main><section class="q" aria-label="Quórum"><span class="cap">Quórum</span><span class="num" id="q" role="status"></span><div class="bar" id="qb"><i id="qf"></i><i id="qr"></i><b id="qm"></b></div><span id="qs"></span><div class="des"><span><i style="background:#7FA2FF"></i><span id="qp"></span></span><span><i style="background:#B79BFF"></i><span id="qrp"></span></span></div><span class="cap" id="qi" style="text-transform:none;letter-spacing:0"></span></section>
 <section class="p" aria-label="Punto en votación"><div><span class="cap" id="pn"></span><h1 id="pt"></h1></div><div id="rs"></div><span class="cap" id="pp" style="text-transform:none;letter-spacing:0"></span></section></main>
-<div class="pie" id="pie">Vota desde tu celular con el enlace que recibiste. Si estás en la sala sin celular, la mesa registra tu voto.</div></body></html>`;
+<div class="pie" id="pie">Vote desde su celular con el enlace que recibió. Si está en la sala sin celular, la mesa registra su voto.</div></body></html>`;
 function abrirPantalla() {
   pantallaWin = window.open('', 'wcon-pantalla', 'width=1280,height=720');
   if (!pantallaWin) { toast('El navegador bloqueó la ventana: permite las ventanas emergentes de esta página.', 'err'); return; }
@@ -1486,17 +1579,29 @@ function actualizarPantalla() {
   const abiertos = d.puntos.filter((p) => !p.cerrado); const p = abiertos[abiertos.length - 1] || d.puntos[d.puntos.length - 1] || null;
   set('asm', `Asamblea de propietarios · ${d.meta.nombre || ''}`); set('est', d.closed ? 'Asamblea cerrada' : abiertos.length ? 'Votación abierta' : d.frozen ? 'Asamblea en sesión' : 'En preparación');
   const ok = d.T > 0 && c.pA >= d.meta.quorumReq; const totalInm = d.units.length || d.rows.length;
-  set('q', `${fmt(c.pA)} %`); doc.getElementById('qf').style.width = Math.min(100, c.pA) + '%'; doc.getElementById('qm').style.left = Math.min(100, Math.max(0, d.meta.quorumReq)) + '%';
-  const qs = doc.getElementById('qs'); qs.className = ok ? 'ok' : 'no'; set('qs', ok ? `✔ Hay quórum · mínimo ${fmt(d.meta.quorumReq)} %` : `Faltan ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} puntos para el quórum (mínimo ${fmt(d.meta.quorumReq)} %)`);
-  set('qi', `${c.nP + c.nR} de ${totalInm} inmuebles presentes${c.nR ? ' · ' + c.nR + ' en representación' : ''}`);
+  set('q', `${fmt(c.pA)}\u00a0%`); doc.getElementById('qf').style.width = Math.min(100, c.pP) + '%'; doc.getElementById('qr').style.width = Math.min(100 - Math.min(100, c.pP), c.pR) + '%';
+  set('qp', `Presentes ${fmt(c.pP)}\u00a0% · ${pl(c.nP, 'inmueble', 'inmuebles')}`); set('qrp', `Representados ${fmt(c.pR)}\u00a0% · ${pl(c.nR, 'inmueble', 'inmuebles')}`); doc.getElementById('qm').style.left = Math.min(100, Math.max(0, d.meta.quorumReq)) + '%';
+  const qs = doc.getElementById('qs'); qs.className = ok ? 'ok' : 'no'; set('qs', ok ? `✔ Hay quórum · mínimo ${fmt(d.meta.quorumReq)}\u00a0%` : `Faltan ${fmt(Math.max(0, d.meta.quorumReq - c.pA))} puntos para el quórum (mínimo ${fmt(d.meta.quorumReq)}\u00a0%)`);
+  set('qi', `${c.nP + c.nR} de ${totalInm} inmuebles en la asamblea`);
   const rs = doc.getElementById('rs');
-  if (!p) { set('pn', 'Esperando'); set('pt', 'Aún no hay un punto en votación'); rs.replaceChildren(); set('pp', ''); return; }
+  if (!p) { set('pn', 'Esperando'); set('pt', 'Aún no hay un punto en votación'); rs.replaceChildren(); rs.dataset.f = ''; set('pp', ''); return; }
   const t = tallyOf(d, p); const base = t.aA || 0; const pc = (x) => (base ? x / base * 100 : 0);
   const filas = [['✔', 'A favor', t.r.F.P + t.r.F.R, '#7FA2FF'], ['✖', 'En contra', t.r.C.P + t.r.C.R, '#FFA877'], ['–', 'Abstención', t.r.X.P + t.r.X.R, '#C3CEE0']];
   set('pn', `Punto ${d.puntos.indexOf(p) + 1} de ${d.puntos.length}${p.cerrado ? ' · cerrado' : ''}`); set('pt', p.titulo || '');
-  rs.replaceChildren(...filas.map(([ic, et, v, col]) => { const f = doc.createElement('div'); f.className = 'r'; const rt = doc.createElement('div'); rt.className = 'rt'; const l = doc.createElement('span'); l.textContent = `${ic} ${et}`; const n = doc.createElement('span'); n.textContent = `${fmt(pc(v))} %`; rt.append(l, n); const rb = doc.createElement('div'); rb.className = 'rb'; const i = doc.createElement('i'); i.style.width = Math.min(100, pc(v)) + '%'; i.style.background = col; rb.append(i); f.append(rt, rb); return f; }));
-  const sin = t.r.N.P + t.r.N.R;
-  set('pp', p.cerrado ? `${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)} % a favor` : `Porcentaje de la alícuota presente${sin ? ' · ' + fmt(pc(sin)) + ' % aún sin votar' : ''}`);
+  const sin = t.r.N.P + t.r.N.R; const um = posUmbral(t, p);
+  const firma = [a.salaOculta ? 1 : 0, p.id, p.cerrado ? 1 : 0, um, p.umbral, p.base, ...filas.map((x) => x[2].toFixed(4)), sin.toFixed(4), t.nA, t.pend].join('|');
+  if (rs.dataset.f === firma) return; rs.dataset.f = firma;
+  const el = (tag, cls, txt) => { const e = doc.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+  if (a.salaOculta && !p.cerrado) {
+    // el resultado se revela al cerrar: mientras tanto solo se muestra la participación
+    const vot = base ? (base - sin) / base * 100 : 0; const f = el('div', 'r'); const rt = el('div', 'rt'); rt.append(el('span', '', 'Han votado'), el('span', '', `${fmt(vot)}\u00a0%`)); const rb = el('div', 'rb'); const i = el('i'); i.style.width = Math.min(100, vot) + '%'; i.style.background = '#5BE0B8'; rb.append(i); f.append(rt, rb);
+    rs.replaceChildren(f, el('div', 'um', `${t.nA - t.pend} de ${t.nA} inmuebles presentes y representados ya votaron.`));
+    doc.getElementById('pp').className = 'cap'; set('pp', 'El resultado se mostrará al cerrar la votación.'); return;
+  }
+  rs.replaceChildren(...filas.map(([ic, et, v, col], idx) => { const f = el('div', 'r'); const rt = el('div', 'rt'); rt.append(el('span', '', `${ic} ${et}`), el('span', '', `${fmt(pc(v))}\u00a0%`)); const w = el('div', 'rbw'); const rb = el('div', 'rb'); const i = el('i'); i.style.width = Math.min(100, pc(v)) + '%'; i.style.background = col; rb.append(i); w.append(rb); if (idx === 0 && um !== null) { const m = el('b'); m.style.left = `calc(${um}% - 2px)`; w.append(m); } f.append(rt, w); return f; }),
+    el('div', 'um', um !== null ? `La línea blanca marca lo necesario para aprobar: más de ${fmt(p.umbral)}\u00a0% ${p.base === 'total' ? 'del edificio' : 'de los asistentes'}.` : `Este punto exige más de ${fmt(p.umbral)}\u00a0% del edificio.`));
+  doc.getElementById('pp').className = p.cerrado ? 'ver ' + (t.ok ? 'ok' : 'no') : 'cap';
+  set('pp', p.cerrado ? `${t.ok ? 'APROBADO' : 'NO APROBADO'}: ${fmt(t.pct)}\u00a0% a favor` : `Porcentaje de la alícuota presente${sin ? ' · ' + fmt(pc(sin)) + '\u00a0% aún sin votar' : ''}`);
 }
 setInterval(actualizarPantalla, 1500);
 
